@@ -1,11 +1,14 @@
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ChevronRight, ChevronDown, ChevronUp, ChevronLeft, Lock, CheckCircle2, Check,
   ArrowRight, ExternalLink, Download, FileText, TrendingUp,
-  MessageCircle, Phone, MessageSquare, FileCheck,
+  MessageCircle, Phone, MessageSquare, FileCheck, MoreHorizontal,
 } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import CircularProgress from '../components/CircularProgress'
+import BottomTabBar from '../components/BottomTabBar'
+import BottomSheet from '../components/BottomSheet'
 import { STEPS, DRAFTS, SECTION_ROWS } from '../data/ticketData'
 
 export default function DefaultLayout({
@@ -38,16 +41,61 @@ export default function DefaultLayout({
   setProfileNavStyle,
 }) {
   const navigate = useNavigate()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [titleScrolled, setTitleScrolled] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setTitleScrolled(window.scrollY > 70)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   return (
     <div className="min-h-screen bg-[#f5f4f0]">
       <Navbar activePage="tickets" dark isReturningUser={isReturningUser} onToggleUserType={handleToggleUserType} profileNavStyle={profileNavStyle} onSetProfileNavStyle={setProfileNavStyle} />
 
-      <div className="px-8 pt-5 pb-2 max-w-[1280px] mx-auto">
-        {/* Back link */}
+      {/* Mobile sticky top bar — back + actions */}
+      <div className="sticky top-0 z-30 md:hidden bg-[#f5f4f0] border-b border-gray-200/70 px-4 py-3 flex items-center justify-between">
         <button
           onClick={() => navigate('/')}
-          className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors mb-4"
+          className="flex items-center gap-1 text-gray-600 hover:text-gray-900 transition-colors"
+        >
+          <ChevronLeft size={18} />
+          {titleScrolled && (
+            <span className="text-sm font-medium text-gray-700 transition-all duration-150">
+              Your 2025 filing
+            </span>
+          )}
+        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setChatOpen(true)}
+            className="relative p-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition-colors"
+          >
+            <MessageSquare size={16} className="text-gray-500" />
+            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center leading-none">1</span>
+          </button>
+          <button
+            onClick={() => setDocsOpen(true)}
+            className="relative p-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition-colors"
+          >
+            <FileCheck size={16} className="text-gray-500" />
+            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center leading-none">4</span>
+          </button>
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition-colors"
+          >
+            <MoreHorizontal size={16} className="text-gray-500" />
+          </button>
+        </div>
+      </div>
+
+      <div className="px-4 sm:px-6 md:px-8 pt-3 md:pt-5 pb-2 max-w-[1280px] mx-auto">
+        {/* Back link — desktop only */}
+        <button
+          onClick={() => navigate('/')}
+          className="hidden md:flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors mb-4"
         >
           <ChevronLeft size={13} />
           Back to dashboard
@@ -56,7 +104,7 @@ export default function DefaultLayout({
         {/* Title row */}
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 tracking-tight leading-tight mb-1.5">Your 2025 filing</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight leading-tight mb-1.5">Your 2025 filing</h1>
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs font-medium text-gray-400">#467501</span>
               <span className="text-gray-300 text-[10px]">•</span>
@@ -75,7 +123,8 @@ export default function DefaultLayout({
               <span className="text-xs text-gray-400">Tax Year 2025</span>
             </div>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Messages + Documents — desktop only, mobile handled by sticky top bar */}
+          <div className="hidden md:flex items-center gap-2 flex-shrink-0">
             <button onClick={() => setChatOpen(true)} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition-colors">
               <MessageSquare size={14} className="text-gray-500 flex-shrink-0" />
               <span className="text-xs font-medium text-gray-600">Messages</span>
@@ -91,7 +140,7 @@ export default function DefaultLayout({
       </div>
 
       {/* Main two-column layout */}
-      <div className="px-8 pt-4 pb-10 max-w-[1280px] mx-auto flex gap-5 items-start">
+      <div className="px-4 sm:px-6 md:px-8 pt-4 pb-24 md:pb-10 max-w-[1280px] mx-auto flex gap-5 items-start">
 
         {/* Steps column */}
         <div className="flex-1 min-w-0">
@@ -184,62 +233,84 @@ export default function DefaultLayout({
           ) : (
             <>
               <div className="space-y-3">
-                {STEPS.map((step) => {
+                {STEPS.map((step, idx, arr) => {
                   const isOpen = openStep === step.num
                   const stepState = getStepState(step.num)
                   const isComplete = stepState === 'complete'
                   const isActive   = stepState === 'active'
                   const isUpcoming = stepState === 'upcoming'
+                  const isLast = idx === arr.length - 1
+                  const railColor = isComplete ? 'bg-green-200' : isActive ? 'bg-blue-200' : 'bg-gray-200'
 
                   return (
-                    <div key={step.num} className="flex gap-3 items-start">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 mt-[10px] ${
-                        isComplete ? 'bg-green-500 text-white' :
-                        isActive   ? 'bg-white border-2 border-blue-500 text-blue-500' :
-                        'bg-gray-200 text-gray-400'
-                      }`}>
-                        {isComplete ? <Check size={16} strokeWidth={3} /> : step.num}
-                      </div>
+                    <div key={step.num} className="relative">
+                      {!isLast && (
+                        <div className={`absolute left-[34px] -bottom-3 w-0.5 h-3 ${railColor} z-10`} />
+                      )}
 
-                      <div className="flex-1 overflow-hidden">
+                      <div>
                         {isUpcoming ? (
-                          <div className="flex items-center gap-3 px-5 py-4">
-                            <span className="text-sm font-semibold text-gray-400">{step.label}</span>
-                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-400">
-                              Upcoming
-                            </span>
+                          <div className="bg-gray-100 border border-gray-200 rounded-2xl">
+                            <div className="flex items-center gap-3 px-5 py-4">
+                              <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-400 flex-shrink-0">
+                                {step.num}
+                              </div>
+                              <span className="text-sm font-semibold text-gray-400">{step.label}</span>
+                              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-gray-200 text-gray-400">Upcoming</span>
+                            </div>
                           </div>
                         ) : (
                           <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
                           <button
                             onClick={() => setOpenStep(isOpen ? null : step.num)}
-                            className="w-full flex items-center justify-between px-5 py-4"
+                            className="w-full px-5 py-4 text-left"
                           >
-                            <div className="flex items-center gap-3">
-                              <span className={`text-sm font-semibold ${isUpcoming ? 'text-gray-400' : 'text-gray-900'}`}>
-                                {step.label}
-                              </span>
-                              <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
-                                isComplete ? 'bg-green-100 text-green-600' :
-                                isActive   ? 'bg-blue-100 text-blue-600'  :
-                                'bg-gray-100 text-gray-400'
-                              }`}>
-                                {isComplete ? 'Complete' : isActive ? 'In progress' : 'Upcoming'}
-                              </span>
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="flex items-center gap-3 min-w-0 flex-1">
+                                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                                  isComplete ? 'bg-green-500 text-white' :
+                                  isActive   ? 'bg-blue-600 text-white'  :
+                                  'bg-gray-100 text-gray-400'
+                                }`}>
+                                  {isComplete ? <Check size={13} strokeWidth={3} /> : step.num}
+                                </div>
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <span className="text-sm font-semibold text-gray-900 leading-tight">
+                                    {step.label}
+                                  </span>
+                                  <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${
+                                    isComplete ? 'bg-green-100 text-green-600' :
+                                    isActive   ? 'bg-blue-100 text-blue-600'  :
+                                    'bg-gray-100 text-gray-400'
+                                  }`}>
+                                    {isComplete ? 'Complete' : 'In progress'}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-3 flex-shrink-0">
+                                {step.num === 1 && !profileComplete && (
+                                  <div className="hidden md:block w-20 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                    <div
+                                      className="h-full bg-blue-500 rounded-full transition-all duration-500"
+                                      style={{ width: `${isReturningUser && !profileStarted ? 100 : profilePct}%` }}
+                                    />
+                                  </div>
+                                )}
+                                {isOpen
+                                  ? <ChevronUp size={16} className="text-gray-400" />
+                                  : <ChevronDown size={16} className="text-gray-400" />}
+                              </div>
                             </div>
-                            <div className="flex items-center gap-3">
-                              {step.num === 1 && !profileComplete && (
-                                <div className="w-20 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                            {step.num === 1 && !profileComplete && (
+                              <div className="md:hidden mt-2.5 pl-10">
+                                <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
                                   <div
                                     className="h-full bg-blue-500 rounded-full transition-all duration-500"
                                     style={{ width: `${isReturningUser && !profileStarted ? 100 : profilePct}%` }}
                                   />
                                 </div>
-                              )}
-                              {isOpen
-                                ? <ChevronUp size={16} className="text-gray-400" />
-                                : <ChevronDown size={16} className="text-gray-400" />}
-                            </div>
+                              </div>
+                            )}
                           </button>
 
                         {/* Step 3 — expert review active */}
@@ -596,8 +667,8 @@ export default function DefaultLayout({
           )}
         </div>
 
-        {/* Right sidebar */}
-        <div className="w-72 flex-shrink-0">
+        {/* Right sidebar — desktop only */}
+        <div className="hidden md:block w-72 flex-shrink-0">
           <div className="space-y-4">
             {paymentComplete ? (
               <div className="bg-white rounded-2xl border border-gray-200 p-5">
@@ -690,6 +761,70 @@ export default function DefaultLayout({
           </div>
         </div>
       </div>
+
+      <BottomTabBar activePage="tickets" />
+
+      <BottomSheet open={sidebarOpen} onClose={() => setSidebarOpen(false)} title="Filing summary">
+        {/* Progress */}
+        {!paymentComplete && (
+          <div className="bg-gray-50 rounded-2xl p-4">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[10px] font-semibold text-gray-400 tracking-widest">OVERALL PROGRESS</p>
+              <span className="text-base font-bold text-gray-900">11%</span>
+            </div>
+            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden mb-1.5">
+              <div className="h-full bg-blue-500 rounded-full" style={{ width: '11%' }} />
+            </div>
+            <p className="text-[11px] text-gray-400">Step 1 of 5 · Complete your profile</p>
+          </div>
+        )}
+        {/* Advisor */}
+        <div className="bg-gray-50 rounded-2xl p-4">
+          <p className="text-[10px] font-semibold text-gray-400 tracking-widest mb-3">YOUR ADVISOR</p>
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">PN</div>
+            <div>
+              <p className="text-sm font-semibold text-gray-900">Priya Nair</p>
+              <p className="text-xs text-gray-400">Senior Tax Advisor</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <button onClick={() => { setChatOpen(true); setSidebarOpen(false) }} className="flex items-center justify-center gap-1.5 bg-white text-gray-700 text-xs font-medium py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+              <MessageCircle size={13} /> Message
+            </button>
+            <button className="flex items-center justify-center gap-1.5 border border-gray-200 text-gray-700 text-xs font-medium py-2 rounded-lg bg-white hover:bg-gray-50 transition-colors">
+              <Phone size={13} /> Call
+            </button>
+          </div>
+        </div>
+        {/* Key dates */}
+        <div className="bg-gray-50 rounded-2xl p-4">
+          <p className="text-[10px] font-semibold text-gray-400 tracking-widest mb-3">KEY DATES</p>
+          <div className="space-y-3">
+            {[
+              { label: 'Submit details by',       date: 'May 30, 2025',  note: '15 days left'  },
+              { label: 'Federal filing deadline',  date: 'Apr 15, 2026',  note: '336 days left' },
+            ].map(({ label, date, note }) => (
+              <div key={label} className="flex items-start gap-2.5">
+                <div className="w-1 h-9 rounded-full bg-orange-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-xs font-medium text-gray-800">{label}</p>
+                  <p className="text-[11px] text-gray-400">{date} · {note}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* Help */}
+        <div className="bg-gray-50 rounded-2xl p-4">
+          <p className="text-[10px] font-semibold text-gray-400 tracking-widest mb-2">NEED HELP?</p>
+          <p className="text-xs text-gray-500 mb-3">Visit our help center for guides and answers.</p>
+          <button className="w-full flex items-center justify-between border border-gray-200 bg-white rounded-xl px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+            Visit help center
+            <ExternalLink size={13} className="text-gray-400" />
+          </button>
+        </div>
+      </BottomSheet>
     </div>
   )
 }

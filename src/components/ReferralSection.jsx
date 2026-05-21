@@ -52,8 +52,8 @@ export default function ReferralSection() {
         ))}
       </div>
 
-      {/* Friends list */}
-      <div className="space-y-2">
+      {/* Friends list — desktop only */}
+      <div className="hidden md:block space-y-2">
         {friends.map((f) => (
           <div key={f.name} className="flex items-center justify-between">
             <div className="flex items-center gap-2">
