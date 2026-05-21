@@ -336,7 +336,13 @@ export default function TicketDetailsPage() {
 
       {/* ── Floating chat panel ── */}
       {chatOpen && (
-        <div className="fixed right-6 top-20 bottom-6 w-[460px] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col z-50 overflow-hidden">
+        <>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm md:hidden z-40" onClick={() => setChatOpen(false)} />
+        <div className="fixed inset-x-0 bottom-0 h-[95vh] md:inset-x-auto md:right-6 md:top-20 md:bottom-6 md:h-auto md:w-[460px] bg-white rounded-t-2xl md:rounded-2xl shadow-2xl border border-gray-200 flex flex-col z-50 overflow-hidden">
+          {/* Drag handle — mobile only */}
+          <div className="md:hidden flex justify-center pt-3 pb-1 flex-shrink-0">
+            <div className="w-10 h-1 rounded-full bg-gray-200" />
+          </div>
           <div className="flex items-center gap-3 px-4 py-3.5 border-b border-gray-100 flex-shrink-0">
             <div className="w-9 h-9 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">PN</div>
             <div className="flex-1 min-w-0">
@@ -395,11 +401,18 @@ export default function TicketDetailsPage() {
             </div>
           )}
         </div>
+        </>
       )}
 
       {/* ── Floating documents panel ── */}
       {docsOpen && (
-        <div className="fixed right-6 top-20 bottom-6 w-[460px] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col z-50 overflow-hidden">
+        <>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm md:hidden z-40" onClick={() => setDocsOpen(false)} />
+        <div className="fixed inset-x-0 bottom-0 h-[95vh] md:inset-x-auto md:right-6 md:top-20 md:bottom-6 md:h-auto md:w-[460px] bg-white rounded-t-2xl md:rounded-2xl shadow-2xl border border-gray-200 flex flex-col z-50 overflow-hidden">
+          {/* Drag handle — mobile only */}
+          <div className="md:hidden flex justify-center pt-3 pb-1 flex-shrink-0">
+            <div className="w-10 h-1 rounded-full bg-gray-200" />
+          </div>
           <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 flex-shrink-0">
             <div>
               <p className="text-sm font-semibold text-gray-900">Document Vault</p>
@@ -541,6 +554,7 @@ export default function TicketDetailsPage() {
             )}
           </div>
         </div>
+        </>
       )}
 
       {profileOpen && (

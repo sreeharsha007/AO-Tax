@@ -349,7 +349,7 @@ export default function DefaultLayout({
                               <p className="text-xs text-gray-400">Priya has prepared <span className="font-medium text-gray-700">{DRAFTS.length} draft returns</span> for your review. Approve all to proceed to payment.</p>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3 mb-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                               {DRAFTS.map(draft => {
                                 const state = draftStates[draft.id]
                                 const commentOpen = draftCommentOpen[draft.id]
