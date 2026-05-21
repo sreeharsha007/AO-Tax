@@ -1,13 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LayoutGrid, Ticket, FolderOpen, Calendar, Gift, Bell, ChevronDown, Users } from 'lucide-react'
+import { LayoutGrid, FolderOpen, Gift, Bell, ChevronDown, Users } from 'lucide-react'
 
 const navItems = [
-  { label: 'Dashboard', icon: LayoutGrid, key: 'dashboard', path: '/' },
-  { label: 'My Filings', icon: Ticket, key: 'tickets', badge: 1, path: '/tickets/467501' },
-  { label: 'Document Vault', icon: FolderOpen, key: 'vault', badge: 12 },
-  { label: 'Important dates', icon: Calendar, key: 'dates' },
-  { label: 'Invite & Earn', icon: Gift, key: 'invite' },
+  { label: 'Dashboard',      icon: LayoutGrid, key: 'dashboard', path: '/' },
+  { label: 'Document Vault', icon: FolderOpen,  key: 'vault',    badge: 12 },
+  { label: 'Invite & Earn',  icon: Gift,        key: 'invite' },
 ]
 
 export default function Navbar({ activePage = 'dashboard', dark = false, isReturningUser = false, onToggleUserType, profileNavStyle, onSetProfileNavStyle }) {
@@ -35,14 +33,14 @@ export default function Navbar({ activePage = 'dashboard', dark = false, isRetur
   const bellColor = dark ? 'text-gray-400 hover:bg-white/10' : 'text-gray-600 hover:bg-gray-100'
 
   return (
-    <nav className={`${bg} border-b px-6 h-14 flex items-center justify-between sticky top-0 z-10`}>
+    <nav className={`${bg} border-b px-6 h-14 hidden md:flex items-center justify-between sticky top-0 z-10`}>
       {/* Logo — left */}
       <button onClick={() => navigate('/')} className="flex items-center gap-1">
         <span className={`font-bold text-sm tracking-wide ${logoText}`}>AOTax</span>
       </button>
 
-      {/* Nav items — absolutely centered */}
-      <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1">
+      {/* Nav items — absolutely centered, hidden on mobile/tablet */}
+      <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex items-center gap-1">
         {navItems.map(({ label, icon: Icon, key, badge, path }) => {
           const isActive = activePage === key
           const activeStyle = dark
@@ -87,7 +85,7 @@ export default function Navbar({ activePage = 'dashboard', dark = false, isRetur
             <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center text-white text-xs font-semibold">
               SR
             </div>
-            <div className="leading-tight">
+            <div className="leading-tight hidden sm:block">
               <div className={`text-xs font-semibold ${nameText}`}>Surajit Ray</div>
               <div className={`text-[10px] ${idText}`}>#155593</div>
             </div>

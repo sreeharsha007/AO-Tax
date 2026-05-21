@@ -4,6 +4,7 @@ import {
   ChevronRight, ChevronDown, ChevronLeft, Upload, X, Plus, Trash2
 } from 'lucide-react'
 import { NAV_SECTIONS } from '../data/filingFormData'
+import BottomSheet from './BottomSheet'
 
 const TICKET = {
   id: '#467501',
@@ -245,11 +246,10 @@ function FormField({ field, value, onChange, hasComment }) {
 
 function FieldGrid({ fields, fieldValues = {}, onFieldChange, commentsByFieldId = {}, onFieldRef }) {
   return (
-    <div className="grid grid-cols-2 gap-x-5 gap-y-5">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4 md:gap-y-5">
       {fields.map(field => {
         const colSpan =
-          field.width === 'full' ? 'col-span-2' :
-          field.width === 'quarter' ? 'col-span-1' :
+          field.width === 'full' ? 'md:col-span-2' :
           'col-span-1'
         const fieldComment = commentsByFieldId[field.id]
         const hasComment = !!fieldComment
@@ -347,9 +347,9 @@ function EmployerEntry({ entry, index, onUpdate, onRemove }) {
       {/* Entry fields */}
       {entry.expanded && (
         <div className="px-5 pb-5 pt-1 border-t border-gray-100 bg-white">
-          <div className="grid grid-cols-2 gap-x-5 gap-y-4 mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4 mt-4">
             {/* Employer name — full width */}
-            <div className="col-span-2">
+            <div className="md:col-span-2">
               <label className="block text-xs font-semibold text-gray-600 mb-1.5">Employer name <span className="text-red-400">*</span></label>
               <input type="text" placeholder="e.g. TechNova Inc." className={inp}
                 value={entry.employer_name || ''}
@@ -357,7 +357,7 @@ function EmployerEntry({ entry, index, onUpdate, onRemove }) {
             </div>
 
             {/* Address */}
-            <div className="col-span-2">
+            <div className="md:col-span-2">
               <label className="block text-xs font-semibold text-gray-600 mb-1.5">Street address <span className="text-red-400">*</span></label>
               <input type="text" placeholder="123 Main St" className={inp}
                 onChange={e => onUpdate(entry.id, 'street_address', e.target.value)} />
@@ -391,7 +391,7 @@ function EmployerEntry({ entry, index, onUpdate, onRemove }) {
             </div>
 
             {/* Currently working */}
-            <div className="col-span-2">
+            <div className="md:col-span-2">
               <label className="block text-xs font-semibold text-gray-600 mb-2">Currently working here</label>
               <div className="flex gap-4">
                 {['Yes','No'].map(o => (
@@ -420,7 +420,7 @@ function EmployerEntry({ entry, index, onUpdate, onRemove }) {
             </div>
 
             {/* Client location */}
-            <div className="col-span-2">
+            <div className="md:col-span-2">
               <label className="block text-xs font-semibold text-gray-600 mb-2">Did you work at client location during your projects/assignments? <span className="text-gray-400 font-normal">(optional)</span></label>
               <div className="flex gap-4">
                 {['Yes','No'].map(o => (
@@ -545,7 +545,7 @@ function InstitutionRow({ entry, index, entryType, docType, onUpdate, onRemove }
           )}
 
           {/* Fields */}
-          <div className="grid grid-cols-2 gap-x-5 gap-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
             <div>
               <label className="block text-xs font-semibold text-gray-600 mb-1.5">Taxpayer / Spouse / Joint</label>
               <select className={sel} defaultValue="" onChange={e => onUpdate(entry.id, 'owner', e.target.value)}>
@@ -567,7 +567,7 @@ function InstitutionRow({ entry, index, entryType, docType, onUpdate, onRemove }
             </div>
 
             {entryType === 'interest' ? (
-              <div className="col-span-2">
+              <div className="md:col-span-2">
                 <label className="block text-xs font-semibold text-gray-600 mb-1.5">Interest income received (USD)</label>
                 <input type="text" placeholder="$0.00" className={inp}
                   onChange={e => onUpdate(entry.id, 'interest_income', e.target.value)} />
@@ -972,7 +972,7 @@ function FormSection({ sub, isEnabled = true, onToggle, onCompletionChange, fiel
   }, [openCardId])
 
   return (
-    <div ref={formRef} className="relative max-w-2xl mx-auto px-8 py-8">
+    <div ref={formRef} className="relative w-full md:max-w-2xl md:mx-auto px-4 md:px-8 py-5 md:py-8">
       {/* Form content — disabled in read-only mode */}
       <div className={readOnly ? 'pointer-events-none select-none' : ''}>
       {/* Title row — toggle always here */}
@@ -1039,7 +1039,7 @@ function FormSection({ sub, isEnabled = true, onToggle, onCompletionChange, fiel
 
       </div>{/* end pointer-events-none wrapper */}
 
-      {/* ── Comment indicators layer — always interactive ── */}
+      {/* ── Comment indicators layer — desktop only ── */}
       {indicatorPositions.map(({ id, top, cardSide }) => {
         const comment = sectionComments.find(c => c.id === id)
         if (!comment) return null
@@ -1050,6 +1050,7 @@ function FormSection({ sub, isEnabled = true, onToggle, onCompletionChange, fiel
           <div
             key={id}
             data-comment-ui
+            className="hidden md:block"
             style={{ position: 'absolute', top: `${top}px`, left: 'calc(100% + 16px)', transform: 'translateY(-50%)', zIndex: 20 }}
           >
             <CommentIndicator
@@ -1308,6 +1309,7 @@ export default function FilingFormShell({ onClose, initialSubId, initialSubState
   })
   const [showDiscard, setShowDiscard] = useState(false)
   const [navOpen, setNavOpen] = useState(false)
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [enabledSubs, setEnabledSubs] = useState(new Set())
   const [comments, setComments] = useState(MOCK_COMMENTS)
 
@@ -1438,11 +1440,43 @@ export default function FilingFormShell({ onClose, initialSubId, initialSubState
 
   return (
     <>
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-    <div className="w-[95%] h-[88vh] bg-white flex flex-col rounded-2xl overflow-hidden shadow-2xl">
+    <div className="fixed inset-0 z-50 md:flex md:items-center md:justify-center md:bg-black/50">
+    <div className="h-full w-full md:w-[95%] md:h-[88vh] bg-white flex flex-col md:rounded-2xl overflow-hidden md:shadow-2xl">
 
-      {/* Header */}
-      <div className="relative flex items-center justify-between px-6 h-14 border-b border-gray-200 bg-white flex-shrink-0">
+      {/* ── Mobile top bar ── */}
+      <div className="md:hidden flex items-center justify-between px-4 h-14 border-b border-gray-200 bg-white flex-shrink-0">
+        <button
+          onClick={() => {
+            if (!hasPrev || readOnly) { readOnly ? onClose() : setShowDiscard(true) }
+            else navigateTo(allSubs[currentIdx - 1].id)
+          }}
+          className="flex items-center gap-1 text-gray-600 min-w-[56px]"
+        >
+          <ChevronLeft size={18} />
+          <span className="text-sm font-medium text-gray-700">{hasPrev ? 'Back' : 'Exit'}</span>
+        </button>
+        <button onClick={() => setMobileNavOpen(true)} className="flex flex-col items-center px-2">
+          <span className="text-sm font-semibold text-gray-900 leading-tight">{activeSub?.label}</span>
+          <span className="text-[11px] text-gray-400">{currentIdx + 1} of {allSubs.length}</span>
+        </button>
+        <button
+          onClick={() => readOnly ? onClose() : saveAndExit()}
+          className="text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors min-w-[56px] text-right"
+        >
+          {readOnly ? 'Close' : 'Save & exit'}
+        </button>
+      </div>
+
+      {/* Mobile progress bar */}
+      <div className="md:hidden h-[3px] bg-gray-100 flex-shrink-0">
+        <div
+          className="h-full bg-blue-500 transition-all duration-500"
+          style={{ width: `${Math.round(((currentIdx) / allSubs.length) * 100)}%` }}
+        />
+      </div>
+
+      {/* ── Desktop header ── */}
+      <div className="relative hidden md:flex items-center justify-between px-6 h-14 border-b border-gray-200 bg-white flex-shrink-0">
         <div>
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold text-gray-900">
@@ -1520,9 +1554,9 @@ export default function FilingFormShell({ onClose, initialSubId, initialSubState
         )}
       </div>
 
-      {/* Slim progress bar — progress nav style */}
+      {/* Slim progress bar — progress nav style, desktop only */}
       {!readOnly && profileNavStyle === 'progress' && (
-        <div className="h-[3px] bg-gray-100 flex-shrink-0">
+        <div className="hidden md:block h-[3px] bg-gray-100 flex-shrink-0">
           <div
             className="h-full bg-blue-500 transition-all duration-500"
             style={{ width: `${Math.round((allSubs.filter(s => (subStates[s.id] || 'not_started') === 'complete').length / allSubs.length) * 100)}%` }}
@@ -1535,7 +1569,7 @@ export default function FilingFormShell({ onClose, initialSubId, initialSubState
         {/* Sidebar */}
         {sectionFilter !== 'filing' && profileNavStyle === 'sidebar' ? (
           /* Compact stepper sidebar — profile and individual section modals */
-          <div className={`w-52 flex-shrink-0 self-start mt-4 ml-4 mr-2 bg-white rounded-xl border border-gray-200 overflow-hidden ${readOnly ? 'pointer-events-none' : ''}`}>
+          <div className={`hidden md:block w-52 flex-shrink-0 self-start mt-4 ml-4 mr-2 bg-white rounded-xl border border-gray-200 overflow-hidden ${readOnly ? 'pointer-events-none' : ''}`}>
             <div className="p-3">
               {allSubs.map((sub, idx) => {
                 const state = subStates[sub.id] || 'not_started'
@@ -1577,7 +1611,7 @@ export default function FilingFormShell({ onClose, initialSubId, initialSubState
           </div>
         ) : (sectionFilter === 'filing' && profileNavStyle === 'sidebar') ? (
           /* Filing nav — full section tree */
-          <div className={`border-r border-gray-100 overflow-y-auto scrollbar-hide bg-gray-50/50 ${readOnly ? 'pointer-events-none' : ''}`}>
+          <div className={`hidden md:block border-r border-gray-100 overflow-y-auto scrollbar-hide bg-gray-50/50 ${readOnly ? 'pointer-events-none' : ''}`}>
             <SidebarNav
               sections={visibleSections}
               activeSubId={activeSubId}
@@ -1606,8 +1640,48 @@ export default function FilingFormShell({ onClose, initialSubId, initialSubState
         </div>
       </div>
 
-      {/* Footer */}
-      <div className={`flex items-center px-6 py-4 border-t border-gray-200 bg-white flex-shrink-0 ${readOnly ? 'justify-end' : 'justify-between'}`}>
+      {/* ── Mobile footer ── */}
+      <div className="md:hidden flex-shrink-0 px-4 pt-3 pb-8 bg-white border-t border-gray-200">
+        {readOnly ? (
+          <button onClick={onClose} className="w-full py-3.5 rounded-xl text-sm font-medium text-gray-500 bg-gray-100">
+            Close
+          </button>
+        ) : (
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => hasPrev && navigateTo(allSubs[currentIdx - 1].id)}
+              disabled={!hasPrev}
+              className={`flex items-center gap-1 px-5 py-3.5 rounded-xl border text-sm font-semibold transition-colors flex-shrink-0 ${
+                hasPrev
+                  ? 'border-gray-200 text-gray-700 hover:bg-gray-50'
+                  : 'border-gray-100 text-gray-300 cursor-not-allowed'
+              }`}
+            >
+              <ChevronLeft size={15} /> Back
+            </button>
+            {hasNext ? (
+              <button
+                onClick={() => { markCurrentComplete(); navigateTo(allSubs[currentIdx + 1].id) }}
+                className="flex-1 py-3.5 rounded-xl bg-blue-600 text-white text-sm font-semibold flex items-center justify-center gap-2"
+              >
+                Save & continue <ArrowRight size={15} />
+              </button>
+            ) : (
+              <button
+                onClick={saveAndExit}
+                className="flex-1 py-3.5 rounded-xl bg-blue-600 text-white text-sm font-semibold flex items-center justify-center gap-2"
+              >
+                {sectionFilter === 'profile'
+                  ? <><CheckCircle2 size={15} /> Complete profile</>
+                  : <>Save & continue <ArrowRight size={15} /></>}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* ── Desktop footer ── */}
+      <div className={`hidden md:flex items-center px-6 py-4 border-t border-gray-200 bg-white flex-shrink-0 ${readOnly ? 'justify-end' : 'justify-between'}`}>
         {readOnly ? (
           <button
             onClick={onClose}
@@ -1709,6 +1783,49 @@ export default function FilingFormShell({ onClose, initialSubId, initialSubState
         </div>
       </>
     )}
+
+    {/* Mobile section navigation bottom sheet */}
+    <BottomSheet open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} title="Sections">
+      <div className="space-y-0.5">
+        {allSubs.map((sub, idx) => {
+          const state = subStates[sub.id] || 'not_started'
+          const isActive = sub.id === activeSubId
+          const isComplete = state === 'complete'
+          const isLast = idx === allSubs.length - 1
+          return (
+            <div key={sub.id}>
+              <button
+                onClick={() => { navigateTo(sub.id); setMobileNavOpen(false) }}
+                className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-colors text-left ${
+                  isActive ? 'bg-blue-50' : 'hover:bg-gray-50'
+                }`}
+              >
+                {isComplete ? (
+                  <CheckCircle2 size={16} className="text-blue-500 flex-shrink-0" />
+                ) : isActive ? (
+                  <div className="w-4 h-4 rounded-full border-2 border-blue-500 bg-blue-50 flex-shrink-0" />
+                ) : (
+                  <Circle size={16} className="text-gray-300 flex-shrink-0" />
+                )}
+                <span className={`text-sm flex-1 ${
+                  isActive   ? 'font-semibold text-gray-900' :
+                  isComplete ? 'font-medium text-gray-500'   :
+                               'text-gray-400'
+                }`}>
+                  {sub.label}
+                </span>
+                {isActive && <ChevronRight size={14} className="text-blue-400 flex-shrink-0" />}
+              </button>
+              {!isLast && (
+                <div className="px-4">
+                  <div className={`ml-[9px] w-px h-2.5 ${isComplete ? 'bg-blue-200' : 'bg-gray-200'}`} />
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </BottomSheet>
 
     {showDiscard && (
       <DiscardModal
