@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import {
-  ChevronRight, ChevronDown, ChevronUp, Lock, CheckCircle2,
+  ChevronRight, ChevronDown, ChevronUp, ChevronLeft, Lock, CheckCircle2, Check,
   ArrowRight, ExternalLink, Download, FileText, TrendingUp,
   MessageCircle, Phone, MessageSquare, FileCheck,
 } from 'lucide-react'
@@ -26,58 +26,62 @@ export default function DefaultLayout({
   handlePayNow,
   setChatOpen,
   setDocsOpen,
+  isReturningUser,
+  profileComplete,
+  profileStarted,
+  profilePct,
+  openProfileFiling,
+  handleSubmitProfile,
+  handleToggleUserType,
+  persistedProfileFieldValues,
+  profileNavStyle,
+  setProfileNavStyle,
 }) {
   const navigate = useNavigate()
 
   return (
     <div className="min-h-screen bg-[#f5f4f0]">
-      <Navbar activePage="tickets" dark />
+      <Navbar activePage="tickets" dark isReturningUser={isReturningUser} onToggleUserType={handleToggleUserType} profileNavStyle={profileNavStyle} onSetProfileNavStyle={setProfileNavStyle} />
 
       <div className="px-8 pt-5 pb-2 max-w-[1280px] mx-auto">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-1.5 text-[11px] text-gray-400 mb-3">
-          <button onClick={() => navigate('/')} className="hover:text-gray-600">Dashboard</button>
-          <ChevronRight size={10} />
-          <button onClick={() => navigate('/')} className="hover:text-gray-600">My Filings</button>
-          <ChevronRight size={10} />
-          <span className="text-gray-600 font-medium">#467501</span>
-        </div>
+        {/* Back link */}
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors mb-4"
+        >
+          <ChevronLeft size={13} />
+          Back to dashboard
+        </button>
 
-        {/* Tags row */}
-        <div className="flex items-center gap-2 flex-wrap mb-3">
-          <span className="bg-blue-100 text-blue-700 text-[11px] font-semibold px-2.5 py-1 rounded-full">#467501</span>
-          {paymentComplete ? (
-            <span className="flex items-center gap-1 text-[11px] font-medium text-green-600">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
-              Filed
-            </span>
-          ) : (
-            <span className="flex items-center gap-1 text-[11px] font-medium text-red-600">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block" />
-              Needs your input
-            </span>
-          )}
-          <span className="text-[11px] text-gray-400">IT Filing Services · Tax Year 2025</span>
-        </div>
-
-        {/* Page title + action buttons */}
-        <div className="flex items-start justify-between gap-4">
+        {/* Title row */}
+        <div className="flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 tracking-tight leading-tight">Your 2025 filing</h1>
-            <p className="text-gray-500 text-sm mt-1.5 max-w-xl">
-              {paymentComplete
-                ? 'Successfully e-filed with the IRS and NY State DTF on May 20, 2025.'
-                : "Complete the steps below to finish your filing. Priya can't move forward until the current step is done."
-              }
-            </p>
+            <h1 className="text-3xl font-bold text-gray-900 tracking-tight leading-tight mb-1.5">Your 2025 filing</h1>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-medium text-gray-400">#467501</span>
+              <span className="text-gray-300 text-[10px]">•</span>
+              {paymentComplete ? (
+                <span className="flex items-center gap-1 text-xs font-medium text-green-600">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" /> Filed
+                </span>
+              ) : (
+                <span className="flex items-center gap-1 text-xs font-medium text-red-500">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block" /> Needs your input
+                </span>
+              )}
+              <span className="text-gray-300 text-[10px]">•</span>
+              <span className="text-xs text-gray-400">IT Filing Services</span>
+              <span className="text-gray-300 text-[10px]">•</span>
+              <span className="text-xs text-gray-400">Tax Year 2025</span>
+            </div>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0 mt-1">
-            <button onClick={() => setChatOpen(true)} className="relative flex items-center gap-2 px-3 py-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition-colors">
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button onClick={() => setChatOpen(true)} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition-colors">
               <MessageSquare size={14} className="text-gray-500 flex-shrink-0" />
               <span className="text-xs font-medium text-gray-600">Messages</span>
               <span className="w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center flex-shrink-0">1</span>
             </button>
-            <button onClick={() => setDocsOpen(true)} className="relative flex items-center gap-2 px-3 py-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition-colors">
+            <button onClick={() => setDocsOpen(true)} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition-colors">
               <FileCheck size={14} className="text-gray-500 flex-shrink-0" />
               <span className="text-xs font-medium text-gray-600">Documents</span>
               <span className="w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center flex-shrink-0">4</span>
@@ -153,10 +157,11 @@ export default function DefaultLayout({
                 {historyOpen && (
                   <div className="border-t border-gray-100 px-5 pb-2">
                     {[
-                      { label: 'Provide details', date: 'May 15, 2025', action: 'View filing',  onAction: openFilingReadOnly },
-                      { label: 'Expert review',   date: 'May 19, 2025', action: 'View notes',   onAction: () => {}          },
-                      { label: 'Review drafts',   date: 'May 19, 2025', action: 'View drafts',  onAction: () => {}          },
-                      { label: 'Payment',         date: 'May 20, 2025', action: 'View invoice', onAction: () => {}          },
+                      { label: 'Profile',         date: 'May 10, 2025', action: 'View profile',  onAction: () => {}         },
+                      { label: 'Provide details', date: 'May 15, 2025', action: 'View filing',   onAction: openFilingReadOnly },
+                      { label: 'Expert review',   date: 'May 19, 2025', action: 'View notes',    onAction: () => {}          },
+                      { label: 'Review drafts',   date: 'May 19, 2025', action: 'View drafts',   onAction: () => {}          },
+                      { label: 'Payment',         date: 'May 20, 2025', action: 'View invoice',  onAction: () => {}          },
                     ].map(({ label, date, action, onAction }, i, arr) => (
                       <div key={label} className={`flex items-center gap-3 py-2.5 ${i < arr.length - 1 ? 'border-b border-gray-50' : ''}`}>
                         <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
@@ -188,43 +193,57 @@ export default function DefaultLayout({
 
                   return (
                     <div key={step.num} className="flex gap-3 items-start">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5 ${
-                        isComplete ? 'bg-blue-500 text-white' :
-                        isActive   ? 'bg-blue-500 text-white' :
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 mt-[10px] ${
+                        isComplete ? 'bg-green-500 text-white' :
+                        isActive   ? 'bg-white border-2 border-blue-500 text-blue-500' :
                         'bg-gray-200 text-gray-400'
                       }`}>
-                        {isComplete ? <CheckCircle2 size={16} strokeWidth={2.5} /> : step.num}
+                        {isComplete ? <Check size={16} strokeWidth={3} /> : step.num}
                       </div>
 
-                      <div className="flex-1 bg-white rounded-2xl border border-gray-200 overflow-hidden">
-                        <button
-                          onClick={() => setOpenStep(isOpen ? null : step.num)}
-                          className="w-full flex items-center justify-between px-5 py-4"
-                        >
-                          <div className="flex items-center gap-3">
-                            {isUpcoming && <Lock size={15} className="text-gray-300" />}
-                            <span className={`text-sm font-semibold ${isUpcoming ? 'text-gray-400' : 'text-gray-900'}`}>
-                              {step.label}
-                            </span>
-                            <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
-                              isComplete ? 'bg-green-100 text-green-600' :
-                              isActive   ? 'bg-blue-100 text-blue-600'  :
-                              'bg-gray-100 text-gray-400'
-                            }`}>
-                              {isComplete ? 'Complete' : isActive ? 'In progress' : 'Upcoming'}
+                      <div className="flex-1 overflow-hidden">
+                        {isUpcoming ? (
+                          <div className="flex items-center gap-3 px-5 py-4">
+                            <span className="text-sm font-semibold text-gray-400">{step.label}</span>
+                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-400">
+                              Upcoming
                             </span>
                           </div>
-                          {isOpen
-                            ? <ChevronUp size={16} className="text-gray-400" />
-                            : <ChevronDown size={16} className="text-gray-400" />}
-                        </button>
+                        ) : (
+                          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+                          <button
+                            onClick={() => setOpenStep(isOpen ? null : step.num)}
+                            className="w-full flex items-center justify-between px-5 py-4"
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className={`text-sm font-semibold ${isUpcoming ? 'text-gray-400' : 'text-gray-900'}`}>
+                                {step.label}
+                              </span>
+                              <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                                isComplete ? 'bg-green-100 text-green-600' :
+                                isActive   ? 'bg-blue-100 text-blue-600'  :
+                                'bg-gray-100 text-gray-400'
+                              }`}>
+                                {isComplete ? 'Complete' : isActive ? 'In progress' : 'Upcoming'}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              {step.num === 1 && !profileComplete && (
+                                <div className="w-20 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                  <div
+                                    className="h-full bg-blue-500 rounded-full transition-all duration-500"
+                                    style={{ width: `${isReturningUser && !profileStarted ? 100 : profilePct}%` }}
+                                  />
+                                </div>
+                              )}
+                              {isOpen
+                                ? <ChevronUp size={16} className="text-gray-400" />
+                                : <ChevronDown size={16} className="text-gray-400" />}
+                            </div>
+                          </button>
 
-                        {!isOpen && (
-                          <p className="px-5 pb-4 text-xs text-gray-400 -mt-2">{step.sub}</p>
-                        )}
-
-                        {/* Step 2 — active */}
-                        {isOpen && step.num === 2 && isActive && (
+                        {/* Step 3 — expert review active */}
+                        {isOpen && step.num === 3 && isActive && (
                           <div className="px-5 pb-5 border-t border-gray-100">
                             <div className="flex items-start gap-3 bg-gray-50 rounded-xl px-4 py-4 mt-4 mb-4">
                               <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">PN</div>
@@ -239,8 +258,8 @@ export default function DefaultLayout({
                           </div>
                         )}
 
-                        {/* Step 2 — complete */}
-                        {isOpen && step.num === 2 && isComplete && (
+                        {/* Step 3 — expert review complete */}
+                        {isOpen && step.num === 3 && isComplete && (
                           <div className="px-5 pb-5 border-t border-gray-100">
                             <div className="flex items-center gap-3 bg-green-50 border border-green-100 rounded-xl px-4 py-3.5 mt-4">
                               <CheckCircle2 size={16} className="text-green-500 flex-shrink-0" />
@@ -252,8 +271,8 @@ export default function DefaultLayout({
                           </div>
                         )}
 
-                        {/* Step 3 — active: draft review */}
-                        {isOpen && step.num === 3 && isActive && (
+                        {/* Step 4 — review drafts active */}
+                        {isOpen && step.num === 4 && isActive && (
                           <div className="px-5 pb-5 border-t border-gray-100">
                             <div className="py-3.5 border-b border-gray-100 mb-4">
                               <p className="text-xs text-gray-400">Priya has prepared <span className="font-medium text-gray-700">{DRAFTS.length} draft returns</span> for your review. Approve all to proceed to payment.</p>
@@ -346,7 +365,7 @@ export default function DefaultLayout({
 
                             {allDraftsApproved && (
                               <button
-                                onClick={() => { setDraftsApproved(true); setOpenStep(4) }}
+                                onClick={() => { setDraftsApproved(true); setOpenStep(5) }}
                                 className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
                               >
                                 Proceed to payment <ArrowRight size={14} />
@@ -355,8 +374,8 @@ export default function DefaultLayout({
                           </div>
                         )}
 
-                        {/* Step 3 — complete */}
-                        {isOpen && step.num === 3 && isComplete && (
+                        {/* Step 4 — review drafts complete */}
+                        {isOpen && step.num === 4 && isComplete && (
                           <div className="px-5 pb-5 border-t border-gray-100">
                             <div className="py-3.5 border-b border-gray-100 mb-4">
                               <p className="text-xs text-gray-400">All <span className="font-medium text-gray-700">{DRAFTS.length} drafts</span> approved · May 19, 2025</p>
@@ -390,8 +409,8 @@ export default function DefaultLayout({
                           </div>
                         )}
 
-                        {/* Step 4 — active */}
-                        {isOpen && step.num === 4 && isActive && (
+                        {/* Step 5 — pay invoice active */}
+                        {isOpen && step.num === 5 && isActive && (
                           <div className="px-5 pb-5 border-t border-gray-100">
                             <div className="py-3.5 border-b border-gray-100 mb-4">
                               <p className="text-xs text-gray-400">Your invoice is ready. Review the breakdown and complete payment to file your returns.</p>
@@ -435,12 +454,83 @@ export default function DefaultLayout({
                           </div>
                         )}
 
-                        {/* Step 1 — expanded */}
+                        {/* Step 1 — profile */}
                         {isOpen && step.num === 1 && (
                           <div className="px-5 pb-5 border-t border-gray-100">
-                            <div className="flex items-center justify-between py-3.5 border-b border-gray-100 mb-3">
-                              <span className="text-xs text-gray-400">
-                                {sectionsStarted === 0 ? 'No sections started yet' : `${sectionsStarted} of 4 sections started`}
+                            {profileComplete ? (
+                              <div className="pt-5 flex items-center justify-between">
+                                <p className="text-sm text-gray-500">
+                                  {isReturningUser ? 'Profile confirmed on May 10, 2025' : 'Profile submitted on May 10, 2025'}
+                                </p>
+                                <button onClick={openProfileFiling} className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors flex-shrink-0">
+                                  View submitted profile <ArrowRight size={13} />
+                                </button>
+                              </div>
+                            ) : isReturningUser ? (
+                              // Returning user — pre-filled, just confirm
+                              <div className="mt-5">
+                                <p className="text-sm text-gray-600 leading-relaxed mb-5">
+                                  We have your details from last year on file. Take a look and confirm they're still accurate — or open to update anything that's changed.
+                                </p>
+                                {/* Summary grid */}
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-3 mb-5">
+                                  {[
+                                    { label: 'Name', value: 'Surajit Ray' },
+                                    { label: 'Visa', value: 'H-1B' },
+                                    { label: 'Address', value: '84 Grove St, New York' },
+                                    { label: 'Filing status', value: 'Married Filing Jointly' },
+                                  ].map(({ label, value }) => (
+                                    <div key={label}>
+                                      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">{label}</p>
+                                      <p className="text-xs font-medium text-gray-700">{value}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                                {/* Actions */}
+                                <div className="flex items-center justify-between">
+                                  <button onClick={handleSubmitProfile} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+                                    Looks good, confirm
+                                  </button>
+                                  <button onClick={openProfileFiling} className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors">
+                                    Review &amp; confirm <ArrowRight size={14} />
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              // States 1 / 2a / 2b — clean modern: description + thin bar + action
+                              <div className="mt-5">
+                                <p className="text-sm text-gray-600 leading-relaxed mb-5">
+                                  {!profileStarted
+                                    ? 'Before Priya can start on your return, she needs a few details about you. Takes minutes and carries over each year.'
+                                    : profilePct < 100
+                                    ? 'Pick up where you left off. A few more sections and you\'re done.'
+                                    : 'All sections filled in. Once submitted, Priya will review everything and get started on your 2025 return.'
+                                  }
+                                </p>
+                                {/* Actions */}
+                                <div className="flex items-center justify-between">
+                                  {profilePct === 100
+                                    ? <button onClick={openProfileFiling} className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors">Review &amp; edit <ArrowRight size={13} /></button>
+                                    : <div />
+                                  }
+                                  <button
+                                    onClick={profilePct === 100 ? handleSubmitProfile : openProfileFiling}
+                                    className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
+                                  >
+                                    {!profileStarted ? 'Start profile' : profilePct < 100 ? 'Continue profile' : 'Submit profile'} <ArrowRight size={14} />
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Step 2 — provide details */}
+                        {isOpen && step.num === 2 && (
+                          <div className="px-5 pb-5 border-t border-gray-100">
+                            <div className="flex items-center justify-between pt-4 pb-2">
+                              <span className="text-sm text-gray-500">
+                                {sectionsStarted === 0 ? 'Click a section to begin' : `${sectionsStarted} of 3 sections started`}
                               </span>
                               {filingSubmitted
                                 ? <span className="text-[11px] text-gray-400">Last submitted May 15, 2025</span>
@@ -448,26 +538,30 @@ export default function DefaultLayout({
                               }
                             </div>
 
-                            <div className="mb-4">
+                            <div>
                               {SECTION_ROWS.map(({ label, sectionId, comments, target }) => {
                                 const progress = getSectionProgress(sectionId)
+                                const ctaLabel = progress === 100 ? 'Review' : progress > 0 ? 'Continue' : 'Start'
                                 return (
                                   <button
                                     key={label}
-                                    onClick={() => openFiling(target)}
+                                    onClick={() => openFiling(target, profileNavStyle, sectionId)}
                                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 text-left group transition-colors"
                                   >
                                     <CircularProgress progress={progress} />
-                                    <span className="flex-1 text-sm text-gray-800">{label}</span>
+                                    <span className="flex items-center gap-1.5 flex-1 min-w-0">
+                                      <span className="text-sm text-gray-800">{label}</span>
+                                      <span className="text-gray-300 text-[11px]">·</span>
+                                      <span className={`text-[11px] tabular-nums ${progress > 0 ? 'text-gray-400' : 'text-gray-300'}`}>{progress}%</span>
+                                    </span>
                                     {comments > 0 && (
-                                      <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-full tabular-nums">
+                                      <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-full tabular-nums flex-shrink-0">
                                         {comments} comment{comments > 1 ? 's' : ''}
                                       </span>
                                     )}
-                                    <span className={`text-[11px] tabular-nums ${progress > 0 ? 'text-gray-400' : 'text-gray-300'}`}>
-                                      {progress}%
+                                    <span className="flex items-center gap-1 text-xs font-semibold text-blue-600 flex-shrink-0">
+                                      {ctaLabel} <ArrowRight size={12} />
                                     </span>
-                                    <ChevronRight size={13} className="text-gray-300 group-hover:text-gray-500 transition-colors" />
                                   </button>
                                 )
                               })}
@@ -479,22 +573,13 @@ export default function DefaultLayout({
                               </button>
                             )}
 
-                            {!filingSubmitted && (
-                              allComplete ? (
-                                <div className="flex gap-2">
-                                  <button onClick={() => openFiling()} className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
-                                    Edit filing
-                                  </button>
-                                  <button onClick={handleSubmitFiling} className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors">
-                                    Submit filing <ArrowRight size={14} />
-                                  </button>
-                                </div>
-                              ) : (
-                                <button onClick={() => openFiling()} className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors">
-                                  {anyStarted ? 'Continue filing' : 'Start filing'} <ArrowRight size={14} />
-                                </button>
-                              )
+                            {!filingSubmitted && allComplete && (
+                              <button onClick={handleSubmitFiling} className="w-full flex items-center justify-center gap-1.5 mt-4 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors">
+                                Submit filing <ArrowRight size={14} />
+                              </button>
                             )}
+                          </div>
+                        )}
                           </div>
                         )}
                       </div>
@@ -553,7 +638,7 @@ export default function DefaultLayout({
                 <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden mb-2">
                   <div className="h-full bg-blue-500 rounded-full" style={{ width: '11%' }} />
                 </div>
-                <p className="text-[11px] text-gray-400">Step 1 of 4 · Provide details</p>
+                <p className="text-[11px] text-gray-400">Step 1 of 5 · Complete your profile</p>
               </div>
             )}
 
