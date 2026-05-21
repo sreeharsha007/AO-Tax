@@ -13,7 +13,21 @@ import MorningBriefLayout from '../layouts/MorningBriefLayout'
 import StudioLayout from '../layouts/StudioLayout'
 import StatusLayout from '../layouts/StatusLayout'
 import QuietRoomLayout from '../layouts/QuietRoomLayout'
-import { SECTION_SUB_IDS, SECTION_ROWS, CHAT_MESSAGES, DRAFTS } from '../data/ticketData'
+import { SECTION_SUB_IDS, PROFILE_SUB_IDS, SECTION_ROWS, CHAT_MESSAGES, DRAFTS } from '../data/ticketData'
+
+const RETURNING_USER_PROFILE_VALUES = {
+  contact: { email: 'surajit.ray@technovausa.com', phone: '+1 (917) 555-0142', phone_day: '+1 (917) 555-0142' },
+  general: {
+    first_name: 'Surajit', last_name: 'Ray', dob: '1987-03-14',
+    us_citizen: 'No', itin_apply: 'No', ssn_itin: '***-**-7291',
+    citizenship: 'India', visa_type: 'H-1B', occupation: 'Software Engineer',
+    has_ead: 'No', visa_status_change: 'No',
+    current_country: 'United States', street_address: '84 Grove Street',
+    city: 'New York', state: 'New York', zip: '10014',
+    mailing_same: 'Yes', us_183_days: 'Yes',
+  },
+  household: { marital_status: 'Married', filing_status: 'Married Filing Jointly', spouse_first_name: 'Ananya', spouse_last_name: 'Ray', spouse_dob: '1989-07-22' },
+}
 
 const LAYOUTS = [
   { key: 'default',   icon: LayoutList,    label: 'Steps',     component: DefaultLayout   },
@@ -64,6 +78,7 @@ export default function TicketDetailsPage() {
   const [searchParams] = useSearchParams()
   const isDemoComplete = searchParams.get('demo') === 'complete'
   const isDemoStep3   = searchParams.get('demo') === 'step3'
+  const isDemoProfile = searchParams.get('demo') === 'profile'
 
   // Layout + scenario switcher state
   const [activeLayout, setActiveLayout] = useState(() => {
@@ -79,10 +94,28 @@ export default function TicketDetailsPage() {
     localStorage.setItem('ao-tax-layout', key)
   }
 
+  // User type toggle (new vs returning) — demo convenience
+  const [isReturningUser, setIsReturningUser] = useState(false)
+
+  // Profile state
+  const [profileComplete, setProfileComplete] = useState(isDemoComplete || isDemoStep3)
+  const [profileNavStyle, setProfileNavStyle] = useState('sidebar')
+  const [profileOpen, setProfileOpen] = useState(false)
+  const [persistedProfileSubStates, setPersistedProfileSubStates] = useState(
+    (isDemoComplete || isDemoStep3 || isDemoProfile)
+      ? PROFILE_SUB_IDS.reduce((a, id) => ({ ...a, [id]: 'complete' }), {})
+      : {}
+  )
+  const [persistedProfileFieldValues, setPersistedProfileFieldValues] = useState(
+    (isDemoComplete || isDemoStep3 || isDemoProfile) ? RETURNING_USER_PROFILE_VALUES : {}
+  )
+
   // Filing step state
-  const [openStep, setOpenStep] = useState(isDemoStep3 ? 3 : 1)
+  const [openStep, setOpenStep] = useState(isDemoStep3 ? 4 : isDemoComplete ? 2 : 1)
   const [filingOpen, setFilingOpen] = useState(false)
   const [filingTarget, setFilingTarget] = useState(null)
+  const [filingNavStyle, setFilingNavStyle] = useState('sidebar')
+  const [filingSectionId, setFilingSectionId] = useState(null)
   const [filingSubmitted, setFilingSubmitted] = useState(false)
   const [filingReadOnly, setFilingReadOnly] = useState(false)
   const [historyOpen, setHistoryOpen] = useState(false)
@@ -168,16 +201,21 @@ export default function TicketDetailsPage() {
 
   function getStepState(stepNum) {
     if (draftsApproved) {
+      if (stepNum <= 4) return 'complete'
+      if (stepNum === 5) return 'active'
+      return 'upcoming'
+    }
+    if (isDemoStep3) {
       if (stepNum <= 3) return 'complete'
       if (stepNum === 4) return 'active'
       return 'upcoming'
     }
-    if (isDemoStep3) {
+    if (filingSubmitted) {
       if (stepNum <= 2) return 'complete'
       if (stepNum === 3) return 'active'
       return 'upcoming'
     }
-    if (filingSubmitted) {
+    if (profileComplete) {
       if (stepNum === 1) return 'complete'
       if (stepNum === 2) return 'active'
       return 'upcoming'
@@ -187,7 +225,34 @@ export default function TicketDetailsPage() {
 
   function handleSubmitFiling() {
     setFilingSubmitted(true)
-    setOpenStep(2)
+    setOpenStep(3)
+  }
+
+  function handleProfileSave(subStates, fieldValues) {
+    setPersistedProfileSubStates(subStates)
+    setPersistedProfileFieldValues(fieldValues)
+    const allDone = PROFILE_SUB_IDS.every(id => subStates[id] === 'complete')
+    setProfileComplete(allDone)
+    if (allDone && openStep === 1) setOpenStep(2)
+  }
+
+  function openProfileFiling() {
+    setProfileOpen(true)
+  }
+
+  function handleSubmitProfile() {
+    setProfileComplete(true)
+    if (openStep === 1) setOpenStep(2)
+  }
+
+  function handleToggleUserType() {
+    const next = !isReturningUser
+    setIsReturningUser(next)
+    // Reset profile state when switching user type
+    setProfileComplete(false)
+    setPersistedProfileSubStates({})
+    setPersistedProfileFieldValues(next ? RETURNING_USER_PROFILE_VALUES : {})
+    setOpenStep(1)
   }
 
   function handleFormSave(subStates, fieldValues) {
@@ -202,8 +267,10 @@ export default function TicketDetailsPage() {
     return Math.round((completed / subIds.length) * 100)
   }
 
-  function openFiling(subId = null) {
+  function openFiling(subId = null, navStyle = 'sidebar', sectionId = null) {
     setFilingTarget(subId)
+    setFilingNavStyle(navStyle)
+    setFilingSectionId(sectionId)
     setFilingOpen(true)
   }
 
@@ -213,6 +280,11 @@ export default function TicketDetailsPage() {
   const sectionsStarted = SECTION_ROWS.filter(({ sectionId }) =>
     (SECTION_SUB_IDS[sectionId] || []).some(id => persistedSubStates[id])
   ).length
+
+  const profileStarted = Object.keys(persistedProfileSubStates).length > 0
+  const profilePct = Math.round(
+    (Object.values(persistedProfileSubStates).filter(s => s === 'complete').length / PROFILE_SUB_IDS.length) * 100
+  )
 
   // Shared layout props
   const layoutProps = {
@@ -233,6 +305,17 @@ export default function TicketDetailsPage() {
     handlePayNow,
     setChatOpen,
     setDocsOpen,
+    // Profile / user-type props
+    isReturningUser,
+    profileComplete,
+    profileStarted,
+    profilePct,
+    openProfileFiling,
+    handleSubmitProfile,
+    handleToggleUserType,
+    persistedProfileFieldValues,
+    profileNavStyle,
+    setProfileNavStyle,
   }
 
   const activeLayoutDef = LAYOUTS.find(l => l.key === activeLayout) ?? LAYOUTS[0]
@@ -460,6 +543,18 @@ export default function TicketDetailsPage() {
         </div>
       )}
 
+      {profileOpen && (
+        <FilingFormShell
+          onClose={() => setProfileOpen(false)}
+          initialSubId="contact"
+          initialSubStates={persistedProfileSubStates}
+          initialFieldValues={persistedProfileFieldValues}
+          onSave={handleProfileSave}
+          sectionFilter="profile"
+          profileNavStyle={profileNavStyle}
+        />
+      )}
+
       {filingOpen && (
         <FilingFormShell
           onClose={() => { setFilingOpen(false); setFilingReadOnly(false) }}
@@ -468,6 +563,8 @@ export default function TicketDetailsPage() {
           initialFieldValues={persistedFieldValues}
           onSave={handleFormSave}
           readOnly={filingReadOnly}
+          sectionFilter={filingReadOnly ? undefined : (filingSectionId ?? 'filing')}
+          profileNavStyle={filingNavStyle}
         />
       )}
     </>

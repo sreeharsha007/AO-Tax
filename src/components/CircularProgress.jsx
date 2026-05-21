@@ -3,15 +3,16 @@ export default function CircularProgress({ progress }) {
   const strokeWidth = 2
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
-  const offset = circumference * (1 - progress / 100)
+  const displayProgress = progress === 0 ? 3 : progress
+  const offset = circumference * (1 - displayProgress / 100)
   const isComplete = progress === 100
   const cx = size / 2
   const cy = size / 2
 
   return (
     <svg width={size} height={size} className="flex-shrink-0 -rotate-90" aria-hidden="true">
-      <circle cx={cx} cy={cy} r={radius} fill="none" stroke="#e5e7eb" strokeWidth={strokeWidth} />
-      {progress > 0 && (
+      <circle cx={cx} cy={cy} r={radius} fill="none" stroke="#bfdbfe" strokeWidth={strokeWidth} />
+      {(
         <circle
           cx={cx} cy={cy} r={radius}
           fill="none" stroke="#3b82f6" strokeWidth={strokeWidth}

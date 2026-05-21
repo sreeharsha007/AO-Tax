@@ -43,9 +43,9 @@ function SidebarToggle({ enabled, onToggle }) {
   )
 }
 
-function SidebarNav({ activeSubId, onSelect, enabledSubs, onToggleSub, subStates, unresolvedBySubId = {} }) {
+function SidebarNav({ sections = NAV_SECTIONS, activeSubId, onSelect, enabledSubs, onToggleSub, subStates, unresolvedBySubId = {} }) {
   const [expanded, setExpanded] = useState(() =>
-    NAV_SECTIONS
+    sections
       .filter(s => s.sub.some(sub => sub.id === activeSubId) || s.state === 'active')
       .map(s => s.id)
   )
@@ -66,7 +66,7 @@ function SidebarNav({ activeSubId, onSelect, enabledSubs, onToggleSub, subStates
 
   return (
     <nav className="w-60 flex-shrink-0 py-5 px-3 overflow-y-auto">
-      {NAV_SECTIONS.map((section) => {
+      {sections.map((section) => {
         const isExpanded = expanded.includes(section.id)
         const isIncome   = section.id === INCOME_SECTION_ID
         const hasSubs    = section.sub.length > 0
@@ -1288,8 +1288,16 @@ function DiscardModal({ onSaveAndExit, onExitWithoutSaving, onCancel }) {
   )
 }
 
-export default function FilingFormShell({ onClose, initialSubId, initialSubStates = {}, initialFieldValues = {}, onSave, readOnly = false }) {
-  const allSubs = NAV_SECTIONS.flatMap(s =>
+export default function FilingFormShell({ onClose, initialSubId, initialSubStates = {}, initialFieldValues = {}, onSave, readOnly = false, sectionFilter, profileNavStyle = 'sidebar' }) {
+  const visibleSections = sectionFilter === 'profile'
+    ? NAV_SECTIONS.filter(s => s.id === 'profile')
+    : sectionFilter === 'filing'
+      ? NAV_SECTIONS.filter(s => s.id !== 'profile')
+      : (sectionFilter && sectionFilter !== 'profile' && sectionFilter !== 'filing')
+        ? NAV_SECTIONS.filter(s => s.id === sectionFilter)
+        : NAV_SECTIONS
+
+  const allSubs = visibleSections.flatMap(s =>
     s.sub.length ? s.sub : [{ id: s.id, label: s.label, state: s.state, fields: [] }]
   )
 
@@ -1299,6 +1307,7 @@ export default function FilingFormShell({ onClose, initialSubId, initialSubState
     return firstActive?.id ?? allSubs[0]?.id
   })
   const [showDiscard, setShowDiscard] = useState(false)
+  const [navOpen, setNavOpen] = useState(false)
   const [enabledSubs, setEnabledSubs] = useState(new Set())
   const [comments, setComments] = useState(MOCK_COMMENTS)
 
@@ -1429,13 +1438,20 @@ export default function FilingFormShell({ onClose, initialSubId, initialSubState
 
   return (
     <>
-    <div className="fixed inset-0 z-50 bg-white flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="w-[95%] h-[88vh] bg-white flex flex-col rounded-2xl overflow-hidden shadow-2xl">
 
       {/* Header */}
-      <div className="flex items-center justify-between px-6 h-14 border-b border-gray-200 bg-white flex-shrink-0">
+      <div className="relative flex items-center justify-between px-6 h-14 border-b border-gray-200 bg-white flex-shrink-0">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-gray-900">{TICKET.service}</span>
+            <span className="text-sm font-semibold text-gray-900">
+              {sectionFilter === 'profile'
+                ? 'Your Profile'
+                : (sectionFilter && sectionFilter !== 'filing')
+                  ? (visibleSections[0]?.label ?? TICKET.service)
+                  : TICKET.service}
+            </span>
             {readOnly ? (
               <span className="text-[11px] text-gray-500 font-medium bg-gray-100 px-2 py-0.5 rounded-full">
                 Submitted · View only
@@ -1452,6 +1468,41 @@ export default function FilingFormShell({ onClose, initialSubId, initialSubState
             <span className="text-[11px] text-gray-400">{TICKET.year}</span>
           </div>
         </div>
+        {/* Header pill — header nav style */}
+        {!readOnly && profileNavStyle === 'header' && (
+          <button
+            onClick={() => setNavOpen(o => !o)}
+            className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 hover:opacity-80 transition-opacity"
+          >
+            <div className="flex items-center">
+              {allSubs.map((sub, idx) => {
+                const state = subStates[sub.id] || 'not_started'
+                const isActive = sub.id === activeSubId
+                const isComplete = state === 'complete'
+                const prevComplete = idx > 0 && (subStates[allSubs[idx - 1].id] || 'not_started') === 'complete'
+                return (
+                  <span key={sub.id} className="flex items-center">
+                    {idx > 0 && (
+                      <span className={`block w-3 h-px flex-shrink-0 ${prevComplete ? 'bg-blue-300' : 'bg-gray-200'}`} />
+                    )}
+                    {isComplete ? (
+                      <CheckCircle2 size={16} className="text-blue-500 flex-shrink-0" />
+                    ) : isActive ? (
+                      <span className="flex items-center gap-1.5 flex-shrink-0">
+                        <span className="w-4 h-4 rounded-full border-2 border-blue-500 bg-blue-50 flex-shrink-0" />
+                        <span className="text-[11px] font-semibold text-blue-600 whitespace-nowrap">{sub.label}</span>
+                      </span>
+                    ) : (
+                      <Circle size={16} className="text-gray-300 flex-shrink-0" />
+                    )}
+                  </span>
+                )
+              })}
+            </div>
+            <ChevronDown size={11} className={`text-gray-400 transition-transform duration-200 flex-shrink-0 ${navOpen ? 'rotate-180' : ''}`} />
+          </button>
+        )}
+
         <button
           onClick={() => readOnly ? onClose() : setShowDiscard(true)}
           className="p-2 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
@@ -1459,21 +1510,85 @@ export default function FilingFormShell({ onClose, initialSubId, initialSubState
         >
           <X size={16} />
         </button>
+        {/* Progress bar center label — progress nav style */}
+        {!readOnly && profileNavStyle === 'progress' && (
+          <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
+            <span className="text-[11px] font-semibold text-gray-700">{activeSub?.label}</span>
+            <span className="text-gray-300">·</span>
+            <span className="text-[11px] text-gray-400">{currentIdx + 1} of {allSubs.length}</span>
+          </div>
+        )}
       </div>
 
-      {/* Body */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
-        <div className={`border-r border-gray-100 overflow-y-auto scrollbar-hide bg-gray-50/50 ${readOnly ? 'pointer-events-none' : ''}`}>
-          <SidebarNav
-            activeSubId={activeSubId}
-            onSelect={navigateTo}
-            enabledSubs={enabledSubs}
-            onToggleSub={toggleSub}
-            subStates={subStates}
-            unresolvedBySubId={unresolvedBySubId}
+      {/* Slim progress bar — progress nav style */}
+      {!readOnly && profileNavStyle === 'progress' && (
+        <div className="h-[3px] bg-gray-100 flex-shrink-0">
+          <div
+            className="h-full bg-blue-500 transition-all duration-500"
+            style={{ width: `${Math.round((allSubs.filter(s => (subStates[s.id] || 'not_started') === 'complete').length / allSubs.length) * 100)}%` }}
           />
         </div>
+      )}
+
+      {/* Body */}
+      <div className="flex flex-1 overflow-hidden bg-[#fafafa]">
+        {/* Sidebar */}
+        {sectionFilter !== 'filing' && profileNavStyle === 'sidebar' ? (
+          /* Compact stepper sidebar — profile and individual section modals */
+          <div className={`w-52 flex-shrink-0 self-start mt-4 ml-4 mr-2 bg-white rounded-xl border border-gray-200 overflow-hidden ${readOnly ? 'pointer-events-none' : ''}`}>
+            <div className="p-3">
+              {allSubs.map((sub, idx) => {
+                const state = subStates[sub.id] || 'not_started'
+                const isActive = sub.id === activeSubId
+                const isComplete = state === 'complete'
+                const isLast = idx === allSubs.length - 1
+                return (
+                  <div key={sub.id}>
+                    <button
+                      onClick={() => navigateTo(sub.id)}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-left ${
+                        isActive ? 'bg-blue-50' : 'hover:bg-gray-50'
+                      }`}
+                    >
+                      {isComplete ? (
+                        <CheckCircle2 size={14} className="text-blue-500 flex-shrink-0" />
+                      ) : isActive ? (
+                        <div className="w-3.5 h-3.5 rounded-full border-2 border-blue-500 bg-blue-50 flex-shrink-0" />
+                      ) : (
+                        <Circle size={14} className="text-gray-300 flex-shrink-0" />
+                      )}
+                      <span className={`text-xs leading-none ${
+                        isActive   ? 'font-semibold text-gray-900' :
+                        isComplete ? 'font-medium text-gray-500'   :
+                                     'text-gray-400'
+                      }`}>
+                        {sub.label}
+                      </span>
+                    </button>
+                    {!isLast && (
+                      <div className="px-3">
+                        <div className={`ml-[7px] w-px h-3 ${isComplete ? 'bg-blue-200' : 'bg-gray-200'}`} />
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        ) : (sectionFilter === 'filing' && profileNavStyle === 'sidebar') ? (
+          /* Filing nav — full section tree */
+          <div className={`border-r border-gray-100 overflow-y-auto scrollbar-hide bg-gray-50/50 ${readOnly ? 'pointer-events-none' : ''}`}>
+            <SidebarNav
+              sections={visibleSections}
+              activeSubId={activeSubId}
+              onSelect={navigateTo}
+              enabledSubs={enabledSubs}
+              onToggleSub={toggleSub}
+              subStates={subStates}
+              unresolvedBySubId={unresolvedBySubId}
+            />
+          </div>
+        ) : null}
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto scrollbar-hide bg-[#fafafa]">
@@ -1521,22 +1636,79 @@ export default function FilingFormShell({ onClose, initialSubId, initialSubState
               >
                 <ArrowLeft size={14} /> Back
               </button>
-              <button
-                onClick={() => { if (hasNext) { markCurrentComplete(); navigateTo(allSubs[currentIdx + 1].id) } }}
-                disabled={!hasNext}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                  hasNext
-                    ? 'bg-blue-600 text-white hover:bg-blue-700'
-                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                }`}
-              >
-                Save and continue <ArrowRight size={14} />
-              </button>
+
+              {hasNext ? (
+                <button
+                  onClick={() => { markCurrentComplete(); navigateTo(allSubs[currentIdx + 1].id) }}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                >
+                  Save and continue <ArrowRight size={14} />
+                </button>
+              ) : (
+                <button
+                  onClick={saveAndExit}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                >
+                  {sectionFilter === 'profile' ? (
+                    <><CheckCircle2 size={14} /> Complete profile</>
+                  ) : (
+                    <>Save and continue <ArrowRight size={14} /></>
+                  )}
+                </button>
+              )}
             </div>
           </>
         )}
       </div>
     </div>
+    </div>
+
+    {/* Header pill dropdown — header nav style */}
+    {navOpen && !readOnly && profileNavStyle === 'header' && (
+      <>
+        <div className="fixed inset-0 z-[55]" onClick={() => setNavOpen(false)} />
+        <div className="fixed top-[57px] left-1/2 -translate-x-1/2 z-[60] bg-white rounded-2xl shadow-lg border border-gray-100 w-60 overflow-hidden">
+          <div className="p-1.5">
+            {allSubs.map((sub, idx) => {
+              const state = subStates[sub.id] || 'not_started'
+              const isActive = sub.id === activeSubId
+              const isComplete = state === 'complete'
+              const isLast = idx === allSubs.length - 1
+              return (
+                <div key={sub.id}>
+                  <button
+                    onClick={() => { navigateTo(sub.id); setNavOpen(false) }}
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left ${
+                      isActive ? 'bg-blue-50' : 'hover:bg-gray-50'
+                    }`}
+                  >
+                    {isComplete ? (
+                      <CheckCircle2 size={14} className="text-blue-500 flex-shrink-0" />
+                    ) : isActive ? (
+                      <div className="w-3.5 h-3.5 rounded-full border-2 border-blue-500 bg-blue-50 flex-shrink-0" />
+                    ) : (
+                      <Circle size={14} className="text-gray-300 flex-shrink-0" />
+                    )}
+                    <span className={`text-[11px] leading-none ${
+                      isActive   ? 'font-semibold text-gray-900' :
+                      isComplete ? 'font-medium text-gray-500'   :
+                                   'text-gray-400'
+                    }`}>
+                      {sub.label}
+                    </span>
+                  </button>
+                  {!isLast && (
+                    <div className="px-3">
+                      <div className={`ml-[7px] w-px h-2.5 ${isComplete ? 'bg-blue-200' : 'bg-gray-200'}`} />
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </>
+    )}
 
     {showDiscard && (
       <DiscardModal

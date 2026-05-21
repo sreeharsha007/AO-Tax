@@ -1,22 +1,23 @@
 export const SECTION_SUB_IDS = {
-  profile:      ['contact', 'general', 'household', 'dependents', 'last_year_return', 'identity', 'visa_passport', 'banking', 'other'],
   income:       ['employment', 'interest_dividends', 'retirement', 'sale_assets', 'rental', 'business', 'other_income'],
   expenses:     ['healthcare', 'education', 'charitable', 'retirement_contributions', 'other_expenses'],
   global_assets: ['global_assets'],
 }
 
+export const PROFILE_SUB_IDS = ['contact', 'general', 'household', 'dependents', 'last_year_return', 'identity', 'visa_passport', 'banking', 'other']
+
 export const SECTION_ROWS = [
-  { label: 'Profile',                sectionId: 'profile',       comments: 3, target: 'general'      },
   { label: 'Income & Investments',   sectionId: 'income',        comments: 2, target: 'employment'   },
   { label: 'Expenses & Deductions',  sectionId: 'expenses',      comments: 0, target: 'healthcare'   },
   { label: 'Global Asset Reporting', sectionId: 'global_assets', comments: 0, target: 'global_assets'},
 ]
 
 export const STEPS = [
-  { num: 1, label: 'Provide details',  sub: 'Complete your filing details and resolve expert-requested updates.', state: 'active'   },
-  { num: 2, label: 'Expert review',    sub: 'Priya reviews and freezes your details once all required items are submitted.', state: 'upcoming' },
-  { num: 3, label: 'Review drafts',    sub: 'Your tax drafts will appear here after expert review is complete.', state: 'upcoming' },
-  { num: 4, label: 'Pay invoice',      sub: 'Invoice is available after you approve the drafts.', state: 'upcoming'  },
+  { num: 1, label: 'Complete your profile', sub: 'Tell us who you are. This carries over to future filings.', state: 'active'   },
+  { num: 2, label: 'Provide details',       sub: 'Complete your filing details and resolve expert-requested updates.', state: 'upcoming' },
+  { num: 3, label: 'Expert review',         sub: 'Priya reviews and freezes your details once all required items are submitted.', state: 'upcoming' },
+  { num: 4, label: 'Review drafts',         sub: 'Your tax drafts will appear here after expert review is complete.', state: 'upcoming' },
+  { num: 5, label: 'Pay invoice',           sub: 'Invoice is available after you approve the drafts.', state: 'upcoming'  },
 ]
 
 export const CHAT_MESSAGES = [
