@@ -131,7 +131,7 @@ export default function ExistingUserLogin() {
         {confirmStep ? (
           <div className="w-full max-w-lg">
             <div className="mb-8">
-              <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-3">
+              <p className={`${theme.label} mb-3`}>
                 {currentStepLabel}
               </p>
               <h1
@@ -152,7 +152,7 @@ export default function ExistingUserLogin() {
           /* ── Steps 1 & 2: Email / OTP ── */
           <div className="w-full max-w-sm">
             <div className="mb-8">
-              <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-3">
+              <p className={`${theme.label} mb-3`}>
                 {currentStepLabel}
               </p>
               <h1

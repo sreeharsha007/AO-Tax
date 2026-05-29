@@ -41,22 +41,22 @@ function DirectionCard({ themeId, isActive, onSelect }) {
         {/* Mini navbar */}
         <div className="h-3 rounded-md bg-[#0f1923] mb-2 w-full" />
 
-        {/* Mini card */}
+        {/* Mini card — shadow and border from direction tokens */}
         <div
           className="bg-white p-2 mb-2"
           style={{
             borderRadius: t.previewCardRadius,
-            boxShadow: themeId === 'loft' ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
+            boxShadow: t.cardShadow ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
             border: themeId === 'default' ? '1px solid #e5e7eb' : '1px solid #f3f4f6',
           }}
         >
           <div className="flex items-center gap-1.5 mb-1.5">
-            {/* Icon badge preview */}
+            {/* Icon badge preview — tinted with accent color */}
             <div
               className="w-3 h-3 rounded flex-shrink-0"
               style={{
-                background: themeId === 'loft' ? '#eff6ff' : '#f3f4f6',
-                borderRadius: themeId === 'loft' ? '4px' : '3px',
+                background: t.iconBadge ? `${t.previewAccent}1a` : '#f3f4f6',
+                borderRadius: t.previewCardRadius === '6px' ? '3px' : '4px',
               }}
             />
             <div className="h-1.5 rounded-full bg-gray-200 flex-1" />

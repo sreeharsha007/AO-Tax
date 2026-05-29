@@ -267,11 +267,11 @@ export const THEMES = {
     useColoredIcons: true,
     iconBadge: true,
     iconBadgeRadius: 'rounded-xl',
-    iconDefault: 'bg-blue-50 text-blue-500',
-    iconProfile: 'bg-blue-50 text-blue-500',
-    iconIncome: 'bg-blue-50 text-blue-600',
-    iconDeductions: 'bg-indigo-50 text-indigo-500',
-    iconAssets: 'bg-cyan-50 text-cyan-600',
+    iconDefault: 'bg-blue-100 text-blue-600',
+    iconProfile: 'bg-blue-100 text-blue-600',
+    iconIncome: 'bg-blue-100 text-blue-600',
+    iconDeductions: 'bg-indigo-100 text-indigo-600',
+    iconAssets: 'bg-cyan-100 text-cyan-700',
 
     label: 'text-[10px] font-bold tracking-widest text-blue-400 uppercase',
 
