@@ -1,31 +1,45 @@
 import { useState } from 'react'
 import {
-  Check, ChevronDown, ChevronUp,
+  Check, ChevronDown,
   Briefcase, Laptop2, TrendingUp, Banknote, Home, Globe,
   Landmark, GraduationCap, HeartHandshake, Stethoscope, Receipt, Monitor,
 } from 'lucide-react'
+import {
+  Briefcase   as PhBriefcase,
+  Laptop      as PhLaptop,
+  TrendUp     as PhTrendUp,
+  Money       as PhMoney,
+  House       as PhHouse,
+  Globe       as PhGlobe,
+  Bank        as PhBank,
+  GraduationCap as PhGraduationCap,
+  HandHeart   as PhHandHeart,
+  Stethoscope as PhStethoscope,
+  Receipt     as PhReceipt,
+  Monitor     as PhMonitor,
+} from '@phosphor-icons/react'
 import { useTheme } from '../context/ThemeContext'
 import { INCOME_OPTIONS, DEDUCTION_OPTIONS } from '../utils/inferProfile'
 
+/* ── Icon maps ───────────────────────────────────────────────────────────── */
 const INCOME_ICONS = {
-  w2:          Briefcase,
-  freelance:   Laptop2,
-  investments: TrendingUp,
-  dividends:   Banknote,
-  rental:      Home,
-  foreign:     Globe,
+  w2: Briefcase, freelance: Laptop2, investments: TrendingUp,
+  dividends: Banknote, rental: Home, foreign: Globe,
 }
-
 const DEDUCTION_ICONS = {
-  mortgage:   Landmark,
-  student:    GraduationCap,
-  charitable: HeartHandshake,
-  medical:    Stethoscope,
-  business:   Receipt,
-  homeoffice: Monitor,
+  mortgage: Landmark, student: GraduationCap, charitable: HeartHandshake,
+  medical: Stethoscope, business: Receipt, homeoffice: Monitor,
+}
+const INCOME_ICONS_PHOSPHOR = {
+  w2: PhBriefcase, freelance: PhLaptop, investments: PhTrendUp,
+  dividends: PhMoney, rental: PhHouse, foreign: PhGlobe,
+}
+const DEDUCTION_ICONS_PHOSPHOR = {
+  mortgage: PhBank, student: PhGraduationCap, charitable: PhHandHeart,
+  medical: PhStethoscope, business: PhReceipt, homeoffice: PhMonitor,
 }
 
-// Pre-filled answers from the user's previous year on file
+/* ── Pre-filled answers from the user's previous year on file ────────────── */
 export const RETURNING_PROFILE_DEFAULTS = {
   usCitizenOrGC: false,
   livingInUS:    true,
@@ -34,6 +48,7 @@ export const RETURNING_PROFILE_DEFAULTS = {
   globalAssets:  false,
 }
 
+/* ── Shared: accordion rows (Default direction) ──────────────────────────── */
 function ConfirmRow({ label, summary, expanded, onToggle, children }) {
   const { theme } = useTheme()
   return (
@@ -48,11 +63,14 @@ function ConfirmRow({ label, summary, expanded, onToggle, children }) {
           className={`text-xs font-medium ${theme.accentText} ${theme.accentTextHover} transition-colors flex-shrink-0 flex items-center gap-1`}
         >
           {expanded ? 'Done' : 'Edit'}
-          {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+          <ChevronDown
+            size={12}
+            className={`transition-transform duration-200 ${expanded ? 'rotate-180' : 'rotate-0'}`}
+          />
         </button>
       </div>
       {expanded && (
-        <div className="px-4 pb-4">
+        <div className="px-4 pb-4 accordion-open">
           <div className="bg-white/80 rounded-xl px-4 pt-4 pb-4 border border-blue-100/60">
             {children}
           </div>
@@ -62,27 +80,40 @@ function ConfirmRow({ label, summary, expanded, onToggle, children }) {
   )
 }
 
-function YesNoInline({ value, onChange }) {
+/* ── Shared: Yes / No pills ──────────────────────────────────────────────── */
+function YesNoInline({ value, onChange, question }) {
   const { theme } = useTheme()
+  const loft = theme.id === 'loft'
   return (
-    <div className="flex gap-2 mt-3">
-      {['yes', 'no'].map(opt => (
-        <button
-          key={opt}
-          onClick={() => onChange(opt === 'yes')}
-          className={`px-5 py-1.5 rounded-full border text-sm font-semibold transition-all ${
-            value === (opt === 'yes')
-              ? `${theme.accentLight} ${theme.accentBorder} ${theme.accentText}`
-              : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
-          }`}
-        >
-          {opt === 'yes' ? 'Yes' : 'No'}
-        </button>
-      ))}
+    <div>
+      {question && (
+        <p className="text-xs text-gray-500 leading-relaxed mb-2.5">{question}</p>
+      )}
+      <div className="flex gap-2">
+        {['yes', 'no'].map(opt => {
+          const active = value === (opt === 'yes')
+          return (
+            <button
+              key={opt}
+              onClick={() => onChange(opt === 'yes')}
+              className={`px-5 py-1.5 border text-sm font-semibold transition-all ${
+                loft ? 'rounded-xl' : 'rounded-full'
+              } ${
+                active
+                  ? `${theme.accentLight} ${theme.accentBorder} ${theme.accentText}`
+                  : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+              }`}
+            >
+              {opt === 'yes' ? 'Yes' : 'No'}
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }
 
+/* ── Shared: chip grid (Default direction) ───────────────────────────────── */
 function ChipGrid({ options, selected, onToggle, icons }) {
   const { theme } = useTheme()
   return (
@@ -110,8 +141,136 @@ function ChipGrid({ options, selected, onToggle, icons }) {
   )
 }
 
+/* ── Loft: compact chip — direct toggle, always visible ─────────────────── */
+function LoftChip({ opt, isSelected, onToggle, lucideIcon: LucideIcon, phosphorIcon: PhosphorIcon }) {
+  return (
+    <button
+      onClick={() => onToggle(opt.id)}
+      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all ${
+        isSelected
+          ? 'bg-blue-50 border-blue-200 text-blue-700'
+          : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300 hover:bg-gray-50'
+      }`}
+    >
+      {PhosphorIcon && (
+        <PhosphorIcon
+          size={11}
+          weight="duotone"
+          className={isSelected ? 'text-blue-600' : 'text-gray-400'}
+          aria-hidden
+        />
+      )}
+      {opt.label}
+      {isSelected && (
+        <Check size={9} className="text-blue-600 flex-shrink-0" strokeWidth={3.5} />
+      )}
+    </button>
+  )
+}
+
+/* ── Loft: section divider ───────────────────────────────────────────────── */
+function ProfileSection({ label, children }) {
+  const { theme } = useTheme()
+  return (
+    <div className="px-6 py-5 border-t border-gray-100">
+      <p className={`${theme.label} mb-3`}>{label}</p>
+      {children}
+    </div>
+  )
+}
+
+/* ── Loft layout: hybrid Direction 1 + Direction 3 ──────────────────────── */
+function LoftConfirmationLayout({ answers, update, toggleMulti, onConfirm, theme }) {
+  return (
+    <div className={`bg-white ${theme.cardRadius} ${theme.cardShadow} overflow-hidden`}>
+
+      {/* Header */}
+      <div className="px-6 pt-6 pb-5 border-b border-gray-100">
+        <p className={theme.label}>BEFORE YOU BEGIN</p>
+        <p className="text-base font-semibold text-gray-900 mt-1.5">Your 2024 profile</p>
+        <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+          Everything from last year is shown below. Tap anything to change it.
+        </p>
+      </div>
+
+      {/* Residency */}
+      <ProfileSection label="Residency">
+        <YesNoInline
+          value={answers.usCitizenOrGC}
+          onChange={v => update('usCitizenOrGC', v)}
+          question="US citizen or green card holder?"
+        />
+        {answers.usCitizenOrGC === false && (
+          <div className="mt-4">
+            <YesNoInline
+              value={answers.livingInUS}
+              onChange={v => update('livingInUS', v)}
+              question="Currently living in the US?"
+            />
+          </div>
+        )}
+      </ProfileSection>
+
+      {/* Income sources */}
+      <ProfileSection label="Income sources">
+        <div className="flex flex-wrap gap-2">
+          {INCOME_OPTIONS.map(opt => (
+            <LoftChip
+              key={opt.id}
+              opt={opt}
+              isSelected={answers.income.includes(opt.id)}
+              onToggle={id => toggleMulti('income', id)}
+              lucideIcon={INCOME_ICONS[opt.id]}
+              phosphorIcon={INCOME_ICONS_PHOSPHOR[opt.id]}
+            />
+          ))}
+        </div>
+      </ProfileSection>
+
+      {/* Deductions */}
+      <ProfileSection label="Deductions">
+        <div className="flex flex-wrap gap-2">
+          {DEDUCTION_OPTIONS.map(opt => (
+            <LoftChip
+              key={opt.id}
+              opt={opt}
+              isSelected={answers.deductions.includes(opt.id)}
+              onToggle={id => toggleMulti('deductions', id)}
+              lucideIcon={DEDUCTION_ICONS[opt.id]}
+              phosphorIcon={DEDUCTION_ICONS_PHOSPHOR[opt.id]}
+            />
+          ))}
+        </div>
+      </ProfileSection>
+
+      {/* Global assets */}
+      <ProfileSection label="Global assets">
+        <YesNoInline
+          value={answers.globalAssets}
+          onChange={v => update('globalAssets', v)}
+          question="Financial accounts or assets outside the US?"
+        />
+      </ProfileSection>
+
+      {/* CTA */}
+      <div className="px-6 py-5 border-t border-gray-100">
+        <button
+          onClick={() => onConfirm(answers)}
+          className={`w-full flex items-center justify-center gap-2 py-3.5 ${theme.btnPrimary} ${theme.btnRadius} text-sm font-semibold transition-all`}
+          style={{ boxShadow: '0 4px 16px rgba(29,78,216,0.24)' }}
+        >
+          <Check size={14} strokeWidth={3} />
+          Confirm — this is still accurate
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/* ── Main export ─────────────────────────────────────────────────────────── */
 export default function ReturningUserConfirmation({ onConfirm }) {
   const { theme } = useTheme()
+  const loft = theme.id === 'loft'
   const [answers, setAnswers] = useState({ ...RETURNING_PROFILE_DEFAULTS })
   const [expandedRow, setExpandedRow] = useState(null)
 
@@ -128,40 +287,45 @@ export default function ReturningUserConfirmation({ onConfirm }) {
     setExpandedRow(prev => prev === key ? null : key)
   }
 
+  /* ── Loft: new open layout ── */
+  if (loft) {
+    return (
+      <LoftConfirmationLayout
+        answers={answers}
+        update={update}
+        toggleMulti={toggleMulti}
+        onConfirm={onConfirm}
+        theme={theme}
+      />
+    )
+  }
+
+  /* ── Default: existing accordion ── */
   const residencySummary = answers.usCitizenOrGC
     ? 'US Citizen or Green Card Holder'
     : answers.livingInUS
       ? 'Non-resident · Currently living in the US'
       : 'Non-resident · Based outside the US'
-
   const incomeSummary = answers.income.length === 0
     ? 'None'
     : answers.income.map(id => INCOME_OPTIONS.find(o => o.id === id)?.label).filter(Boolean).join(' · ')
-
   const deductionsSummary = answers.deductions.length === 0
     ? 'None'
     : answers.deductions.map(id => DEDUCTION_OPTIONS.find(o => o.id === id)?.label).filter(Boolean).join(' · ')
-
   const globalSummary = answers.globalAssets
     ? 'Has international accounts or assets'
     : 'No international accounts'
 
   return (
     <div className="rounded-2xl overflow-hidden border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50/60">
-      {/* Header */}
       <div className="px-5 pt-5 pb-4">
         <p className="text-[10px] font-bold tracking-widest text-indigo-400/80 uppercase mb-2">BEFORE YOU BEGIN</p>
         <p className="text-base font-semibold text-gray-900 mb-1">Your profile from last year</p>
         <p className="text-xs text-gray-500 leading-relaxed">Confirm it's still accurate for 2025, or edit anything that's changed.</p>
       </div>
 
-      {/* Residency row */}
-      <ConfirmRow
-        label="Residency"
-        summary={residencySummary}
-        expanded={expandedRow === 'residency'}
-        onToggle={() => toggleRow('residency')}
-      >
+      <ConfirmRow label="Residency" summary={residencySummary}
+        expanded={expandedRow === 'residency'} onToggle={() => toggleRow('residency')}>
         <div className="space-y-4">
           <div>
             <p className="text-xs font-semibold text-gray-700">Are you a US citizen or green card holder?</p>
@@ -176,56 +340,32 @@ export default function ReturningUserConfirmation({ onConfirm }) {
         </div>
       </ConfirmRow>
 
-      {/* Income row */}
-      <ConfirmRow
-        label="Income sources"
-        summary={incomeSummary}
-        expanded={expandedRow === 'income'}
-        onToggle={() => toggleRow('income')}
-      >
+      <ConfirmRow label="Income sources" summary={incomeSummary}
+        expanded={expandedRow === 'income'} onToggle={() => toggleRow('income')}>
         <div>
           <p className="text-xs font-semibold text-gray-700">Select all that apply</p>
-          <ChipGrid
-            options={INCOME_OPTIONS}
-            selected={answers.income}
-            onToggle={id => toggleMulti('income', id)}
-            icons={INCOME_ICONS}
-          />
+          <ChipGrid options={INCOME_OPTIONS} selected={answers.income}
+            onToggle={id => toggleMulti('income', id)} icons={INCOME_ICONS} />
         </div>
       </ConfirmRow>
 
-      {/* Deductions row */}
-      <ConfirmRow
-        label="Deductions"
-        summary={deductionsSummary}
-        expanded={expandedRow === 'deductions'}
-        onToggle={() => toggleRow('deductions')}
-      >
+      <ConfirmRow label="Deductions" summary={deductionsSummary}
+        expanded={expandedRow === 'deductions'} onToggle={() => toggleRow('deductions')}>
         <div>
           <p className="text-xs font-semibold text-gray-700">Select all that apply</p>
-          <ChipGrid
-            options={DEDUCTION_OPTIONS}
-            selected={answers.deductions}
-            onToggle={id => toggleMulti('deductions', id)}
-            icons={DEDUCTION_ICONS}
-          />
+          <ChipGrid options={DEDUCTION_OPTIONS} selected={answers.deductions}
+            onToggle={id => toggleMulti('deductions', id)} icons={DEDUCTION_ICONS} />
         </div>
       </ConfirmRow>
 
-      {/* Global assets row */}
-      <ConfirmRow
-        label="Global assets"
-        summary={globalSummary}
-        expanded={expandedRow === 'global'}
-        onToggle={() => toggleRow('global')}
-      >
+      <ConfirmRow label="Global assets" summary={globalSummary}
+        expanded={expandedRow === 'global'} onToggle={() => toggleRow('global')}>
         <div>
           <p className="text-xs font-semibold text-gray-700">Do you hold financial accounts or assets outside the US?</p>
           <YesNoInline value={answers.globalAssets} onChange={v => update('globalAssets', v)} />
         </div>
       </ConfirmRow>
 
-      {/* Confirm CTA */}
       <div className="px-5 py-4 border-t border-blue-100/70">
         <button
           onClick={() => onConfirm(answers)}

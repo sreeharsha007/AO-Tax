@@ -2,7 +2,7 @@ export const THEMES = {
   default: {
     id: 'default',
     name: 'Default',
-    description: 'Current design',
+    description: 'Clean · Blue · Functional',
     previewPageBg: '#ffffff',
     previewAccent: '#2563eb',
     previewCardRadius: '6px',
@@ -12,11 +12,13 @@ export const THEMES = {
     fontHeading: "'Inter', system-ui, sans-serif",
 
     pageBg: 'bg-white',
+    pageGrain: false,
 
     card: 'bg-white border border-gray-200',
     cardRadius: 'rounded-xl',
+    cardShadow: '',
 
-    btnPrimary: 'bg-blue-600 text-white hover:bg-blue-700',
+    btnPrimary: 'bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.98]',
     btnSecondary: 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50',
     btnRadius: 'rounded-xl',
     btnDisabled: 'bg-gray-100 text-gray-400 cursor-not-allowed',
@@ -40,7 +42,12 @@ export const THEMES = {
 
     badgeRadius: 'rounded-full',
 
+    // Icon system
+    iconStyle: 'lucide',          // 'lucide' | 'phosphor'
+    iconWeight: 'regular',        // phosphor weight: thin/light/regular/bold/fill/duotone
     useColoredIcons: false,
+    iconBadge: false,             // wrap icons in a badge/background
+    iconBadgeRadius: 'rounded-lg',
     iconDefault: 'bg-gray-100 text-gray-500',
     iconProfile: 'bg-gray-100 text-gray-500',
     iconIncome: 'bg-gray-100 text-gray-500',
@@ -48,8 +55,105 @@ export const THEMES = {
     iconAssets: 'bg-gray-100 text-gray-500',
 
     label: 'text-[10px] font-bold tracking-widest text-gray-400 uppercase',
+
+    // Key moment tokens
+    heroNumberSize: 'text-4xl',
+    heroNumberColor: 'text-gray-900',
+    successBg: 'bg-blue-50',
+    successText: 'text-blue-900',
+    advisorCardBg: 'bg-white',
+    advisorCardHeaderBg: '',
+    advisorAvatarBg: 'bg-purple-600',
+    completeBg: 'bg-emerald-50',
+    completeAccent: 'text-emerald-700',
+
+    // Typography scale tokens
+    loginHeadingCls: 'text-4xl font-bold tracking-tight',
+    sectionHeadingCls: 'text-2xl font-bold',
+    heroTagline: 'text-sm text-gray-500',
+
+    // Illustration tokens
+    useIllustrations: false,
+    emptyStateStyle: 'text',      // 'text' | 'icon' | 'illustrated'
   },
 
+  loft: {
+    id: 'loft',
+    name: 'Loft',
+    description: 'Warm · Elevated · Premium',
+    previewPageBg: '#f5f4f0',
+    previewAccent: '#1d4ed8',
+    previewCardRadius: '12px',
+    previewBtnRadius: '10px',
+
+    fontBody: "'Inter', system-ui, sans-serif",
+    fontHeading: "'Inter', system-ui, sans-serif",
+
+    pageBg: 'bg-[#f5f4f0]',
+    pageGrain: true,
+
+    card: 'bg-white border border-gray-100',
+    cardRadius: 'rounded-2xl',
+    cardShadow: 'shadow-[0_2px_16px_rgba(0,0,0,0.07),0_1px_4px_rgba(0,0,0,0.05)]',
+
+    btnPrimary: 'bg-blue-700 text-white hover:bg-blue-800 active:scale-[0.97] transition-all tracking-wide',
+    btnSecondary: 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:shadow-sm active:scale-[0.98] transition-all tracking-wide',
+    btnRadius: 'rounded-xl',
+    btnDisabled: 'bg-gray-100 text-gray-400 cursor-not-allowed',
+
+    inputCls: 'border border-gray-200 rounded-xl focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(29,78,216,0.10)] bg-[#fafbff] text-gray-900 placeholder-gray-400 transition-all',
+
+    accentText: 'text-blue-700',
+    accentBg: 'bg-blue-700',
+    accentBgHover: 'hover:bg-blue-800',
+    accentTextHover: 'hover:text-blue-800',
+    accentLight: 'bg-blue-50',
+    accentBorder: 'border-blue-600',
+    accentTextColor: '#1d4ed8',
+
+    progressFill: 'bg-blue-600',
+    progressTrack: 'bg-gray-100',
+
+    stepActive: 'border-2 border-blue-700 text-blue-700 bg-white shadow-sm',
+    stepComplete: 'bg-emerald-500 text-white shadow-sm',
+    stepUpcoming: 'bg-gray-200 text-gray-400',
+
+    badgeRadius: 'rounded-full',
+
+    // Icon system — Phosphor duotone badges
+    iconStyle: 'phosphor',
+    iconWeight: 'duotone',
+    useColoredIcons: true,
+    iconBadge: true,
+    iconBadgeRadius: 'rounded-xl',
+    iconDefault: 'bg-blue-50 text-blue-600',
+    iconProfile: 'bg-indigo-50 text-indigo-600',
+    iconIncome: 'bg-emerald-50 text-emerald-600',
+    iconDeductions: 'bg-amber-50 text-amber-600',
+    iconAssets: 'bg-sky-50 text-sky-600',
+
+    label: 'text-[10px] font-bold tracking-widest text-gray-400 uppercase',
+
+    // Key moment tokens
+    heroNumberSize: 'text-5xl',
+    heroNumberColor: 'text-blue-700',
+    successBg: 'bg-gradient-to-br from-blue-50 to-indigo-50',
+    successText: 'text-blue-900',
+    advisorCardBg: 'bg-white',
+    advisorCardHeaderBg: 'bg-gradient-to-br from-slate-800 to-blue-900',
+    advisorAvatarBg: 'bg-gradient-to-br from-indigo-500 to-blue-600',
+    completeBg: 'bg-gradient-to-br from-emerald-50 to-teal-50',
+    completeAccent: 'text-emerald-700',
+
+    // Typography scale tokens
+    loginHeadingCls: 'text-5xl font-black tracking-tight leading-none',
+    sectionHeadingCls: 'text-3xl font-bold',
+    heroTagline: 'text-base text-gray-500',
+
+    // Illustration tokens
+    useIllustrations: true,
+    emptyStateStyle: 'illustrated',
+  },
 }
 
-export const THEME_LIST = ['default']
+export const THEME_LIST = ['default', 'loft']

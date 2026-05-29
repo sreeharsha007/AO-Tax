@@ -1,110 +1,168 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   ArrowLeft, ArrowRight, Check,
   Briefcase, Laptop2, TrendingUp, Banknote, Home, Globe,
   Landmark, GraduationCap, HeartHandshake, Stethoscope, Receipt, Monitor,
 } from 'lucide-react'
+import {
+  Briefcase   as PhBriefcase,
+  Laptop      as PhLaptop,
+  TrendUp     as PhTrendUp,
+  Money       as PhMoney,
+  House       as PhHouse,
+  Globe       as PhGlobe,
+  Bank        as PhBank,
+  GraduationCap as PhGraduationCap,
+  HandHeart   as PhHandHeart,
+  Stethoscope as PhStethoscope,
+  Receipt     as PhReceipt,
+  Monitor     as PhMonitor,
+} from '@phosphor-icons/react'
 import { INCOME_OPTIONS, DEDUCTION_OPTIONS } from '../utils/inferProfile'
+import { useTheme } from '../context/ThemeContext'
 
+/* ── Icon maps ───────────────────────────────────────────────────────────── */
 const INCOME_ICONS = {
-  w2:          Briefcase,
-  freelance:   Laptop2,
-  investments: TrendingUp,
-  dividends:   Banknote,
-  rental:      Home,
-  foreign:     Globe,
+  w2: Briefcase, freelance: Laptop2, investments: TrendingUp,
+  dividends: Banknote, rental: Home, foreign: Globe,
 }
-
 const DEDUCTION_ICONS = {
-  mortgage:   Landmark,
-  student:    GraduationCap,
-  charitable: HeartHandshake,
-  medical:    Stethoscope,
-  business:   Receipt,
-  homeoffice: Monitor,
+  mortgage: Landmark, student: GraduationCap, charitable: HeartHandshake,
+  medical: Stethoscope, business: Receipt, homeoffice: Monitor,
+}
+const INCOME_ICONS_PHOSPHOR = {
+  w2: PhBriefcase, freelance: PhLaptop, investments: PhTrendUp,
+  dividends: PhMoney, rental: PhHouse, foreign: PhGlobe,
+}
+const DEDUCTION_ICONS_PHOSPHOR = {
+  mortgage: PhBank, student: PhGraduationCap, charitable: PhHandHeart,
+  medical: PhStethoscope, business: PhReceipt, homeoffice: PhMonitor,
 }
 
-const BASE_STEPS = ['Residency', 'Income', 'Deductions']
-const FULL_STEPS = [...BASE_STEPS, 'Global assets']
-
-function getSteps(answers) {
-  const isConfirmedNR = answers.usCitizenOrGC === false && answers.livingInUS === false
-  return isConfirmedNR ? BASE_STEPS : FULL_STEPS
-}
-
+/* ── Yes / No buttons ────────────────────────────────────────────────────── */
 function YesNo({ value, onChange }) {
+  const { theme } = useTheme()
   return (
     <div className="grid grid-cols-2 gap-3">
-      {['yes', 'no'].map(opt => (
-        <button
-          key={opt}
-          onClick={() => onChange(opt)}
-          className={`py-4 rounded-xl border text-sm font-semibold transition-all capitalize ${
-            value === opt
-              ? 'bg-blue-50 border-blue-500 text-blue-700'
-              : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
-          }`}
-        >
-          {opt === 'yes' ? 'Yes' : 'No'}
-        </button>
-      ))}
+      {['yes', 'no'].map(opt => {
+        const active = value === opt
+        return (
+          <button
+            key={opt}
+            onClick={() => onChange(opt)}
+            className={`py-4 ${theme.btnRadius} border text-sm font-semibold transition-all capitalize ${
+              active
+                ? `${theme.accentLight} ${theme.accentBorder} ${theme.accentText}`
+                : `bg-white border-gray-200 text-gray-700 hover:border-gray-300 ${theme.id === 'loft' ? 'hover:shadow-sm' : ''}`
+            }`}
+          >
+            {opt === 'yes' ? 'Yes' : 'No'}
+          </button>
+        )
+      })}
     </div>
   )
 }
 
-function OptionPill({ label, sub, selected, onClick, icon: Icon }) {
+/* ── Option pill — Default grid card ─────────────────────────────────────── */
+function OptionPill({ label, sub, selected, onClick, lucideIcon: LucideIcon, phosphorIcon: PhosphorIcon, badgeCls }) {
+  const { theme } = useTheme()
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left p-4 rounded-xl border transition-all ${
+      className={`w-full text-left p-4 ${theme.cardRadius} border transition-all ${
         selected
-          ? 'bg-blue-50 border-blue-500'
+          ? `${theme.accentLight} ${theme.accentBorder}`
           : 'bg-white border-gray-200 hover:border-gray-300'
       }`}
     >
       <div className="flex items-start justify-between mb-3">
-        {Icon && (
-          <Icon size={16} className={selected ? 'text-blue-500' : 'text-gray-400'} />
+        {LucideIcon && (
+          <LucideIcon size={16} className={selected ? theme.accentText : 'text-gray-400'} />
         )}
-        {selected && <Check size={13} className="text-blue-500" />}
+        {selected && <Check size={13} className={theme.accentText} strokeWidth={3} />}
       </div>
-      <p className={`text-sm font-medium leading-tight ${selected ? 'text-blue-700' : 'text-gray-900'}`}>
-        {label}
-      </p>
-      <p className={`text-xs mt-1 ${selected ? 'text-blue-400' : 'text-gray-500'}`}>
-        {sub}
-      </p>
+      <p className={`text-sm font-medium leading-tight ${selected ? theme.accentText : 'text-gray-900'}`}>{label}</p>
+      <p className={`text-xs mt-1 ${selected ? 'text-gray-400' : 'text-gray-500'}`}>{sub}</p>
     </button>
   )
 }
 
-function ResidencyStep({ answers, update }) {
+/* ── Option row — Loft stacked list ──────────────────────────────────────── */
+function OptionRow({ label, sub, selected, onClick, lucideIcon: LucideIcon, phosphorIcon: PhosphorIcon, badgeCls, index }) {
+  const { theme } = useTheme()
+  const [bouncing, setBouncing] = useState(false)
+  const prev = useRef(selected)
+
+  useEffect(() => {
+    if (!prev.current && selected) setBouncing(true)
+    prev.current = selected
+  }, [selected])
+
+  return (
+    /* Outer div: stagger entrance only */
+    <div
+      className="item-enter"
+      style={{ animationDelay: `${index * 35}ms` }}
+    >
+      <button
+        onClick={onClick}
+        onAnimationEnd={() => setBouncing(false)}
+        className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl border transition-all text-left ${
+          bouncing ? 'select-bounce' : ''
+        } ${
+          selected
+            ? 'bg-blue-50 border-blue-100'
+            : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm'
+        }`}
+      >
+        {/* Icon badge — category colour always on */}
+        {(LucideIcon || PhosphorIcon) && (
+          <div className={`w-8 h-8 ${theme.iconBadgeRadius} flex items-center justify-center flex-shrink-0 ${badgeCls || 'bg-gray-100 text-gray-500'}`}>
+            {PhosphorIcon
+              ? <PhosphorIcon size={16} weight="duotone" />
+              : LucideIcon && <LucideIcon size={14} />}
+          </div>
+        )}
+        {/* Label + sub */}
+        <div className="flex-1 min-w-0">
+          <p className={`text-sm font-medium leading-tight ${selected ? 'text-blue-700' : 'text-gray-900'}`}>{label}</p>
+          <p className={`text-xs mt-0.5 ${selected ? 'text-gray-400' : 'text-gray-500'}`}>{sub}</p>
+        </div>
+        {/* Selection circle */}
+        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+          selected ? 'bg-blue-700 border-blue-700' : 'bg-white border-gray-300'
+        }`}>
+          {selected && <Check size={9} className="text-white" strokeWidth={3.5} />}
+        </div>
+      </button>
+    </div>
+  )
+}
+
+/* ── Residency step ──────────────────────────────────────────────────────── */
+function ResidencyStep({ answers, update, loft }) {
   return (
     <div className="space-y-8">
       <div className="space-y-4">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900 leading-snug">
+          <h2 className={`${loft ? 'text-2xl' : 'text-xl'} font-semibold text-gray-900 leading-snug`}>
             Are you a US citizen or green card holder?
           </h2>
-          <p className="text-sm text-gray-500 mt-1.5">
-            This determines which tax form applies to you.
-          </p>
+          <p className="text-sm text-gray-500 mt-1.5">This determines which tax form applies to you.</p>
         </div>
         <YesNo
           value={answers.usCitizenOrGC === null ? null : answers.usCitizenOrGC ? 'yes' : 'no'}
           onChange={v => update('usCitizenOrGC', v === 'yes')}
         />
       </div>
-
       {answers.usCitizenOrGC === false && (
         <div className="space-y-4 pt-2 border-t border-gray-100">
           <div>
-            <h3 className="text-base font-semibold text-gray-900">
+            <h3 className={`${loft ? 'text-lg' : 'text-base'} font-semibold text-gray-900`}>
               Are you currently living in the US?
             </h3>
-            <p className="text-xs text-gray-500 mt-1">
-              Residency affects your filing requirements.
-            </p>
+            <p className="text-xs text-gray-500 mt-1">Residency affects your filing requirements.</p>
           </div>
           <YesNo
             value={answers.livingInUS === null ? null : answers.livingInUS ? 'yes' : 'no'}
@@ -116,34 +174,58 @@ function ResidencyStep({ answers, update }) {
   )
 }
 
-function SelectStep({ title, sub, options, selected, onToggle, icons }) {
+/* ── Select step (income / deductions) ───────────────────────────────────── */
+function SelectStep({ title, sub, options, selected, onToggle, lucideIcons, phosphorIcons, badgeCls, loft }) {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 leading-snug">{title}</h2>
+        <h2 className={`${loft ? 'text-2xl' : 'text-xl'} font-semibold text-gray-900 leading-snug`}>{title}</h2>
         <p className="text-sm text-gray-500 mt-1.5">{sub}</p>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-        {options.map(opt => (
-          <OptionPill
-            key={opt.id}
-            label={opt.label}
-            sub={opt.sub}
-            icon={icons?.[opt.id]}
-            selected={selected.includes(opt.id)}
-            onClick={() => onToggle(opt.id)}
-          />
-        ))}
-      </div>
+      {loft ? (
+        /* Loft: stacked list with stagger + selection bounce */
+        <div className="space-y-2">
+          {options.map((opt, i) => (
+            <OptionRow
+              key={opt.id}
+              index={i}
+              label={opt.label}
+              sub={opt.sub}
+              lucideIcon={lucideIcons?.[opt.id]}
+              phosphorIcon={phosphorIcons?.[opt.id]}
+              badgeCls={badgeCls}
+              selected={selected.includes(opt.id)}
+              onClick={() => onToggle(opt.id)}
+            />
+          ))}
+        </div>
+      ) : (
+        /* Default: 2-column card grid */
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          {options.map(opt => (
+            <OptionPill
+              key={opt.id}
+              label={opt.label}
+              sub={opt.sub}
+              lucideIcon={lucideIcons?.[opt.id]}
+              phosphorIcon={phosphorIcons?.[opt.id]}
+              badgeCls={badgeCls}
+              selected={selected.includes(opt.id)}
+              onClick={() => onToggle(opt.id)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }
 
-function GlobalAssetsStep({ answers, update }) {
+/* ── Global assets step ──────────────────────────────────────────────────── */
+function GlobalAssetsStep({ answers, update, loft }) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 leading-snug">
+        <h2 className={`${loft ? 'text-2xl' : 'text-xl'} font-semibold text-gray-900 leading-snug`}>
           Do you hold financial accounts or assets outside the US?
         </h2>
         <p className="text-sm text-gray-500 mt-1.5">
@@ -158,24 +240,30 @@ function GlobalAssetsStep({ answers, update }) {
   )
 }
 
+/* ── Main wizard ─────────────────────────────────────────────────────────── */
+const BASE_STEPS = ['Residency', 'Income', 'Deductions']
+const FULL_STEPS = [...BASE_STEPS, 'Global assets']
+
+function getSteps(answers) {
+  return answers.usCitizenOrGC === false && answers.livingInUS === false
+    ? BASE_STEPS : FULL_STEPS
+}
+
 export default function ProfileWizard({ onComplete, onSkip, initialAnswers = null }) {
+  const { theme } = useTheme()
+  const loft = theme.id === 'loft'
+
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState(initialAnswers ?? {
-    usCitizenOrGC: null,
-    livingInUS: null,
-    income: [],
-    deductions: [],
-    globalAssets: null,
+    usCitizenOrGC: null, livingInUS: null,
+    income: [], deductions: [], globalAssets: null,
   })
 
   const steps = getSteps(answers)
-  const pct = Math.round(((step + 1) / steps.length) * 100)
+  const pct   = Math.round(((step + 1) / steps.length) * 100)
 
-  function update(key, value) {
-    setAnswers(prev => ({ ...prev, [key]: value }))
-  }
-
-  function toggleMulti(key, id) {
+  function update(key, value)    { setAnswers(prev => ({ ...prev, [key]: value })) }
+  function toggleMulti(key, id)  {
     setAnswers(prev => {
       const arr = prev[key]
       return { ...prev, [key]: arr.includes(id) ? arr.filter(x => x !== id) : [...arr, id] }
@@ -188,53 +276,48 @@ export default function ProfileWizard({ onComplete, onSkip, initialAnswers = nul
       if (answers.usCitizenOrGC === false && answers.livingInUS === null) return false
       return true
     }
-    if (step === 1) return true
-    if (step === 2) return true
+    if (step === 1 || step === 2) return true
     if (step === 3) return answers.globalAssets !== null
     return false
   }
 
   function handleContinue() {
-    if (step < steps.length - 1) {
-      setStep(s => s + 1)
-    } else {
-      onComplete(answers)
-    }
+    if (step < steps.length - 1) setStep(s => s + 1)
+    else onComplete(answers)
   }
 
   const isLast = step === steps.length - 1
 
-  return (
-    <div>
-      {/* Progress bar */}
+  const inner = (
+    <>
+      {/* Progress bar — Loft: step name only, no percentage */}
       <div className="mb-8">
-        <div className="h-0.5 bg-gray-200 rounded-full overflow-hidden mb-2">
+        <div className={`h-0.5 ${theme.progressTrack} rounded-full overflow-hidden mb-2`}>
           <div
-            className="h-full bg-blue-600 rounded-full transition-all duration-500 ease-out"
+            className={`h-full ${theme.progressFill} rounded-full progress-fill-animated`}
             style={{ width: `${pct}%` }}
           />
         </div>
         <div className="flex items-center justify-between">
-          <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase">
-            {steps[step]}
-          </p>
-          <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase">
-            {pct}%
-          </p>
+          <p className={theme.label}>{steps[step]}</p>
+          {!loft && <p className={theme.label}>{pct}%</p>}
         </div>
       </div>
 
-      {/* Step content */}
-      <div>
-        {step === 0 && <ResidencyStep answers={answers} update={update} />}
+      {/* Step content with entrance animation */}
+      <div key={step} className={loft ? 'step-enter' : 'step-enter-default'}>
+        {step === 0 && <ResidencyStep answers={answers} update={update} loft={loft} />}
         {step === 1 && (
           <SelectStep
             title="Where does your income come from?"
             sub="Select all that apply."
             options={INCOME_OPTIONS}
-            icons={INCOME_ICONS}
+            lucideIcons={INCOME_ICONS}
+            phosphorIcons={INCOME_ICONS_PHOSPHOR}
+            badgeCls={theme.iconIncome}
             selected={answers.income}
             onToggle={id => toggleMulti('income', id)}
+            loft={loft}
           />
         )}
         {step === 2 && (
@@ -242,46 +325,58 @@ export default function ProfileWizard({ onComplete, onSkip, initialAnswers = nul
             title="Any of these apply to you this year?"
             sub="Select all that apply."
             options={DEDUCTION_OPTIONS}
-            icons={DEDUCTION_ICONS}
+            lucideIcons={DEDUCTION_ICONS}
+            phosphorIcons={DEDUCTION_ICONS_PHOSPHOR}
+            badgeCls={theme.iconDeductions}
             selected={answers.deductions}
             onToggle={id => toggleMulti('deductions', id)}
+            loft={loft}
           />
         )}
-        {step === 3 && <GlobalAssetsStep answers={answers} update={update} />}
+        {step === 3 && <GlobalAssetsStep answers={answers} update={update} loft={loft} />}
       </div>
 
       {/* Footer actions */}
       <div className="mt-10 flex items-center justify-between">
         <button
           onClick={onSkip}
-          className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+          className={`text-sm font-medium ${theme.accentText} ${theme.accentTextHover} transition-colors`}
         >
-          Skip for now
+          {loft ? "I'll do this later" : 'Skip for now'}
         </button>
         <div className="flex items-center gap-3">
           {step > 0 && (
             <button
               onClick={() => setStep(s => s - 1)}
-              className="flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+              className={`flex items-center gap-1.5 text-sm font-medium ${theme.accentText} ${theme.accentTextHover} transition-colors`}
             >
-              <ArrowLeft size={15} />
-              Back
+              <ArrowLeft size={15} /> Back
             </button>
           )}
           <button
+            key={canContinue() ? 'active' : 'disabled'}
             onClick={handleContinue}
             disabled={!canContinue()}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-              canContinue()
-                ? 'bg-blue-600 text-white hover:bg-blue-700'
-                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            className={`flex items-center gap-2 px-5 py-2.5 text-sm font-semibold transition-all ${theme.btnRadius} ${
+              canContinue() ? `${theme.btnPrimary} ${loft ? 'btn-unlock' : ''}` : theme.btnDisabled
             }`}
+            style={loft && canContinue() ? { boxShadow: '0 4px 12px rgba(29,78,216,0.24)' } : undefined}
           >
-            {isLast ? 'Finish' : 'Continue'}
-            <ArrowRight size={15} />
+            {isLast ? 'Finish' : 'Continue'} <ArrowRight size={15} />
           </button>
         </div>
       </div>
-    </div>
+    </>
   )
+
+  /* Loft: wrap in a floating card */
+  if (loft) {
+    return (
+      <div className={`bg-white ${theme.cardRadius} ${theme.cardShadow} p-6`}>
+        {inner}
+      </div>
+    )
+  }
+
+  return <div>{inner}</div>
 }

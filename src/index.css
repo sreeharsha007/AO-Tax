@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,6 +7,131 @@
   * { box-sizing: border-box; }
   body { margin: 0; background: #f5f4f0; font-family: 'Inter', system-ui, sans-serif; }
   #root { min-height: 100vh; }
+}
+
+/* ── Loft grain texture ─────────────────────────────────────────────────── */
+/* Zero-dependency SVG noise filter applied as a pseudo-element overlay.     */
+/* Opacity is low enough to be imperceptible on performance profiling.       */
+
+.loft-grain::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px 200px;
+}
+
+/* ── Loft motion defaults ───────────────────────────────────────────────── */
+.loft-page * {
+  --tw-transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ── Loft card hover lift ───────────────────────────────────────────────── */
+.loft-card-hover {
+  transition: transform 150ms ease-out, box-shadow 150ms ease-out;
+}
+.loft-card-hover:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.09), 0 1px 6px rgba(0,0,0,0.06);
+}
+
+/* ── Progress bar animated fill ─────────────────────────────────────────── */
+.progress-fill-animated {
+  transition: width 700ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ── Loft input focus ring ───────────────────────────────────────────────── */
+.loft-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12);
+}
+
+/* ── Item stagger entrance ──────────────────────────────────────────────── */
+@keyframes item-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.item-enter { animation: item-enter 220ms cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
+
+/* ── OTP digit bounce ───────────────────────────────────────────────────── */
+@keyframes digit-bounce {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.18); }
+  70%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+.digit-bounce { animation: digit-bounce 220ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+/* ── Selection micro-bounce ─────────────────────────────────────────────── */
+@keyframes select-bounce {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(0.97); }
+  70%  { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+.select-bounce { animation: select-bounce 250ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+/* ── SVG check mark draw ────────────────────────────────────────────────── */
+@keyframes draw-check {
+  from { stroke-dashoffset: 50; }
+  to   { stroke-dashoffset: 0; }
+}
+.draw-check {
+  stroke-dasharray: 50;
+  stroke-dashoffset: 50;
+  animation: draw-check 450ms cubic-bezier(0.25, 0.46, 0.45, 0.94) 350ms both;
+}
+
+/* ── Section count badge pop ────────────────────────────────────────────── */
+@keyframes badge-pop {
+  0%   { transform: scale(0) rotate(-12deg); opacity: 0; }
+  65%  { transform: scale(1.2) rotate(4deg);  opacity: 1; }
+  100% { transform: scale(1) rotate(0);        opacity: 1; }
+}
+.badge-pop { animation: badge-pop 380ms cubic-bezier(0.34, 1.56, 0.64, 1) 550ms both; }
+
+/* ── Fade in ────────────────────────────────────────────────────────────── */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.fade-in { animation: fade-in 200ms ease-out both; }
+
+/* ── Button unlock pulse ────────────────────────────────────────────────── */
+@keyframes btn-unlock {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+.btn-unlock { animation: btn-unlock 350ms cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+/* ── Accordion expand ───────────────────────────────────────────────────── */
+@keyframes accordion-open {
+  from { opacity: 0; transform: translateY(-5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.accordion-open { animation: accordion-open 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
+
+/* ── Step entrance animation (Loft) ─────────────────────────────────────── */
+@keyframes step-enter {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.step-enter {
+  animation: step-enter 230ms cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+/* ── Subtle fade for default direction ──────────────────────────────────── */
+@keyframes step-enter-default {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.step-enter-default {
+  animation: step-enter-default 150ms ease both;
 }
 
 * {

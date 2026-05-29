@@ -1,56 +1,71 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { COUNTRIES } from '../utils/inferProfile'
 import { useTheme } from '../context/ThemeContext'
 import ReturningUserConfirmation from '../components/ReturningUserConfirmation'
 
-function OTPInput({ value, onChange, inputCls }) {
+/* ── OTP digit box — handles its own bounce without remounting ───────────── */
+function DigitBox({ digit, inputRef, onChange, onKeyDown, inputCls, loft }) {
+  const [bouncing, setBouncing] = useState(false)
+  const prev = useRef('')
+  useEffect(() => {
+    if (!prev.current && digit) setBouncing(true)
+    prev.current = digit
+  }, [digit])
+  return (
+    <div
+      className={`flex-1 min-w-0 ${bouncing && loft ? 'digit-bounce' : ''}`}
+      onAnimationEnd={() => setBouncing(false)}
+    >
+      <input
+        ref={inputRef}
+        type="text" inputMode="numeric" maxLength={1}
+        value={digit}
+        onChange={onChange}
+        onKeyDown={onKeyDown}
+        className={`w-full h-11 text-center text-lg font-semibold focus:outline-none transition-all ${inputCls}`}
+      />
+    </div>
+  )
+}
+
+/* ── OTP input ───────────────────────────────────────────────────────────── */
+function OTPInput({ value, onChange, inputCls, loft }) {
   const refs = useRef([])
   const digits = value.padEnd(6, '').split('').slice(0, 6)
 
   function handleChange(i, e) {
     const ch = e.target.value.replace(/\D/g, '').slice(-1)
-    const next = [...digits]
-    next[i] = ch
+    const next = [...digits]; next[i] = ch
     onChange(next.join('').trim())
     if (ch && i < 5) refs.current[i + 1]?.focus()
   }
-
   function handleKeyDown(i, e) {
     if (e.key === 'Backspace') {
       if (digits[i]) {
-        const next = [...digits]
-        next[i] = ''
+        const next = [...digits]; next[i] = ''
         onChange(next.join('').trim())
-      } else if (i > 0) {
-        refs.current[i - 1]?.focus()
-      }
+      } else if (i > 0) refs.current[i - 1]?.focus()
     }
   }
-
   function handlePaste(e) {
     const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
-    if (pasted) {
-      onChange(pasted)
-      refs.current[Math.min(pasted.length, 5)]?.focus()
-    }
+    if (pasted) { onChange(pasted); refs.current[Math.min(pasted.length, 5)]?.focus() }
     e.preventDefault()
   }
 
   return (
     <div className="flex gap-3" onPaste={handlePaste}>
       {Array.from({ length: 6 }).map((_, i) => (
-        <input
+        <DigitBox
           key={i}
-          ref={el => refs.current[i] = el}
-          type="text"
-          inputMode="numeric"
-          maxLength={1}
-          value={digits[i] || ''}
+          digit={digits[i] || ''}
+          inputRef={el => refs.current[i] = el}
           onChange={e => handleChange(i, e)}
           onKeyDown={e => handleKeyDown(i, e)}
-          className={`w-11 h-12 text-center text-xl font-semibold focus:outline-none transition-colors ${inputCls}`}
+          inputCls={inputCls}
+          loft={loft}
         />
       ))}
     </div>
@@ -60,11 +75,12 @@ function OTPInput({ value, onChange, inputCls }) {
 export default function ExistingUserLogin() {
   const navigate = useNavigate()
   const { theme } = useTheme()
+  const loft = theme.id === 'loft'
   const [identifier, setIdentifier] = useState('')
-  const [country, setCountry] = useState('US')
+  const [country, setCountry]       = useState('US')
   const [countryOpen, setCountryOpen] = useState(false)
-  const [otpSent, setOtpSent] = useState(false)
-  const [otp, setOtp] = useState('')
+  const [otpSent, setOtpSent]       = useState(false)
+  const [otp, setOtp]               = useState('')
   const [resendTimer, setResendTimer] = useState(0)
   const [confirmStep, setConfirmStep] = useState(false)
 
@@ -78,37 +94,53 @@ export default function ExistingUserLogin() {
   const canSend = isEmail ? identifier.includes('.') : identifier.replace(/\D/g, '').length >= 6
   const selectedCountry = COUNTRIES.find(c => c.code === country) || COUNTRIES[0]
 
-  function handleSend() {
-    setOtpSent(true)
-    setResendTimer(30)
-    setOtp('')
-  }
+  function handleSend() { setOtpSent(true); setResendTimer(30); setOtp('') }
+
+  const currentStepLabel = confirmStep
+    ? 'CONFIRM YOUR PROFILE · STEP 3 OF 3'
+    : otpSent ? 'VERIFY · STEP 2 OF 3' : 'SIGN IN · STEP 1 OF 3'
 
   return (
-    <div className={`min-h-screen ${theme.pageBg} flex flex-col`}>
-      <header className="flex items-center gap-3 px-6 py-5">
+    <div className={`min-h-screen ${theme.pageBg} flex flex-col relative overflow-hidden`}>
+
+      {/* Loft ambient glow */}
+      {loft && (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
+          <div className="absolute top-[-80px] right-[-60px] w-[400px] h-[400px] bg-blue-100/30 rounded-full blur-3xl" />
+        </div>
+      )}
+
+      {/* Header */}
+      <header className="relative z-10 flex items-center gap-3 px-6 py-5">
         <button
           onClick={() => confirmStep ? setConfirmStep(false) : navigate('/')}
           className="text-gray-400 hover:text-gray-700 transition-colors"
         >
           <ArrowLeft size={18} />
         </button>
-        <span className="font-bold text-sm tracking-wide text-gray-900" style={{ fontFamily: theme.fontHeading }}>AOTax</span>
+        <span className="font-bold text-sm tracking-wide text-gray-900" style={{ fontFamily: theme.fontHeading }}>
+          AOTax
+        </span>
       </header>
 
-      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-16">
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 pb-16">
+        {/* Keyed wrapper drives step entrance animation */}
+        <div key={confirmStep ? 'confirm' : 'login'} className={`w-full flex flex-col items-center ${loft ? 'step-enter' : 'step-enter-default'}`}>
 
+        {/* ── Step 3: Profile confirmation (KEY MOMENT) ── */}
         {confirmStep ? (
-          /* ── Step 3: Profile confirmation ── */
           <div className="w-full max-w-lg">
             <div className="mb-8">
               <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-3">
-                CONFIRM YOUR PROFILE · STEP 3 OF 3
+                {currentStepLabel}
               </p>
-              <h1 className="text-2xl font-bold text-gray-900" style={{ fontFamily: theme.fontHeading }}>
+              <h1
+                className={`${theme.sectionHeadingCls} text-gray-900`}
+                style={{ fontFamily: theme.fontHeading }}
+              >
                 One quick check.
               </h1>
-              <p className="text-sm text-gray-500 mt-1.5 leading-relaxed">
+              <p className="text-sm text-gray-500 mt-2 leading-relaxed">
                 Your profile from last year is on file — confirm it's still accurate before we get started.
               </p>
             </div>
@@ -121,15 +153,23 @@ export default function ExistingUserLogin() {
           <div className="w-full max-w-sm">
             <div className="mb-8">
               <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-3">
-                {otpSent ? 'VERIFY · STEP 2 OF 3' : 'SIGN IN · STEP 1 OF 3'}
+                {currentStepLabel}
               </p>
-              <h1 className="text-2xl font-bold text-gray-900" style={{ fontFamily: theme.fontHeading }}>Welcome back.</h1>
-              <p className="text-sm text-gray-500 mt-1">Enter your email or mobile to continue.</p>
+              <h1
+                className={`${theme.sectionHeadingCls} text-gray-900`}
+                style={{ fontFamily: theme.fontHeading }}
+              >
+                Welcome back.
+              </h1>
+              <p className="text-sm text-gray-500 mt-1.5">Enter your email or mobile to continue.</p>
             </div>
 
-            <div className="space-y-4">
+            <div className={`space-y-4 ${loft ? `bg-white ${theme.cardRadius} p-6 ${theme.cardShadow}` : ''}`}>
               <div>
-                <div className={`relative flex ${theme.inputCls} overflow-visible focus-within:ring-0`} style={{ padding: 0 }}>
+                <div
+                  className={`relative flex ${theme.inputCls} overflow-visible focus-within:ring-0`}
+                  style={{ padding: 0 }}
+                >
                   {!isEmail && (
                     <button
                       type="button"
@@ -170,7 +210,7 @@ export default function ExistingUserLogin() {
                 {canSend && !otpSent && (
                   <button
                     onClick={handleSend}
-                    className={`mt-2 text-xs font-semibold ${theme.accentText} ${theme.accentTextHover} transition-colors`}
+                    className={`mt-2 text-xs font-semibold ${theme.accentText} ${theme.accentTextHover} transition-colors ${loft ? 'fade-in' : ''}`}
                   >
                     Send verification code →
                   </button>
@@ -182,40 +222,37 @@ export default function ExistingUserLogin() {
                   <div className="flex items-center justify-between mb-1.5">
                     <label className={theme.label}>Verification code</label>
                     <div>
-                      {resendTimer > 0 ? (
-                        <span className="text-[10px] text-gray-400">Resend in {resendTimer}s</span>
-                      ) : (
-                        <button
-                          onClick={handleSend}
-                          className={`text-[10px] font-semibold ${theme.accentText} ${theme.accentTextHover} transition-colors`}
-                        >
-                          Resend code
-                        </button>
-                      )}
+                      {resendTimer > 0
+                        ? <span className="text-[10px] text-gray-400">Resend in {resendTimer}s</span>
+                        : <button onClick={handleSend} className={`text-[10px] font-semibold ${theme.accentText} ${theme.accentTextHover} transition-colors`}>Resend code</button>
+                      }
                     </div>
                   </div>
-                  <OTPInput value={otp} onChange={setOtp} inputCls={theme.inputCls} />
+                  <OTPInput value={otp} onChange={setOtp} inputCls={theme.inputCls} loft={loft} />
                   <p className="text-xs text-gray-400 mt-2">
                     Sent to {isEmail ? identifier : `${selectedCountry.dial} ${identifier}`}
                   </p>
                 </div>
               )}
-
-              <button
-                onClick={() => setConfirmStep(true)}
-                disabled={!otpSent || otp.length < 6}
-                className={`w-full flex items-center justify-center gap-2 py-3.5 text-sm font-semibold transition-all ${theme.btnRadius} ${
-                  otpSent && otp.length === 6
-                    ? `${theme.btnPrimary}`
-                    : theme.btnDisabled
-                }`}
-              >
-                Sign in <ArrowRight size={15} />
-              </button>
             </div>
+
+            <button
+              key={otpSent && otp.length === 6 ? 'active' : 'disabled'}
+              onClick={() => setConfirmStep(true)}
+              disabled={!otpSent || otp.length < 6}
+              className={`mt-6 w-full flex items-center justify-center gap-2 py-3.5 text-sm font-semibold transition-all ${theme.btnRadius} ${
+                otpSent && otp.length === 6
+                  ? `${theme.btnPrimary} ${loft ? 'btn-unlock' : ''}`
+                  : theme.btnDisabled
+              }`}
+              style={loft && otpSent && otp.length === 6 ? { boxShadow: '0 4px 16px rgba(29,78,216,0.28)' } : undefined}
+            >
+              Sign in <ArrowRight size={15} />
+            </button>
           </div>
         )}
 
+        </div>{/* end step animation wrapper */}
       </div>
     </div>
   )
