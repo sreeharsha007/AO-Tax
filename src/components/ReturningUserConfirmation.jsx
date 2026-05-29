@@ -83,7 +83,7 @@ function ConfirmRow({ label, summary, expanded, onToggle, children }) {
 /* ── Shared: Yes / No pills ──────────────────────────────────────────────── */
 function YesNoInline({ value, onChange, question }) {
   const { theme } = useTheme()
-  const loft = theme.id === 'loft'
+  const enhanced = theme.animationsEnhanced
   return (
     <div>
       {question && (
@@ -97,7 +97,7 @@ function YesNoInline({ value, onChange, question }) {
               key={opt}
               onClick={() => onChange(opt === 'yes')}
               className={`px-5 py-1.5 border text-sm font-semibold transition-all ${
-                loft ? 'rounded-xl' : 'rounded-full'
+                enhanced ? theme.pillBtnRadius : 'rounded-full'
               } ${
                 active
                   ? `${theme.accentLight} ${theme.accentBorder} ${theme.accentText}`
@@ -270,7 +270,7 @@ function LoftConfirmationLayout({ answers, update, toggleMulti, onConfirm, theme
 /* ── Main export ─────────────────────────────────────────────────────────── */
 export default function ReturningUserConfirmation({ onConfirm }) {
   const { theme } = useTheme()
-  const loft = theme.id === 'loft'
+  const enhanced = theme.animationsEnhanced
   const [answers, setAnswers] = useState({ ...RETURNING_PROFILE_DEFAULTS })
   const [expandedRow, setExpandedRow] = useState(null)
 
@@ -288,7 +288,7 @@ export default function ReturningUserConfirmation({ onConfirm }) {
   }
 
   /* ── Loft: new open layout ── */
-  if (loft) {
+  if (enhanced) {
     return (
       <LoftConfirmationLayout
         answers={answers}

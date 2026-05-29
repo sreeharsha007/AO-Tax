@@ -53,7 +53,7 @@ function YesNo({ value, onChange }) {
             className={`py-4 ${theme.btnRadius} border text-sm font-semibold transition-all capitalize ${
               active
                 ? `${theme.accentLight} ${theme.accentBorder} ${theme.accentText}`
-                : `bg-white border-gray-200 text-gray-700 hover:border-gray-300 ${theme.id === 'loft' ? 'hover:shadow-sm' : ''}`
+                : `bg-white border-gray-200 text-gray-700 hover:border-gray-300 ${theme.animationsEnhanced ? 'hover:shadow-sm' : ''}`
             }`}
           >
             {opt === 'yes' ? 'Yes' : 'No'}
@@ -126,13 +126,14 @@ function OptionRow({ label, sub, selected, onClick, lucideIcon: LucideIcon, phos
         )}
         {/* Label + sub */}
         <div className="flex-1 min-w-0">
-          <p className={`text-sm font-medium leading-tight ${selected ? 'text-blue-700' : 'text-gray-900'}`}>{label}</p>
+          <p className={`text-sm font-medium leading-tight ${selected ? theme.accentText : 'text-gray-900'}`}>{label}</p>
           <p className={`text-xs mt-0.5 ${selected ? 'text-gray-400' : 'text-gray-500'}`}>{sub}</p>
         </div>
-        {/* Selection circle */}
-        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-          selected ? 'bg-blue-700 border-blue-700' : 'bg-white border-gray-300'
-        }`}>
+        {/* Selection circle — inline style for direction-accurate accent */}
+        <div
+          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${!selected ? 'bg-white border-gray-300' : ''}`}
+          style={selected ? { backgroundColor: theme.accentTextColor, borderColor: theme.accentTextColor } : undefined}
+        >
           {selected && <Check size={9} className="text-white" strokeWidth={3.5} />}
         </div>
       </button>
@@ -141,12 +142,12 @@ function OptionRow({ label, sub, selected, onClick, lucideIcon: LucideIcon, phos
 }
 
 /* ── Residency step ──────────────────────────────────────────────────────── */
-function ResidencyStep({ answers, update, loft }) {
+function ResidencyStep({ answers, update, enhanced }) {
   return (
     <div className="space-y-8">
       <div className="space-y-4">
         <div>
-          <h2 className={`${loft ? 'text-2xl' : 'text-xl'} font-semibold text-gray-900 leading-snug`}>
+          <h2 className={`${enhanced ? 'text-2xl' : 'text-xl'} font-semibold text-gray-900 leading-snug`}>
             Are you a US citizen or green card holder?
           </h2>
           <p className="text-sm text-gray-500 mt-1.5">This determines which tax form applies to you.</p>
@@ -159,7 +160,7 @@ function ResidencyStep({ answers, update, loft }) {
       {answers.usCitizenOrGC === false && (
         <div className="space-y-4 pt-2 border-t border-gray-100">
           <div>
-            <h3 className={`${loft ? 'text-lg' : 'text-base'} font-semibold text-gray-900`}>
+            <h3 className={`${enhanced ? 'text-lg' : 'text-base'} font-semibold text-gray-900`}>
               Are you currently living in the US?
             </h3>
             <p className="text-xs text-gray-500 mt-1">Residency affects your filing requirements.</p>
@@ -175,14 +176,14 @@ function ResidencyStep({ answers, update, loft }) {
 }
 
 /* ── Select step (income / deductions) ───────────────────────────────────── */
-function SelectStep({ title, sub, options, selected, onToggle, lucideIcons, phosphorIcons, badgeCls, loft }) {
+function SelectStep({ title, sub, options, selected, onToggle, lucideIcons, phosphorIcons, badgeCls, enhanced }) {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className={`${loft ? 'text-2xl' : 'text-xl'} font-semibold text-gray-900 leading-snug`}>{title}</h2>
+        <h2 className={`${enhanced ? 'text-2xl' : 'text-xl'} font-semibold text-gray-900 leading-snug`}>{title}</h2>
         <p className="text-sm text-gray-500 mt-1.5">{sub}</p>
       </div>
-      {loft ? (
+      {enhanced ? (
         /* Loft: stacked list with stagger + selection bounce */
         <div className="space-y-2">
           {options.map((opt, i) => (
@@ -221,11 +222,11 @@ function SelectStep({ title, sub, options, selected, onToggle, lucideIcons, phos
 }
 
 /* ── Global assets step ──────────────────────────────────────────────────── */
-function GlobalAssetsStep({ answers, update, loft }) {
+function GlobalAssetsStep({ answers, update, enhanced }) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className={`${loft ? 'text-2xl' : 'text-xl'} font-semibold text-gray-900 leading-snug`}>
+        <h2 className={`${enhanced ? 'text-2xl' : 'text-xl'} font-semibold text-gray-900 leading-snug`}>
           Do you hold financial accounts or assets outside the US?
         </h2>
         <p className="text-sm text-gray-500 mt-1.5">
@@ -251,7 +252,7 @@ function getSteps(answers) {
 
 export default function ProfileWizard({ onComplete, onSkip, initialAnswers = null }) {
   const { theme } = useTheme()
-  const loft = theme.id === 'loft'
+  const enhanced = theme.animationsEnhanced
 
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState(initialAnswers ?? {
@@ -300,13 +301,13 @@ export default function ProfileWizard({ onComplete, onSkip, initialAnswers = nul
         </div>
         <div className="flex items-center justify-between">
           <p className={theme.label}>{steps[step]}</p>
-          {!loft && <p className={theme.label}>{pct}%</p>}
+          {!enhanced && <p className={theme.label}>{pct}%</p>}
         </div>
       </div>
 
       {/* Step content with entrance animation */}
-      <div key={step} className={loft ? 'step-enter' : 'step-enter-default'}>
-        {step === 0 && <ResidencyStep answers={answers} update={update} loft={loft} />}
+      <div key={step} className={enhanced ? 'step-enter' : 'step-enter-default'}>
+        {step === 0 && <ResidencyStep answers={answers} update={update} enhanced={enhanced} />}
         {step === 1 && (
           <SelectStep
             title="Where does your income come from?"
@@ -317,7 +318,7 @@ export default function ProfileWizard({ onComplete, onSkip, initialAnswers = nul
             badgeCls={theme.iconIncome}
             selected={answers.income}
             onToggle={id => toggleMulti('income', id)}
-            loft={loft}
+            enhanced={enhanced}
           />
         )}
         {step === 2 && (
@@ -330,10 +331,10 @@ export default function ProfileWizard({ onComplete, onSkip, initialAnswers = nul
             badgeCls={theme.iconDeductions}
             selected={answers.deductions}
             onToggle={id => toggleMulti('deductions', id)}
-            loft={loft}
+            enhanced={enhanced}
           />
         )}
-        {step === 3 && <GlobalAssetsStep answers={answers} update={update} loft={loft} />}
+        {step === 3 && <GlobalAssetsStep answers={answers} update={update} enhanced={enhanced} />}
       </div>
 
       {/* Footer actions */}
@@ -342,7 +343,7 @@ export default function ProfileWizard({ onComplete, onSkip, initialAnswers = nul
           onClick={onSkip}
           className={`text-sm font-medium ${theme.accentText} ${theme.accentTextHover} transition-colors`}
         >
-          {loft ? "I'll do this later" : 'Skip for now'}
+          {enhanced ? "I'll do this later" : 'Skip for now'}
         </button>
         <div className="flex items-center gap-3">
           {step > 0 && (
@@ -358,9 +359,9 @@ export default function ProfileWizard({ onComplete, onSkip, initialAnswers = nul
             onClick={handleContinue}
             disabled={!canContinue()}
             className={`flex items-center gap-2 px-5 py-2.5 text-sm font-semibold transition-all ${theme.btnRadius} ${
-              canContinue() ? `${theme.btnPrimary} ${loft ? 'btn-unlock' : ''}` : theme.btnDisabled
+              canContinue() ? `${theme.btnPrimary} ${enhanced ? 'btn-unlock' : ''}` : theme.btnDisabled
             }`}
-            style={loft && canContinue() ? { boxShadow: '0 4px 12px rgba(29,78,216,0.24)' } : undefined}
+            style={enhanced && canContinue() ? { boxShadow: '0 4px 12px rgba(29,78,216,0.24)' } : undefined}
           >
             {isLast ? 'Finish' : 'Continue'} <ArrowRight size={15} />
           </button>
@@ -370,7 +371,7 @@ export default function ProfileWizard({ onComplete, onSkip, initialAnswers = nul
   )
 
   /* Loft: wrap in a floating card */
-  if (loft) {
+  if (enhanced) {
     return (
       <div className={`bg-white ${theme.cardRadius} ${theme.cardShadow} p-6`}>
         {inner}

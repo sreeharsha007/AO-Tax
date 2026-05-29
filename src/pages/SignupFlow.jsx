@@ -7,7 +7,7 @@ import { COUNTRIES, buildSectionList } from '../utils/inferProfile'
 import { useTheme } from '../context/ThemeContext'
 
 /* ── OTP digit box — handles its own bounce without remounting ───────────── */
-function DigitBox({ digit, inputRef, onChange, onKeyDown, inputCls, loft }) {
+function DigitBox({ digit, inputRef, onChange, onKeyDown, inputCls, enhanced }) {
   const [bouncing, setBouncing] = useState(false)
   const prev = useRef('')
   useEffect(() => {
@@ -16,7 +16,7 @@ function DigitBox({ digit, inputRef, onChange, onKeyDown, inputCls, loft }) {
   }, [digit])
   return (
     <div
-      className={`flex-1 min-w-0 ${bouncing && loft ? 'digit-bounce' : ''}`}
+      className={`flex-1 min-w-0 ${bouncing && enhanced ? 'digit-bounce' : ''}`}
       onAnimationEnd={() => setBouncing(false)}
     >
       <input
@@ -32,7 +32,7 @@ function DigitBox({ digit, inputRef, onChange, onKeyDown, inputCls, loft }) {
 }
 
 /* ── OTP input ───────────────────────────────────────────────────────────── */
-function OTPInput({ value, onChange, inputCls, loft }) {
+function OTPInput({ value, onChange, inputCls, enhanced }) {
   const refs = useRef([])
   const digits = value.padEnd(6, '').split('').slice(0, 6)
 
@@ -66,7 +66,7 @@ function OTPInput({ value, onChange, inputCls, loft }) {
           onChange={e => handleChange(i, e)}
           onKeyDown={e => handleKeyDown(i, e)}
           inputCls={inputCls}
-          loft={loft}
+          enhanced={enhanced}
         />
       ))}
     </div>
@@ -127,49 +127,72 @@ function TextInput({ placeholder, value, onChange, type = 'text', autoFocus, inp
   )
 }
 
-/* ── Loft: Monogram — thin-ring with initial, replaces generic illustration ─ */
-function LoftMonogram({ initial }) {
-  return (
-    <div className="relative w-14 h-14 mx-auto mb-5">
-      <svg width="56" height="56" viewBox="0 0 56 56" fill="none" aria-hidden className="absolute inset-0">
-        <circle cx="28" cy="28" r="26" stroke="rgba(255,255,255,0.18)" strokeWidth="1" />
-        <circle cx="28" cy="28" r="20" stroke="rgba(255,255,255,0.10)" strokeWidth="0.75" strokeDasharray="2 3" />
-      </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-white text-2xl font-light tracking-widest select-none" aria-hidden>
+/* ── Monogram — style driven by theme.monogramStyle ─────────────────────── */
+function WelcomeMonogram({ initial }) {
+  const { theme } = useTheme()
+
+  if (theme.monogramStyle === 'rings') {
+    // Loft: thin SVG rings — delicate, warm, personal
+    return (
+      <div className="relative w-14 h-14 mx-auto mb-5">
+        <svg width="56" height="56" viewBox="0 0 56 56" fill="none" aria-hidden className="absolute inset-0">
+          <circle cx="28" cy="28" r="26" stroke="rgba(255,255,255,0.18)" strokeWidth="1" />
+          <circle cx="28" cy="28" r="20" stroke="rgba(255,255,255,0.10)" strokeWidth="0.75" strokeDasharray="2 3" />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-white text-2xl font-light tracking-widest select-none" aria-hidden>
+            {initial}
+          </span>
+        </div>
+      </div>
+    )
+  }
+
+  if (theme.monogramStyle === 'square') {
+    // Azure: solid rounded square — confident, branded
+    return (
+      <div
+        className="w-14 h-14 rounded-2xl mx-auto mb-5 flex items-center justify-center"
+        style={{ backgroundColor: 'rgba(255,255,255,0.20)', boxShadow: '0 4px 16px rgba(0,0,0,0.15)' }}
+      >
+        <span className="text-white text-2xl font-semibold select-none" aria-hidden>
           {initial}
         </span>
       </div>
-    </div>
-  )
+    )
+  }
+
+  return null
 }
 
-/* ── Loft: Document illustration — thin line-work, specific to filing ─────── */
-function LoftDocumentIllustration({ sectionCount }) {
+/* ── Document illustration — palette driven by theme.revealIllustrationPalette */
+function DocumentIllustration({ sectionCount }) {
+  const { theme } = useTheme()
+  const cool = theme.revealIllustrationPalette === 'cool'
+
+  // Palette: warm (Loft slate) vs cool (Azure blue/cyan)
+  const bodyStroke   = cool ? '#93c5fd' : '#94a3b8'   // blue-300 vs slate-400
+  const linesStroke  = cool ? '#bfdbfe' : '#cbd5e1'   // blue-200 vs slate-300
+  const checkStroke  = theme.accentTextColor           // always the direction's accent
+
   return (
     <div className="relative mx-auto mb-2" style={{ width: 72, height: 72 }}>
       <svg width="72" height="72" viewBox="0 0 72 72" fill="none" aria-hidden>
-        {/* Document body */}
-        <path
-          d="M12 8h32l14 14v46H12z"
-          stroke="#94a3b8" strokeWidth="1.5" strokeLinejoin="round"
-        />
-        {/* Folded corner */}
-        <path
-          d="M44 8v14h14"
-          stroke="#94a3b8" strokeWidth="1.5" strokeLinejoin="round"
-        />
-        {/* Content lines */}
-        <path d="M20 32h32M20 39h32M20 46h22" stroke="#cbd5e1" strokeWidth="1.25" strokeLinecap="round" />
+        <path d="M12 8h32l14 14v46H12z" stroke={bodyStroke} strokeWidth="1.5" strokeLinejoin="round" />
+        <path d="M44 8v14h14" stroke={bodyStroke} strokeWidth="1.5" strokeLinejoin="round" />
+        <path d="M20 32h32M20 39h32M20 46h22" stroke={linesStroke} strokeWidth="1.25" strokeLinecap="round" />
         {/* Check mark — drawn via stroke-dashoffset animation */}
         <path
           d="M20 56l9 9 19-21"
-          stroke="#1d4ed8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+          stroke={checkStroke} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
           className="draw-check"
         />
       </svg>
       {sectionCount > 0 && (
-        <div className="absolute -top-1 -right-2 w-5 h-5 rounded-full bg-blue-700 border-2 border-white flex items-center justify-center badge-pop">
+        <div
+          className="absolute -top-1 -right-2 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center badge-pop"
+          style={{ backgroundColor: theme.accentTextColor }}
+        >
           <span className="text-white text-[9px] font-bold leading-none">{sectionCount}</span>
         </div>
       )}
@@ -182,7 +205,7 @@ const STEP_KEYS = ['account', 'profile']
 export default function SignupFlow({ initialData = {} }) {
   const navigate = useNavigate()
   const { theme } = useTheme()
-  const loft = theme.id === 'loft'
+  const enhanced = theme.animationsEnhanced
   const [step, setStep] = useState('account')
   const [profileAnswers, setProfileAnswers] = useState(null)
 
@@ -231,10 +254,10 @@ export default function SignupFlow({ initialData = {} }) {
   return (
     <div className={`min-h-screen ${theme.pageBg} flex flex-col relative overflow-hidden`}>
 
-      {/* Loft ambient glow */}
-      {loft && (
+      {/* Ambient glow */}
+      {theme.ambientGlow && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
-          <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[500px] h-[350px] bg-blue-200/20 rounded-full blur-3xl" />
+          <div className={`absolute top-[-100px] left-1/2 -translate-x-1/2 w-[500px] h-[350px] ${theme.ambientGlowPrimary} rounded-full blur-3xl`} />
         </div>
       )}
 
@@ -258,7 +281,7 @@ export default function SignupFlow({ initialData = {} }) {
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 pb-12">
         <div className={`w-full ${step === 'profile' ? 'max-w-lg' : 'max-w-sm'}`}>
           {/* Keyed wrapper drives step entrance animation */}
-          <div key={step} className={loft ? 'step-enter' : 'step-enter-default'}>
+          <div key={step} className={enhanced ? 'step-enter' : 'step-enter-default'}>
 
           {/* ── Step: Account creation ─────────────────────────────────── */}
           {step === 'account' && (
@@ -270,7 +293,7 @@ export default function SignupFlow({ initialData = {} }) {
                 <p className="text-sm text-gray-500 mt-1">Just the basics to get started.</p>
               </div>
 
-              <div className={`${loft ? `space-y-5 bg-white ${theme.cardRadius} px-6 py-7 ${theme.cardShadow}` : 'space-y-4'}`}>
+              <div className={theme.formCardWrapped ? `${theme.formFieldSpacing} bg-white ${theme.cardRadius} px-6 py-7 ${theme.cardShadow}` : 'space-y-4'}>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <FieldLabel theme={theme}>First name</FieldLabel>
@@ -298,7 +321,7 @@ export default function SignupFlow({ initialData = {} }) {
                   {canSendOtp && !otpSent && (
                     <button
                       onClick={handleSendOtp}
-                      className={`mt-2 text-xs font-semibold ${theme.accentText} ${theme.accentTextHover} transition-colors ${loft ? 'fade-in' : ''}`}
+                      className={`mt-2 text-xs font-semibold ${theme.accentText} ${theme.accentTextHover} transition-colors ${enhanced ? 'fade-in' : ''}`}
                     >
                       Send verification code →
                     </button>
@@ -316,7 +339,7 @@ export default function SignupFlow({ initialData = {} }) {
                         }
                       </div>
                     </div>
-                    <OTPInput value={otp} onChange={setOtp} inputCls={theme.inputCls} loft={loft} />
+                    <OTPInput value={otp} onChange={setOtp} inputCls={theme.inputCls} enhanced={enhanced} />
                     <p className="text-xs text-gray-400 mt-2">Sent to {selectedCountry.dial} {form.mobile}</p>
                   </div>
                 )}
@@ -326,8 +349,8 @@ export default function SignupFlow({ initialData = {} }) {
                 key={canContinue ? 'active' : 'disabled'}
                 onClick={() => setStep('welcome')}
                 disabled={!canContinue}
-                className={`mt-6 w-full flex items-center justify-center gap-2 py-3.5 text-sm font-semibold transition-all ${theme.btnRadius} ${canContinue ? `${theme.btnPrimary} ${loft ? 'btn-unlock' : ''}` : theme.btnDisabled}`}
-                style={loft && canContinue ? { boxShadow: '0 4px 16px rgba(29,78,216,0.28)' } : undefined}
+                className={`mt-6 w-full flex items-center justify-center gap-2 py-3.5 text-sm font-semibold transition-all ${theme.btnRadius} ${canContinue ? `${theme.btnPrimary} ${enhanced ? 'btn-unlock' : ''}` : theme.btnDisabled}`}
+                style={enhanced && canContinue ? { boxShadow: `0 4px 16px ${theme.accentTextColor}47` } : undefined}
               >
                 Continue <ArrowRight size={15} />
               </button>
@@ -337,39 +360,39 @@ export default function SignupFlow({ initialData = {} }) {
           {/* ── Step: Welcome (KEY MOMENT) ────────────────────────────── */}
           {step === 'welcome' && (
             <div className="text-center">
-              {loft ? (
-                /* Loft welcome card */
+              {theme.welcomeCardStyle !== 'minimal' ? (
+                /* Enhanced welcome card — gradient header driven by theme.advisorCardHeaderBg */
                 <div className={`${theme.cardRadius} ${theme.cardShadow} overflow-hidden mb-2`}>
-                  {/* Gradient header */}
-                  <div className="bg-gradient-to-br from-slate-800 to-blue-900 px-6 pt-8 pb-10 relative overflow-hidden">
-                    {/* Ambient glow */}
-                    <div className="absolute -top-8 -right-8 w-32 h-32 bg-blue-500/15 rounded-full blur-2xl" aria-hidden />
+                  {/* Gradient header — color from token */}
+                  <div className={`${theme.advisorCardHeaderBg} px-6 pt-8 pb-10 relative overflow-hidden`}>
+                    {/* Ambient glow within header */}
+                    <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full blur-2xl" aria-hidden />
 
-                    {/* Thin-ring monogram — personal, typographic */}
-                    <LoftMonogram initial={(form.firstName[0] || 'A').toUpperCase()} />
+                    {/* Direction monogram — rings, square, or none */}
+                    <WelcomeMonogram initial={(form.firstName[0] || 'A').toUpperCase()} />
 
                     <h1 className="text-3xl font-bold text-white relative z-10 mt-1">
                       Welcome, {form.firstName}.
                     </h1>
-                    <p className="text-blue-200/75 text-sm mt-1.5 relative z-10 font-light">Your account is ready.</p>
+                    <p className="text-white/60 text-sm mt-1.5 relative z-10 font-light">Your account is ready.</p>
                   </div>
 
                   {/* Card body — staggered entrance */}
                   <div className="bg-white px-6 py-6">
                     <p
-                      className={`text-sm text-gray-600 leading-relaxed ${loft ? 'item-enter' : ''}`}
-                      style={loft ? { animationDelay: '100ms' } : undefined}
+                      className={`text-sm text-gray-600 leading-relaxed ${enhanced ? 'item-enter' : ''}`}
+                      style={enhanced ? { animationDelay: '100ms' } : undefined}
                     >
                       A few questions help us understand your tax situation and tailor your 2025 return. Takes about a minute.
                     </p>
                     <div
-                      className={`mt-5 space-y-3 ${loft ? 'item-enter' : ''}`}
-                      style={loft ? { animationDelay: '160ms' } : undefined}
+                      className={`mt-5 space-y-3 ${enhanced ? 'item-enter' : ''}`}
+                      style={enhanced ? { animationDelay: '160ms' } : undefined}
                     >
                       <button
                         onClick={() => setStep('profile')}
                         className={`w-full flex items-center justify-center gap-2.5 ${theme.btnPrimary} ${theme.btnRadius} py-3.5 text-sm font-semibold transition-all`}
-                        style={{ boxShadow: '0 4px 16px rgba(29,78,216,0.28)' }}
+                        style={{ boxShadow: `0 4px 16px ${theme.accentTextColor}47` }}
                       >
                         <FilePlus size={18} weight="duotone" />
                         Set up my 2025 filing
@@ -438,12 +461,12 @@ export default function SignupFlow({ initialData = {} }) {
           {/* ── Step: Reveal (KEY MOMENT) ──────────────────────────────── */}
           {step === 'reveal' && (
             <div className="text-center">
-              {loft ? (
-                /* Loft reveal card */
-                <div className={`bg-gradient-to-br from-blue-50 via-indigo-50/60 to-blue-50 ${theme.cardRadius} border border-blue-100 ${theme.cardShadow} overflow-hidden`}>
+              {theme.useIllustrations ? (
+                /* Enhanced reveal card — tokens drive background, border, illustration */
+                <div className={`${theme.successBg} ${theme.cardRadius} border border-blue-100 ${theme.cardShadow} overflow-hidden`}>
                   {/* Illustration area */}
                   <div className="px-8 pt-10 pb-6">
-                    <LoftDocumentIllustration sectionCount={sections.length} />
+                    <DocumentIllustration sectionCount={sections.length} />
                     <h1 className="text-3xl font-bold text-gray-900 mt-6 leading-tight">Your filing is set up.</h1>
                     <p className="text-sm text-gray-500 mt-2.5 leading-relaxed max-w-[240px] mx-auto">
                       {sections.length > 0
@@ -457,7 +480,7 @@ export default function SignupFlow({ initialData = {} }) {
                     <button
                       onClick={handleStartFiling}
                       className={`w-full flex items-center justify-center gap-2.5 ${theme.btnPrimary} ${theme.btnRadius} py-3.5 text-sm font-semibold transition-all`}
-                      style={{ boxShadow: '0 4px 16px rgba(29,78,216,0.28)' }}
+                      style={{ boxShadow: `0 4px 16px ${theme.accentTextColor}47` }}
                     >
                       <ArrowCircleRight size={18} weight="duotone" />
                       Start my 2025 filing

@@ -6,7 +6,7 @@ import { useTheme } from '../context/ThemeContext'
 import ReturningUserConfirmation from '../components/ReturningUserConfirmation'
 
 /* ── OTP digit box — handles its own bounce without remounting ───────────── */
-function DigitBox({ digit, inputRef, onChange, onKeyDown, inputCls, loft }) {
+function DigitBox({ digit, inputRef, onChange, onKeyDown, inputCls, enhanced }) {
   const [bouncing, setBouncing] = useState(false)
   const prev = useRef('')
   useEffect(() => {
@@ -15,7 +15,7 @@ function DigitBox({ digit, inputRef, onChange, onKeyDown, inputCls, loft }) {
   }, [digit])
   return (
     <div
-      className={`flex-1 min-w-0 ${bouncing && loft ? 'digit-bounce' : ''}`}
+      className={`flex-1 min-w-0 ${bouncing && enhanced ? 'digit-bounce' : ''}`}
       onAnimationEnd={() => setBouncing(false)}
     >
       <input
@@ -31,7 +31,7 @@ function DigitBox({ digit, inputRef, onChange, onKeyDown, inputCls, loft }) {
 }
 
 /* ── OTP input ───────────────────────────────────────────────────────────── */
-function OTPInput({ value, onChange, inputCls, loft }) {
+function OTPInput({ value, onChange, inputCls, enhanced }) {
   const refs = useRef([])
   const digits = value.padEnd(6, '').split('').slice(0, 6)
 
@@ -65,7 +65,7 @@ function OTPInput({ value, onChange, inputCls, loft }) {
           onChange={e => handleChange(i, e)}
           onKeyDown={e => handleKeyDown(i, e)}
           inputCls={inputCls}
-          loft={loft}
+          enhanced={enhanced}
         />
       ))}
     </div>
@@ -75,7 +75,7 @@ function OTPInput({ value, onChange, inputCls, loft }) {
 export default function ExistingUserLogin() {
   const navigate = useNavigate()
   const { theme } = useTheme()
-  const loft = theme.id === 'loft'
+  const enhanced = theme.animationsEnhanced
   const [identifier, setIdentifier] = useState('')
   const [country, setCountry]       = useState('US')
   const [countryOpen, setCountryOpen] = useState(false)
@@ -103,10 +103,10 @@ export default function ExistingUserLogin() {
   return (
     <div className={`min-h-screen ${theme.pageBg} flex flex-col relative overflow-hidden`}>
 
-      {/* Loft ambient glow */}
-      {loft && (
+      {/* Ambient glow */}
+      {theme.ambientGlow && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
-          <div className="absolute top-[-80px] right-[-60px] w-[400px] h-[400px] bg-blue-100/30 rounded-full blur-3xl" />
+          <div className={`absolute top-[-80px] right-[-60px] w-[400px] h-[400px] ${theme.ambientGlowPrimary} rounded-full blur-3xl`} />
         </div>
       )}
 
@@ -125,7 +125,7 @@ export default function ExistingUserLogin() {
 
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 pb-16">
         {/* Keyed wrapper drives step entrance animation */}
-        <div key={confirmStep ? 'confirm' : 'login'} className={`w-full flex flex-col items-center ${loft ? 'step-enter' : 'step-enter-default'}`}>
+        <div key={confirmStep ? 'confirm' : 'login'} className={`w-full flex flex-col items-center ${enhanced ? 'step-enter' : 'step-enter-default'}`}>
 
         {/* ── Step 3: Profile confirmation (KEY MOMENT) ── */}
         {confirmStep ? (
@@ -164,7 +164,7 @@ export default function ExistingUserLogin() {
               <p className="text-sm text-gray-500 mt-1.5">Enter your email or mobile to continue.</p>
             </div>
 
-            <div className={`space-y-4 ${loft ? `bg-white ${theme.cardRadius} p-6 ${theme.cardShadow}` : ''}`}>
+            <div className={theme.formCardWrapped ? `${theme.formFieldSpacing} bg-white ${theme.cardRadius} px-6 py-7 ${theme.cardShadow}` : 'space-y-4'}>
               <div>
                 <div
                   className={`relative flex ${theme.inputCls} overflow-visible focus-within:ring-0`}
@@ -210,7 +210,7 @@ export default function ExistingUserLogin() {
                 {canSend && !otpSent && (
                   <button
                     onClick={handleSend}
-                    className={`mt-2 text-xs font-semibold ${theme.accentText} ${theme.accentTextHover} transition-colors ${loft ? 'fade-in' : ''}`}
+                    className={`mt-2 text-xs font-semibold ${theme.accentText} ${theme.accentTextHover} transition-colors ${enhanced ? 'fade-in' : ''}`}
                   >
                     Send verification code →
                   </button>
@@ -228,7 +228,7 @@ export default function ExistingUserLogin() {
                       }
                     </div>
                   </div>
-                  <OTPInput value={otp} onChange={setOtp} inputCls={theme.inputCls} loft={loft} />
+                  <OTPInput value={otp} onChange={setOtp} inputCls={theme.inputCls} enhanced={enhanced} />
                   <p className="text-xs text-gray-400 mt-2">
                     Sent to {isEmail ? identifier : `${selectedCountry.dial} ${identifier}`}
                   </p>
@@ -242,10 +242,10 @@ export default function ExistingUserLogin() {
               disabled={!otpSent || otp.length < 6}
               className={`mt-6 w-full flex items-center justify-center gap-2 py-3.5 text-sm font-semibold transition-all ${theme.btnRadius} ${
                 otpSent && otp.length === 6
-                  ? `${theme.btnPrimary} ${loft ? 'btn-unlock' : ''}`
+                  ? `${theme.btnPrimary} ${enhanced ? 'btn-unlock' : ''}`
                   : theme.btnDisabled
               }`}
-              style={loft && otpSent && otp.length === 6 ? { boxShadow: '0 4px 16px rgba(29,78,216,0.28)' } : undefined}
+              style={enhanced && otpSent && otp.length === 6 ? { boxShadow: `0 4px 16px ${theme.accentTextColor}47` } : undefined}
             >
               Sign in <ArrowRight size={15} />
             </button>

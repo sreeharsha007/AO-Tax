@@ -1,29 +1,26 @@
 import { useNavigate } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
-import { UserCirclePlus, UserCircle, ArrowCircleRight } from '@phosphor-icons/react'
+import { UserCirclePlus, UserCircle } from '@phosphor-icons/react'
 import { useTheme } from '../context/ThemeContext'
 
 export default function LoginPage() {
   const navigate = useNavigate()
   const { theme } = useTheme()
-  const loft = theme.id === 'loft'
+  const enhanced = theme.animationsEnhanced
 
   return (
     <div className={`min-h-screen ${theme.pageBg} flex flex-col relative overflow-hidden`}>
 
-      {/* Loft: ambient glow behind content */}
-      {loft && (
+      {/* Ambient glow — driven by theme.ambientGlow token */}
+      {theme.ambientGlow && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
-          <div className="absolute top-[-120px] left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-blue-200/25 rounded-full blur-3xl" />
-          <div className="absolute bottom-[-80px] right-[-100px] w-[400px] h-[400px] bg-indigo-100/30 rounded-full blur-3xl" />
+          <div className={`absolute top-[-120px] left-1/2 -translate-x-1/2 w-[600px] h-[400px] ${theme.ambientGlowPrimary} rounded-full blur-3xl`} />
+          <div className={`absolute bottom-[-80px] right-[-100px] w-[400px] h-[400px] ${theme.ambientGlowSecondary} rounded-full blur-3xl`} />
         </div>
       )}
 
       <header className="relative px-6 py-5 z-10">
-        <span
-          className="font-bold text-sm tracking-wide text-gray-900"
-          style={{ fontFamily: theme.fontHeading }}
-        >
+        <span className="font-bold text-sm tracking-wide text-gray-900" style={{ fontFamily: theme.fontHeading }}>
           AOTax
         </span>
       </header>
@@ -31,8 +28,8 @@ export default function LoginPage() {
       <div className="relative flex-1 flex flex-col items-center justify-center px-6 pb-16 z-10">
         <div className="w-full max-w-sm">
 
-          {/* Loft: icon badge above heading */}
-          {loft && (
+          {/* Icon badge above heading — driven by theme.showHeaderIcon */}
+          {theme.showHeaderIcon && (
             <div className="mb-6">
               <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center shadow-[0_4px_16px_rgba(29,78,216,0.35)]">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -43,20 +40,17 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* Staggered entrance in Loft */}
+          {/* Staggered entrance — driven by theme.animationsEnhanced */}
           <div
-            className={loft ? 'item-enter' : ''}
-            style={loft ? { animationDelay: '0ms' } : undefined}
+            className={enhanced ? 'item-enter' : ''}
+            style={enhanced ? { animationDelay: '0ms' } : undefined}
           >
             <div className="mb-10">
-              <h1
-                className={`${theme.loginHeadingCls} text-gray-900`}
-                style={{ fontFamily: theme.fontHeading }}
-              >
+              <h1 className={`${theme.loginHeadingCls} text-gray-900`} style={{ fontFamily: theme.fontHeading }}>
                 Welcome.
               </h1>
               <p className={`${theme.heroTagline} mt-2.5 leading-relaxed`}>
-                Tax filing managed by experts,<br className={loft ? '' : 'hidden'} /> built around you.
+                Tax filing managed by experts,<br className={enhanced ? '' : 'hidden'} /> built around you.
               </p>
             </div>
           </div>
@@ -64,18 +58,18 @@ export default function LoginPage() {
           <div className="space-y-3">
             {/* New user CTA */}
             <div
-              className={loft ? 'item-enter' : ''}
-              style={loft ? { animationDelay: '80ms' } : undefined}
+              className={enhanced ? 'item-enter' : ''}
+              style={enhanced ? { animationDelay: '80ms' } : undefined}
             >
               <button
                 onClick={() => navigate('/signup')}
-                className={`w-full flex items-center justify-between ${theme.btnPrimary} ${theme.btnRadius} px-5 py-4 transition-all group ${loft ? 'loft-card-hover' : ''}`}
-                style={loft ? { boxShadow: '0 4px 16px rgba(29,78,216,0.30)' } : undefined}
+                className={`w-full flex items-center justify-between ${theme.btnPrimary} ${theme.btnRadius} px-5 py-4 transition-all group ${theme.cardHoverLift ? 'loft-card-hover' : ''}`}
+                style={enhanced ? { boxShadow: `0 4px 16px ${theme.accentTextColor}4c` } : undefined}
               >
                 <div className="flex items-center gap-3">
-                  {loft ? (
+                  {theme.iconStyle === 'phosphor' && (
                     <UserCirclePlus size={22} weight="duotone" className="opacity-80 flex-shrink-0" />
-                  ) : null}
+                  )}
                   <div className="text-left">
                     <p className="text-sm font-semibold">New to AOTax</p>
                     <p className="text-xs opacity-60 mt-0.5">Create your account</p>
@@ -87,18 +81,18 @@ export default function LoginPage() {
 
             {/* Returning user CTA */}
             <div
-              className={loft ? 'item-enter' : ''}
-              style={loft ? { animationDelay: '140ms' } : undefined}
+              className={enhanced ? 'item-enter' : ''}
+              style={enhanced ? { animationDelay: '140ms' } : undefined}
             >
               <button
                 onClick={() => navigate('/auth')}
-                className={`w-full flex items-center justify-between ${theme.btnSecondary} ${theme.btnRadius} px-5 py-4 transition-all group ${loft ? 'loft-card-hover' : ''}`}
-                style={loft ? { boxShadow: '0 2px 8px rgba(0,0,0,0.06)' } : undefined}
+                className={`w-full flex items-center justify-between ${theme.btnSecondary} ${theme.btnRadius} px-5 py-4 transition-all group ${theme.cardHoverLift ? 'loft-card-hover' : ''}`}
+                style={enhanced ? { boxShadow: '0 2px 8px rgba(0,0,0,0.06)' } : undefined}
               >
                 <div className="flex items-center gap-3">
-                  {loft ? (
-                    <UserCircle size={22} weight="duotone" className="text-blue-600 flex-shrink-0" />
-                  ) : null}
+                  {theme.iconStyle === 'phosphor' && (
+                    <UserCircle size={22} weight="duotone" className={`${theme.accentText} flex-shrink-0`} />
+                  )}
                   <div className="text-left">
                     <p className="text-sm font-semibold text-gray-800">Returning customer</p>
                     <p className="text-xs text-gray-400 mt-0.5">Sign in to your account</p>
@@ -109,11 +103,11 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Loft: trust signal */}
-          {loft && (
+          {/* Trust signal — driven by theme.showTrustSignal */}
+          {theme.showTrustSignal && (
             <p
-              className="text-center text-[11px] text-gray-400 mt-10 leading-relaxed item-enter"
-              style={{ animationDelay: '200ms' }}
+              className={`text-center text-[11px] text-gray-400 mt-10 leading-relaxed ${enhanced ? 'item-enter' : ''}`}
+              style={enhanced ? { animationDelay: '200ms' } : undefined}
             >
               Trusted by 12,000+ filers · IRS-authorized · Bank-level encryption
             </p>
