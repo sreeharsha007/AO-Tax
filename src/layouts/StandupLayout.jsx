@@ -27,14 +27,14 @@ export default function StandupLayout({ scenario = 0, setChatOpen, setDocsOpen }
   const isHighSignal = scenario === 2
 
   return (
-    <div className="min-h-screen bg-[#f5f4f0]">
+    <div className="min-h-screen bg-white">
       <Navbar activePage="tickets" dark />
 
       <div className="px-8 pt-5 pb-2 max-w-[720px] mx-auto">
         <div className="flex items-center gap-1.5 text-[11px] text-gray-400 mb-3">
-          <button onClick={() => navigate('/')} className="hover:text-gray-600">Dashboard</button>
+          <button onClick={() => navigate('/dashboard')} className="hover:text-gray-600">Dashboard</button>
           <ChevronRight size={10} />
-          <button onClick={() => navigate('/')} className="hover:text-gray-600">My Filings</button>
+          <button onClick={() => navigate('/dashboard')} className="hover:text-gray-600">My Filings</button>
           <ChevronRight size={10} />
           <span className="text-gray-600 font-medium">#467501</span>
         </div>

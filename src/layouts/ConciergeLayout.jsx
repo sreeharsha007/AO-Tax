@@ -9,15 +9,15 @@ export default function ConciergeLayout({ scenario = 0, setChatOpen, setDocsOpen
   const navigate = useNavigate()
 
   return (
-    <div className={`min-h-screen transition-colors duration-500 ${scenario === 1 ? 'bg-blue-50' : 'bg-[#f5f4f0]'}`}>
+    <div className={`min-h-screen transition-colors duration-500 ${scenario === 1 ? 'bg-blue-50' : 'bg-white'}`}>
       <Navbar activePage="tickets" dark />
 
       {/* Header */}
       <div className="px-8 pt-5 pb-2 max-w-[820px] mx-auto">
         <div className="flex items-center gap-1.5 text-[11px] text-gray-400 mb-3">
-          <button onClick={() => navigate('/')} className="hover:text-gray-600">Dashboard</button>
+          <button onClick={() => navigate('/dashboard')} className="hover:text-gray-600">Dashboard</button>
           <ChevronRight size={10} />
-          <button onClick={() => navigate('/')} className="hover:text-gray-600">My Filings</button>
+          <button onClick={() => navigate('/dashboard')} className="hover:text-gray-600">My Filings</button>
           <ChevronRight size={10} />
           <span className="text-gray-600 font-medium">#467501</span>
         </div>

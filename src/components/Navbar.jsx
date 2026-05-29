@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { LayoutGrid, FolderOpen, Gift, Bell, ChevronDown, Users } from 'lucide-react'
 
 const navItems = [
-  { label: 'Dashboard',      icon: LayoutGrid, key: 'dashboard', path: '/' },
+  { label: 'Dashboard',      icon: LayoutGrid, key: 'dashboard', path: '/dashboard' },
   { label: 'Document Vault', icon: FolderOpen,  key: 'vault',    badge: 12 },
   { label: 'Invite & Earn',  icon: Gift,        key: 'invite' },
 ]
@@ -35,7 +35,7 @@ export default function Navbar({ activePage = 'dashboard', dark = false, isRetur
   return (
     <nav className={`${bg} border-b px-6 h-14 hidden md:flex items-center justify-between sticky top-0 z-10`}>
       {/* Logo — left */}
-      <button onClick={() => navigate('/')} className="flex items-center gap-1">
+      <button onClick={() => navigate('/dashboard')} className="flex items-center gap-1">
         <span className={`font-bold text-sm tracking-wide ${logoText}`}>AOTax</span>
       </button>
 

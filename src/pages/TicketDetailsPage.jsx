@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useLocation } from 'react-router-dom'
 import { X, Send, Download, FileCheck, LayoutList, ListChecks, MessageCircle, Calendar, Sparkles, ClipboardList, AlignLeft, Layers, Activity, Moon } from 'lucide-react'
 import FilingFormShell from '../components/FilingFormShell'
 import FloatingConceptPanel from '../components/FloatingConceptPanel'
@@ -14,6 +14,7 @@ import StudioLayout from '../layouts/StudioLayout'
 import StatusLayout from '../layouts/StatusLayout'
 import QuietRoomLayout from '../layouts/QuietRoomLayout'
 import { SECTION_SUB_IDS, PROFILE_SUB_IDS, SECTION_ROWS, CHAT_MESSAGES, DRAFTS } from '../data/ticketData'
+import { buildSectionList } from '../utils/inferProfile'
 
 const RETURNING_USER_PROFILE_VALUES = {
   contact: { email: 'surajit.ray@technovausa.com', phone: '+1 (917) 555-0142', phone_day: '+1 (917) 555-0142' },
@@ -76,9 +77,17 @@ const LAYOUTS = [
 
 export default function TicketDetailsPage() {
   const [searchParams] = useSearchParams()
-  const isDemoComplete = searchParams.get('demo') === 'complete'
-  const isDemoStep3   = searchParams.get('demo') === 'step3'
-  const isDemoProfile = searchParams.get('demo') === 'profile'
+  const location = useLocation()
+  const isDemoComplete  = searchParams.get('demo') === 'complete'
+  const isDemoStep3    = searchParams.get('demo') === 'step3'
+  const isDemoProfile  = searchParams.get('demo') === 'profile'
+  const isDemoReturning = searchParams.get('demo') === 'returning'
+
+  // Assessment state passed via router state from onboarding / dashboard flows
+  const navAssessmentComplete     = location.state?.assessmentComplete     ?? false
+  const navAssessmentSectionCount = location.state?.assessmentSectionCount ?? 0
+  const navAssessmentAnswers      = location.state?.assessmentAnswers      ?? null
+  const navIsReturningUser        = location.state?.isReturningUser        ?? false
 
   // Layout + scenario switcher state
   const [activeLayout, setActiveLayout] = useState(() => {
@@ -94,8 +103,14 @@ export default function TicketDetailsPage() {
     localStorage.setItem('ao-tax-layout', key)
   }
 
-  // User type toggle (new vs returning) — demo convenience
-  const [isReturningUser, setIsReturningUser] = useState(false)
+  // User type toggle (new vs returning) — seeded from URL param or router state
+  const [isReturningUser, setIsReturningUser] = useState(isDemoReturning || navIsReturningUser)
+
+  // Assessment state (profile wizard — prerequisite to filing steps)
+  const [assessmentComplete, setAssessmentComplete] = useState(isDemoComplete || isDemoStep3 || navAssessmentComplete)
+  const [assessmentSectionCount, setAssessmentSectionCount] = useState(
+    (isDemoComplete || isDemoStep3) ? 4 : navAssessmentComplete ? navAssessmentSectionCount : 0
+  )
 
   // Profile state
   const [profileComplete, setProfileComplete] = useState(isDemoComplete || isDemoStep3)
@@ -245,10 +260,18 @@ export default function TicketDetailsPage() {
     if (openStep === 1) setOpenStep(2)
   }
 
+  function handleCompleteAssessment(answers) {
+    const sections = buildSectionList(answers)
+    setAssessmentComplete(true)
+    setAssessmentSectionCount(sections.length)
+  }
+
   function handleToggleUserType() {
     const next = !isReturningUser
     setIsReturningUser(next)
-    // Reset profile state when switching user type
+    // Reset all assessment + profile state when switching user type
+    setAssessmentComplete(false)
+    setAssessmentSectionCount(0)
     setProfileComplete(false)
     setPersistedProfileSubStates({})
     setPersistedProfileFieldValues(next ? RETURNING_USER_PROFILE_VALUES : {})
@@ -314,6 +337,10 @@ export default function TicketDetailsPage() {
     handleSubmitProfile,
     handleToggleUserType,
     persistedProfileFieldValues,
+    assessmentComplete,
+    assessmentSectionCount,
+    initialAssessmentAnswers: navAssessmentAnswers,
+    onCompleteAssessment: handleCompleteAssessment,
     profileNavStyle,
     setProfileNavStyle,
   }

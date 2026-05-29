@@ -21,9 +21,9 @@ export default function MorningBriefLayout({ scenario = 0, setChatOpen, setDocsO
 
         {/* Breadcrumb */}
         <div className="flex items-center gap-1.5 text-[11px] text-gray-400 mb-10">
-          <button onClick={() => navigate('/')} className="hover:text-gray-600">Dashboard</button>
+          <button onClick={() => navigate('/dashboard')} className="hover:text-gray-600">Dashboard</button>
           <ChevronRight size={10} />
-          <button onClick={() => navigate('/')} className="hover:text-gray-600">My Filings</button>
+          <button onClick={() => navigate('/dashboard')} className="hover:text-gray-600">My Filings</button>
           <ChevronRight size={10} />
           <span className="text-gray-600 font-medium">#467501</span>
         </div>

@@ -1,3 +1,5 @@
+import { useTheme } from '../context/ThemeContext'
+
 const events = [
   { title: 'Estimated payment due', sub: 'IRS deadline', month: 'May', day: '28', year: '2026', accent: 'bg-orange-400' },
   { title: 'Q2 estimate · self-employed', sub: 'IRS deadline', month: 'Jun', day: '15', year: '2026', accent: 'bg-orange-400' },
@@ -5,11 +7,13 @@ const events = [
 ]
 
 export default function UpcomingSection() {
+  const { theme } = useTheme()
+
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5">
+    <div className={`${theme.card} ${theme.cardRadius} p-5`}>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-semibold text-gray-900">Upcoming</h3>
-        <button className="text-xs text-blue-600 font-medium hover:underline">View all</button>
+        <button className={`text-xs font-medium ${theme.accentText} ${theme.accentTextHover} transition-colors`}>View all</button>
       </div>
       <div className="space-y-3">
         {events.map((e) => (

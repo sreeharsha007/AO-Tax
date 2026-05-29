@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronDown } from 'lucide-react'
+import { useTheme } from '../context/ThemeContext'
 
 const STATUS_STYLES = {
   'Needs approval':  'bg-amber-100 text-amber-700',
@@ -45,7 +46,7 @@ const TICKETS = [
     updatedTs: 20250521,
     progress: 0,
     total: 5,
-    href: '/tickets/467501',
+    href: '/tickets/467501?demo=returning',
   },
   {
     id: '#467504',
@@ -104,20 +105,61 @@ const TICKETS = [
 const YEARS = ['All years', '2025', '2024']
 const TYPES = ['All types', 'IT Filing']
 
-export default function MyTickets() {
+const NEW_USER_TICKET = [
+  {
+    id: '#467503',
+    service: 'IT Filing Services',
+    type: 'IT Filing',
+    year: '2025',
+    status: 'Not started',
+    completed: false,
+    updated: 'Today',
+    updatedTs: 99999999,
+    progress: 0,
+    total: 5,
+    href: '/tickets/467501',
+  },
+]
+
+export default function MyTickets({ isNewUser = false, assessmentDone = false, assessmentAnswers = null, filedTicketId = null }) {
   const [year, setYear]                   = useState('All years')
   const [type, setType]                   = useState('All types')
   const [showCompleted, setShowCompleted] = useState(false)
   const navigate = useNavigate()
+  const { theme } = useTheme()
 
-  const visible = TICKETS
-    .filter(t => {
-      if (!showCompleted && t.completed) return false
-      if (year !== 'All years' && t.year !== year) return false
-      if (type !== 'All types' && t.type !== type) return false
-      return true
-    })
-    .sort((a, b) => b.updatedTs - a.updatedTs)
+  // For new users who already completed the assessment, carry that state through
+  // to the filing page so the wizard isn't shown again.
+  function go(href) {
+    if (!href) return
+    const navState = isNewUser && assessmentDone
+      ? { assessmentComplete: true, assessmentAnswers }
+      : undefined
+    navigate(href, navState ? { state: navState } : undefined)
+  }
+
+  // After a filing is completed, overlay its status so the list reflects reality
+  // without mutating the shared mock data.
+  function applyOverrides(ticket) {
+    if (filedTicketId && ticket.id === filedTicketId) {
+      return { ...ticket, status: 'Filed', completed: true, progress: ticket.total, href: null }
+    }
+    return ticket
+  }
+
+  const visible = isNewUser
+    ? NEW_USER_TICKET
+    : TICKETS
+        .map(applyOverrides)
+        .filter(t => {
+          // Always show the ticket that was just filed so the user sees it flip
+          if (filedTicketId && t.id === filedTicketId) return true
+          if (!showCompleted && t.completed) return false
+          if (year !== 'All years' && t.year !== year) return false
+          if (type !== 'All types' && t.type !== type) return false
+          return true
+        })
+        .sort((a, b) => b.updatedTs - a.updatedTs)
 
   // Mobile: sort by priority (most actionable = hero)
   const mobileCards = [...visible].sort((a, b) => (PRIORITY[a.status] ?? 9) - (PRIORITY[b.status] ?? 9))
@@ -125,7 +167,7 @@ export default function MyTickets() {
   const restCards = mobileCards.slice(1)
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5">
+    <div className={`${theme.card} ${theme.cardRadius} p-5`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
@@ -134,8 +176,8 @@ export default function MyTickets() {
         </div>
       </div>
 
-      {/* Filters row */}
-      <div className="flex items-center gap-2 mb-4">
+      {/* Filters row — hidden for new users who have a single filing */}
+      <div className={`flex items-center gap-2 mb-4 ${isNewUser ? 'hidden' : ''}`}>
         <div className="relative">
           <select
             value={year}
@@ -162,7 +204,7 @@ export default function MyTickets() {
         <button
           onClick={() => setShowCompleted(v => !v)}
           className={`md:hidden text-[11px] font-medium px-2.5 py-1 rounded-full transition-colors ${
-            showCompleted ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            showCompleted ? `${theme.accentBg} text-white` : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
           }`}
         >
           Show completed
@@ -173,7 +215,7 @@ export default function MyTickets() {
           <div
             onClick={() => setShowCompleted(v => !v)}
             className={`w-7 h-4 rounded-full transition-colors relative flex-shrink-0 ${
-              showCompleted ? 'bg-gray-900' : 'bg-gray-200'
+              showCompleted ? theme.accentBg : 'bg-gray-200'
             }`}
           >
             <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white shadow-sm transition-all ${
@@ -199,8 +241,8 @@ export default function MyTickets() {
                     </p>
                     {heroCard.href ? (
                       <button
-                        onClick={() => navigate(heroCard.href)}
-                        className="text-base font-bold text-gray-900 hover:text-blue-600 transition-colors text-left leading-tight"
+                        onClick={() => go(heroCard.href)}
+                        className={`text-base font-bold text-gray-900 ${theme.accentTextHover} transition-colors text-left leading-tight`}
                       >
                         {heroCard.id}
                       </button>
@@ -221,7 +263,7 @@ export default function MyTickets() {
                   </div>
                   <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
                     <div
-                      className={`h-full rounded-full ${heroCard.completed ? 'bg-emerald-400' : 'bg-blue-500'}`}
+                      className={`h-full rounded-full ${heroCard.completed ? 'bg-emerald-400' : theme.progressFill}`}
                       style={{ width: `${(heroCard.progress / heroCard.total) * 100}%` }}
                     />
                   </div>
@@ -229,8 +271,8 @@ export default function MyTickets() {
 
                 {heroCard.href && ctaLabel(heroCard.status) && (
                   <button
-                    onClick={() => navigate(heroCard.href)}
-                    className="w-full py-2.5 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-800 transition-colors"
+                    onClick={() => go(heroCard.href)}
+                    className={`w-full py-2.5 ${theme.btnSecondary} ${theme.btnRadius} text-sm font-semibold transition-colors`}
                   >
                     {ctaLabel(heroCard.status)}
                   </button>
@@ -245,8 +287,8 @@ export default function MyTickets() {
                   <div className="flex items-center">
                     {t.href ? (
                       <button
-                        onClick={() => navigate(t.href)}
-                        className="text-sm font-semibold text-blue-600 hover:underline"
+                        onClick={() => go(t.href)}
+                        className={`text-sm font-semibold ${theme.accentText} hover:underline`}
                       >
                         {t.id}
                       </button>
@@ -261,7 +303,7 @@ export default function MyTickets() {
                     <div className="flex items-center gap-1.5">
                       <div className="w-12 h-1.5 bg-gray-200 rounded-full overflow-hidden">
                         <div
-                          className={`h-full rounded-full ${t.completed ? 'bg-emerald-400' : 'bg-blue-500'}`}
+                          className={`h-full rounded-full ${t.completed ? 'bg-emerald-400' : theme.progressFill}`}
                           style={{ width: `${(t.progress / t.total) * 100}%` }}
                         />
                       </div>
@@ -296,8 +338,8 @@ export default function MyTickets() {
                   <td className="py-3">
                     {t.href ? (
                       <button
-                        onClick={() => navigate(t.href)}
-                        className="text-blue-600 font-medium hover:underline"
+                        onClick={() => go(t.href)}
+                        className={`${theme.accentText} font-medium hover:underline`}
                       >
                         {t.id}
                       </button>
@@ -316,7 +358,7 @@ export default function MyTickets() {
                     <div className="flex items-center gap-2">
                       <div className="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                         <div
-                          className={`h-full rounded-full ${t.completed ? 'bg-emerald-400' : 'bg-blue-500'}`}
+                          className={`h-full rounded-full ${t.completed ? 'bg-emerald-400' : theme.progressFill}`}
                           style={{ width: `${(t.progress / t.total) * 100}%` }}
                         />
                       </div>

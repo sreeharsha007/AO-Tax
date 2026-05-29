@@ -1,231 +1,209 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { X, User, Building2, Check, ChevronLeft } from 'lucide-react'
+import { useTheme } from '../context/ThemeContext'
+import {
+  X, User, Building2, Check, ArrowRight,
+  FileText, Lightbulb, RotateCcw, MapPin, CreditCard, Shield,
+  Briefcase, Users, ShoppingCart, TrendingUp, BookOpen, ShieldCheck,
+} from 'lucide-react'
 
 const SERVICES = {
   individual: [
-    { id: 'it-filing', label: 'IT Filing Services', sub: 'Federal & state income tax filing' },
-    { id: 'tax-advisory', label: 'Tax Advisory', sub: 'Personalized tax planning guidance' },
-    { id: 'amended', label: 'Amended Return', sub: 'Correct a previously filed return' },
-    { id: 'state-filing', label: 'State Filing Only', sub: 'State-level tax return filing' },
-    { id: 'itin', label: 'ITIN Application', sub: 'Apply for an individual tax ID' },
-    { id: 'audit', label: 'Audit Support', sub: 'Representation during IRS audit' },
+    { id: 'it-filing',    icon: FileText,   label: 'IT Filing Services',  sub: 'Federal & state income tax filing' },
+    { id: 'tax-advisory', icon: Lightbulb,  label: 'Tax Advisory',        sub: 'Personalized tax planning guidance' },
+    { id: 'amended',      icon: RotateCcw,  label: 'Amended Return',      sub: 'Correct a previously filed return' },
+    { id: 'state-filing', icon: MapPin,     label: 'State Filing Only',   sub: 'State-level tax return filing' },
+    { id: 'itin',         icon: CreditCard, label: 'ITIN Application',    sub: 'Apply for an individual tax ID' },
+    { id: 'audit',        icon: Shield,     label: 'Audit Support',       sub: 'Representation during IRS audit' },
   ],
   business: [
-    { id: 'biz-filing', label: 'Business Tax Filing', sub: 'Corporate or LLC tax return' },
-    { id: 'payroll', label: 'Payroll Tax', sub: 'Payroll tax compliance & filings' },
-    { id: 'sales-tax', label: 'Sales Tax', sub: 'Sales tax registration & returns' },
-    { id: 'corp-advisory', label: 'Corporate Advisory', sub: 'Strategic business tax planning' },
-    { id: 'bookkeeping', label: 'Bookkeeping', sub: 'Monthly financial record keeping' },
-    { id: 'biz-audit', label: 'Audit Support', sub: 'Business IRS audit representation' },
+    { id: 'biz-filing',    icon: Briefcase,    label: 'Business Tax Filing', sub: 'Corporate or LLC tax return' },
+    { id: 'payroll',       icon: Users,        label: 'Payroll Tax',         sub: 'Payroll tax compliance & filings' },
+    { id: 'sales-tax',     icon: ShoppingCart, label: 'Sales Tax',           sub: 'Sales tax registration & returns' },
+    { id: 'corp-advisory', icon: TrendingUp,   label: 'Corporate Advisory',  sub: 'Strategic business tax planning' },
+    { id: 'bookkeeping',   icon: BookOpen,     label: 'Bookkeeping',         sub: 'Monthly financial record keeping' },
+    { id: 'biz-audit',     icon: ShieldCheck,  label: 'Audit Support',       sub: 'Business IRS audit representation' },
   ],
 }
 
 const YEARS = ['2025', '2024', '2023', '2022', '2021']
 
-const STEP_SUBTITLE = {
-  1: 'Who is this filing for?',
-  2: 'Select a service',
-  3: 'Filing details',
-}
+const STEP_LABEL = { 1: 'FILING TYPE', 2: 'SERVICE', 3: 'DETAILS' }
 
-export default function NewTicketModal({ onClose }) {
+export default function NewTicketModal({ onClose, isReturningUser = false }) {
   const navigate = useNavigate()
-  const [type, setType] = useState(null)
-  const [service, setService] = useState(null)
-  const [year, setYear] = useState('')
+  const { theme } = useTheme()
+  const [type, setType]               = useState(null)
+  const [service, setService]         = useState(null)
+  const [year, setYear]               = useState('')
   const [description, setDescription] = useState('')
 
-  const step = !type ? 1 : !service ? 2 : 3
+  const step      = !type ? 1 : !service ? 2 : 3
   const canSubmit = type && service && year
 
   function handleCreate() {
     if (!canSubmit) return
     onClose()
-    navigate('/tickets/467501')
+    navigate(
+      '/tickets/467501',
+      isReturningUser ? { state: { isReturningUser: true } } : undefined,
+    )
   }
 
   return (
-    <div className="fixed inset-0 z-50 md:flex md:items-center md:justify-center md:p-4">
-      {/* Desktop backdrop */}
-      <div className="hidden md:block absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center md:p-4">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
-      <div className="relative h-full w-full flex flex-col bg-white md:rounded-2xl md:h-auto md:max-w-2xl md:overflow-hidden md:shadow-2xl">
+      <div className={`relative w-full flex flex-col bg-white rounded-t-2xl md:${theme.cardRadius} md:max-w-2xl md:shadow-2xl max-h-[92vh] overflow-hidden`}>
 
-        {/* ── Mobile top bar ── */}
-        <div className="md:hidden flex items-center justify-between px-4 h-14 border-b border-gray-100 flex-shrink-0">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 pt-5 pb-4 flex-shrink-0">
+          <div>
+            <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-0.5">
+              {STEP_LABEL[step]}
+            </p>
+            <h2 className="text-base font-semibold text-gray-900">New filing</h2>
+          </div>
           <button
             onClick={onClose}
-            className="flex items-center gap-1 text-sm font-medium text-gray-500 min-w-[56px]"
+            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors"
           >
-            <ChevronLeft size={16} />
-            Cancel
-          </button>
-          <div className="text-center">
-            <p className="text-sm font-semibold text-gray-900">New filing</p>
-            <p className="text-[11px] text-gray-400">{STEP_SUBTITLE[step]}</p>
-          </div>
-          <div className="min-w-[56px]" />
-        </div>
-
-        {/* Mobile step progress bar */}
-        <div className="md:hidden h-[3px] bg-gray-100 flex-shrink-0">
-          <div
-            className="h-full bg-blue-500 transition-all duration-500"
-            style={{ width: `${Math.round((step / 3) * 100)}%` }}
-          />
-        </div>
-
-        {/* ── Desktop header ── */}
-        <div className="hidden md:flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
-          <div>
-            <h2 className="text-base font-semibold text-gray-900">New filing</h2>
-            <p className="text-xs text-gray-400 mt-0.5">{STEP_SUBTITLE[step]}</p>
-          </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400">
             <X size={16} />
           </button>
         </div>
 
-        {/* Body — scrollable on mobile */}
-        <div className="flex-1 overflow-y-auto px-4 md:px-6 py-5 space-y-5">
+        {/* Progress bar */}
+        <div className="h-0.5 bg-gray-100 flex-shrink-0">
+          <div
+            className={`h-full ${theme.progressFill} rounded-full transition-all duration-500`}
+            style={{ width: `${Math.round((step / 3) * 100)}%` }}
+          />
+        </div>
 
-          {/* Step 1: Filing type */}
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+
+          {/* Step 1 — Filing type */}
           <div>
-            <p className="text-xs font-semibold text-gray-500 mb-2.5">Filing type</p>
+            <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-3">
+              Who is this filing for?
+            </p>
             <div className="grid grid-cols-2 gap-3">
               {[
-                { id: 'individual', icon: User, label: 'Individual', sub: 'Personal tax return (1040)' },
-                { id: 'business', icon: Building2, label: 'Business', sub: 'Corporate or business return' },
+                { id: 'individual', icon: User,      label: 'Individual', sub: 'Personal tax return (1040)' },
+                { id: 'business',   icon: Building2, label: 'Business',   sub: 'Corporate or business return' },
               ].map(({ id, icon: Icon, label, sub }) => (
                 <button
                   key={id}
                   onClick={() => { setType(id); setService(null) }}
-                  className={`relative flex flex-col md:flex-row items-center md:items-start gap-3 p-4 rounded-xl border-2 text-center md:text-left transition-all ${
+                  className={`w-full text-left p-4 rounded-xl border transition-all ${
                     type === id
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                      ? `${theme.accentLight} ${theme.accentBorder}`
+                      : 'bg-white border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  {/* Check badge — mobile, absolute top-right */}
-                  {type === id && (
-                    <div className="md:hidden absolute top-2.5 right-2.5 w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center">
-                      <Check size={10} className="text-white" />
-                    </div>
-                  )}
-                  <div className={`w-12 h-12 md:w-8 md:h-8 rounded-2xl md:rounded-lg flex items-center justify-center flex-shrink-0 ${
-                    type === id ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-500'
-                  }`}>
-                    <Icon size={22} className="md:hidden" aria-hidden />
-                    <Icon size={16} className="hidden md:block" aria-hidden />
+                  <div className="flex items-start justify-between mb-3">
+                    <Icon size={16} className={type === id ? theme.accentText : 'text-gray-400'} aria-hidden />
+                    {type === id && <Check size={13} className={theme.accentText} strokeWidth={3} />}
                   </div>
-                  <div className="min-w-0">
-                    <p className={`text-sm font-semibold ${type === id ? 'text-blue-700' : 'text-gray-800'}`}>{label}</p>
-                    <p className="text-[11px] text-gray-400 mt-0.5 leading-snug">{sub}</p>
-                  </div>
-                  {/* Check badge — desktop, inline */}
-                  {type === id && (
-                    <div className="hidden md:flex ml-auto w-4 h-4 rounded-full bg-blue-500 items-center justify-center flex-shrink-0">
-                      <Check size={10} className="text-white" />
-                    </div>
-                  )}
+                  <p className={`text-sm font-semibold leading-tight ${type === id ? theme.accentText : 'text-gray-900'}`}>
+                    {label}
+                  </p>
+                  <p className={`text-xs mt-1 leading-snug ${type === id ? 'text-gray-500 opacity-70' : 'text-gray-500'}`}>
+                    {sub}
+                  </p>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Step 2: Service */}
+          {/* Step 2 — Service */}
           {type && (
             <div>
-              <p className="text-xs font-semibold text-gray-500 mb-2.5">Service</p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-3">
-                {SERVICES[type].map(({ id, label, sub }) => (
+              <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-3">
+                Select a service
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+                {SERVICES[type].map(({ id, icon: Icon, label, sub }) => (
                   <button
                     key={id}
                     onClick={() => setService(id)}
-                    className={`flex items-start gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all ${
+                    className={`w-full text-left p-4 rounded-xl border transition-all ${
                       service === id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                        ? `${theme.accentLight} ${theme.accentBorder}`
+                        : 'bg-white border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-medium leading-snug ${service === id ? 'text-blue-700' : 'text-gray-800'}`}>{label}</p>
-                      <p className="text-[11px] text-gray-400 mt-0.5 leading-snug">{sub}</p>
+                    <div className="flex items-start justify-between mb-3">
+                      <Icon size={16} className={service === id ? theme.accentText : 'text-gray-400'} aria-hidden />
+                      {service === id && <Check size={13} className={theme.accentText} strokeWidth={3} />}
                     </div>
-                    <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 mt-0.5 transition-all flex items-center justify-center ${
-                      service === id ? 'border-blue-500 bg-blue-500' : 'border-gray-300'
-                    }`}>
-                      {service === id && <Check size={10} className="text-white" />}
-                    </div>
+                    <p className={`text-sm font-semibold leading-tight ${service === id ? theme.accentText : 'text-gray-900'}`}>
+                      {label}
+                    </p>
+                    <p className={`text-xs mt-1 leading-snug ${service === id ? 'text-gray-500 opacity-70' : 'text-gray-500'}`}>
+                      {sub}
+                    </p>
                   </button>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Step 3: Details */}
+          {/* Step 3 — Details */}
           {type && service && (
             <div className="space-y-4">
+              <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase">
+                Filing details
+              </p>
               <div>
                 <label className="text-xs font-semibold text-gray-500 block mb-1.5">
-                  Filing year <span className="text-red-400">*</span>
+                  Tax year <span className="text-red-400">*</span>
                 </label>
                 <select
                   value={year}
-                  onChange={(e) => setYear(e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-3 text-sm text-gray-800 bg-white focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                  onChange={e => setYear(e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-3 text-sm text-gray-800 bg-white focus:outline-none focus:border-blue-400 transition-colors"
                 >
                   <option value="">Select year</option>
-                  {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
+                  {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
                 </select>
               </div>
               <div>
                 <label className="text-xs font-semibold text-gray-500 block mb-1.5">
-                  Description <span className="text-gray-300 font-normal">(optional)</span>
+                  Notes <span className="text-gray-300 font-normal">(optional)</span>
                 </label>
                 <textarea
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Add any notes or context for your advisor…"
+                  onChange={e => setDescription(e.target.value)}
+                  placeholder="Add any context for your advisor…"
                   rows={3}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-3 text-sm text-gray-800 resize-none focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 placeholder-gray-300"
+                  className="w-full border border-gray-200 rounded-xl px-3 py-3 text-sm text-gray-800 resize-none focus:outline-none focus:border-blue-400 transition-colors placeholder-gray-300"
                 />
               </div>
             </div>
           )}
         </div>
 
-        {/* ── Mobile footer ── */}
-        <div className="md:hidden flex-shrink-0 px-4 pt-3 pb-8 border-t border-gray-100 bg-white">
+        {/* Footer */}
+        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 flex-shrink-0">
           <button
-            onClick={handleCreate}
-            disabled={!canSubmit}
-            className={`w-full py-3.5 rounded-xl text-sm font-semibold transition-all ${
-              canSubmit
-                ? 'bg-gray-900 text-white'
-                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            }`}
+            onClick={onClose}
+            className="text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors"
           >
-            Create filing
-          </button>
-        </div>
-
-        {/* ── Desktop footer ── */}
-        <div className="hidden md:flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50 flex-shrink-0">
-          <button onClick={onClose} className="text-sm text-gray-500 hover:text-gray-700 font-medium">
             Cancel
           </button>
           <button
             onClick={handleCreate}
             disabled={!canSubmit}
-            className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${
+            className={`flex items-center gap-2 px-5 py-2.5 ${theme.btnRadius} text-sm font-semibold transition-all ${
               canSubmit
-                ? 'bg-gray-900 text-white hover:bg-gray-800'
+                ? theme.btnPrimary
                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'
             }`}
           >
-            Create ticket
+            Create filing <ArrowRight size={14} />
           </button>
         </div>
       </div>

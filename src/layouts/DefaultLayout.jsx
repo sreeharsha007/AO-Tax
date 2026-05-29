@@ -4,12 +4,19 @@ import {
   ChevronRight, ChevronDown, ChevronUp, ChevronLeft, Lock, CheckCircle2, Check,
   ArrowRight, ExternalLink, Download, FileText, TrendingUp,
   MessageCircle, Phone, MessageSquare, FileCheck, MoreHorizontal,
+  Briefcase, Laptop2, Banknote, Home, Globe,
+  Landmark, GraduationCap, HeartHandshake, Stethoscope, Receipt, Monitor,
 } from 'lucide-react'
 import Navbar from '../components/Navbar'
+import { useTheme } from '../context/ThemeContext'
+import ReturningUserConfirmation from '../components/ReturningUserConfirmation'
+import AssessmentWizardModal from '../components/AssessmentWizardModal'
 import CircularProgress from '../components/CircularProgress'
 import BottomTabBar from '../components/BottomTabBar'
 import BottomSheet from '../components/BottomSheet'
 import { STEPS, DRAFTS, SECTION_ROWS } from '../data/ticketData'
+import { buildSectionList, INCOME_OPTIONS, DEDUCTION_OPTIONS } from '../utils/inferProfile'
+
 
 export default function DefaultLayout({
   paymentComplete,
@@ -39,9 +46,17 @@ export default function DefaultLayout({
   persistedProfileFieldValues,
   profileNavStyle,
   setProfileNavStyle,
+  assessmentComplete,
+  assessmentSectionCount,
+  initialAssessmentAnswers,
+  onCompleteAssessment,
 }) {
   const navigate = useNavigate()
+  const { theme } = useTheme()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [assessmentWizardOpen, setAssessmentWizardOpen] = useState(false)
+  // Seed with answers that arrived via router state (from onboarding or dashboard)
+  const [assessmentAnswers, setAssessmentAnswers] = useState(initialAssessmentAnswers ?? null)
   const [titleScrolled, setTitleScrolled] = useState(false)
 
   useEffect(() => {
@@ -51,13 +66,13 @@ export default function DefaultLayout({
   }, [])
 
   return (
-    <div className="min-h-screen bg-[#f5f4f0]">
+    <div className={`min-h-screen ${theme.pageBg}`}>
       <Navbar activePage="tickets" dark isReturningUser={isReturningUser} onToggleUserType={handleToggleUserType} profileNavStyle={profileNavStyle} onSetProfileNavStyle={setProfileNavStyle} />
 
       {/* Mobile sticky top bar — back + actions */}
-      <div className="sticky top-0 z-30 md:hidden bg-[#f5f4f0] border-b border-gray-200/70 px-4 py-3 flex items-center justify-between">
+      <div className="sticky top-0 z-30 md:hidden bg-white border-b border-gray-200/70 px-4 py-3 flex items-center justify-between">
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/dashboard', paymentComplete ? { state: { justFiled: true } } : undefined)}
           className="flex items-center gap-1 text-gray-600 hover:text-gray-900 transition-colors"
         >
           <ChevronLeft size={18} />
@@ -94,7 +109,7 @@ export default function DefaultLayout({
       <div className="px-4 sm:px-6 md:px-8 pt-3 md:pt-5 pb-2 max-w-[1280px] mx-auto">
         {/* Back link — desktop only */}
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/dashboard', paymentComplete ? { state: { justFiled: true } } : undefined)}
           className="hidden md:flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors mb-4"
         >
           <ChevronLeft size={13} />
@@ -143,7 +158,34 @@ export default function DefaultLayout({
       <div className="px-4 sm:px-6 md:px-8 pt-4 pb-24 md:pb-10 max-w-[1280px] mx-auto flex gap-5 items-start">
 
         {/* Steps column */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 flex flex-col">
+
+          {/* Profile strip / confirmation card — assessment not yet complete */}
+          {!assessmentComplete && !paymentComplete && (
+            isReturningUser ? (
+              <ReturningUserConfirmation onConfirm={answers => {
+                setAssessmentWizardOpen(false)
+                onCompleteAssessment(answers)
+              }} />
+            ) : (
+              <div className="mb-4 rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50/60 p-6">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-[10px] font-bold tracking-widest text-indigo-400/80 mb-2">BEFORE YOU BEGIN</p>
+                    <p className="text-base font-semibold text-gray-900 mb-1.5">Complete your filing setup</p>
+                    <p className="text-xs text-gray-500 leading-relaxed max-w-[300px]">A few quick questions to tailor your filing. Takes about a minute.</p>
+                  </div>
+                  <button
+                    onClick={() => setAssessmentWizardOpen(true)}
+                    className={`flex items-center gap-1.5 px-4 py-2.5 ${theme.btnPrimary} ${theme.btnRadius} text-xs font-semibold transition-colors flex-shrink-0 whitespace-nowrap`}
+                  >
+                    Start setup <ArrowRight size={13} />
+                  </button>
+                </div>
+              </div>
+            )
+          )}
+
           {paymentComplete ? (
             <div className="space-y-3">
               {/* Filed confirmation card */}
@@ -193,7 +235,7 @@ export default function DefaultLayout({
               </div>
 
               {/* Filing history timeline */}
-              <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+              <div className={`${theme.card} ${theme.cardRadius} overflow-hidden`}>
                 <button
                   onClick={() => setHistoryOpen(o => !o)}
                   className="w-full flex items-center justify-between px-5 py-4"
@@ -221,13 +263,24 @@ export default function DefaultLayout({
                           <span className="text-[11px] text-gray-300">·</span>
                           <span className="text-[11px] text-gray-400">{date}</span>
                         </div>
-                        <button onClick={onAction} className="text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors flex-shrink-0">
+                        <button onClick={onAction} className={`text-[11px] font-medium ${theme.accentText} ${theme.accentTextHover} transition-colors flex-shrink-0`}>
                           {action} →
                         </button>
                       </div>
                     ))}
                   </div>
                 )}
+              </div>
+            </div>
+          ) : !assessmentComplete ? (
+            <div className="flex-1 rounded-2xl border border-dashed border-gray-200 px-5 flex items-center justify-center text-center min-h-[320px]">
+              <div>
+                <p className="text-sm font-semibold text-gray-500 mb-1.5">Your filing steps will appear here</p>
+                <p className="text-xs text-gray-400 max-w-[240px] mx-auto leading-relaxed">
+                  {isReturningUser
+                    ? 'Confirm your profile above to pick up where you left off.'
+                    : 'Complete your filing setup above to start the filing process.'}
+                </p>
               </div>
             </div>
           ) : (
@@ -250,7 +303,7 @@ export default function DefaultLayout({
 
                       <div>
                         {isUpcoming ? (
-                          <div className="bg-gray-100 border border-gray-200 rounded-2xl">
+                          <div className={`bg-gray-100 border border-gray-200 ${theme.cardRadius}`}>
                             <div className="flex items-center gap-3 px-5 py-4">
                               <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-400 flex-shrink-0">
                                 {step.num}
@@ -260,7 +313,7 @@ export default function DefaultLayout({
                             </div>
                           </div>
                         ) : (
-                          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+                          <div className={`${theme.card} ${theme.cardRadius} overflow-hidden`}>
                           <button
                             onClick={() => setOpenStep(isOpen ? null : step.num)}
                             className="w-full px-5 py-4 text-left"
@@ -268,8 +321,8 @@ export default function DefaultLayout({
                             <div className="flex items-center justify-between gap-3">
                               <div className="flex items-center gap-3 min-w-0 flex-1">
                                 <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                                  isComplete ? 'bg-green-500 text-white' :
-                                  isActive   ? 'bg-blue-600 text-white'  :
+                                  isComplete ? theme.stepComplete :
+                                  isActive   ? theme.stepActive :
                                   'bg-gray-100 text-gray-400'
                                 }`}>
                                   {isComplete ? <Check size={13} strokeWidth={3} /> : step.num}
@@ -278,9 +331,9 @@ export default function DefaultLayout({
                                   <span className="text-sm font-semibold text-gray-900 leading-tight">
                                     {step.label}
                                   </span>
-                                  <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${
+                                  <span className={`text-[11px] font-semibold px-2 py-0.5 ${theme.badgeRadius} flex-shrink-0 ${
                                     isComplete ? 'bg-green-100 text-green-600' :
-                                    isActive   ? 'bg-blue-100 text-blue-600'  :
+                                    isActive   ? `${theme.accentLight} ${theme.accentText}`  :
                                     'bg-gray-100 text-gray-400'
                                   }`}>
                                     {isComplete ? 'Complete' : 'In progress'}
@@ -291,7 +344,7 @@ export default function DefaultLayout({
                                 {step.num === 1 && !profileComplete && (
                                   <div className="hidden md:block w-20 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                                     <div
-                                      className="h-full bg-blue-500 rounded-full transition-all duration-500"
+                                      className={`h-full ${theme.progressFill} rounded-full transition-all duration-500`}
                                       style={{ width: `${isReturningUser && !profileStarted ? 100 : profilePct}%` }}
                                     />
                                   </div>
@@ -305,7 +358,7 @@ export default function DefaultLayout({
                               <div className="md:hidden mt-2.5 pl-10">
                                 <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
                                   <div
-                                    className="h-full bg-blue-500 rounded-full transition-all duration-500"
+                                    className={`h-full ${theme.progressFill} rounded-full transition-all duration-500`}
                                     style={{ width: `${isReturningUser && !profileStarted ? 100 : profilePct}%` }}
                                   />
                                 </div>
@@ -410,10 +463,10 @@ export default function DefaultLayout({
                                           </div>
                                         ) : (
                                           <div className="flex gap-2">
-                                            <button onClick={() => approveDraft(draft.id)} className="flex-1 py-2 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition-colors">
+                                            <button onClick={() => approveDraft(draft.id)} className={`flex-1 py-2 ${theme.btnRadius} ${theme.btnPrimary} text-xs font-semibold transition-colors`}>
                                               Approve
                                             </button>
-                                            <button onClick={() => toggleCommentBox(draft.id)} className="flex-1 py-2 rounded-lg border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+                                            <button onClick={() => toggleCommentBox(draft.id)} className={`flex-1 py-2 ${theme.btnRadius} ${theme.btnSecondary} text-xs font-medium transition-colors`}>
                                               Request changes
                                             </button>
                                           </div>
@@ -437,7 +490,7 @@ export default function DefaultLayout({
                             {allDraftsApproved && (
                               <button
                                 onClick={() => { setDraftsApproved(true); setOpenStep(5) }}
-                                className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
+                                className={`w-full flex items-center justify-center gap-1.5 px-4 py-2.5 ${theme.btnRadius} ${theme.btnPrimary} text-sm font-semibold transition-colors`}
                               >
                                 Proceed to payment <ArrowRight size={14} />
                               </button>
@@ -515,10 +568,10 @@ export default function DefaultLayout({
                               </div>
                             </div>
                             <div className="flex gap-2">
-                              <button className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+                              <button className={`flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 ${theme.btnRadius} ${theme.btnSecondary} text-sm font-medium transition-colors`}>
                                 View invoice <ExternalLink size={13} />
                               </button>
-                              <button onClick={handlePayNow} className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors">
+                              <button onClick={handlePayNow} className={`flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 ${theme.btnRadius} ${theme.btnPrimary} text-sm font-semibold transition-colors`}>
                                 Pay now <ArrowRight size={14} />
                               </button>
                             </div>
@@ -533,7 +586,7 @@ export default function DefaultLayout({
                                 <p className="text-sm text-gray-500">
                                   {isReturningUser ? 'Profile confirmed on May 10, 2025' : 'Profile submitted on May 10, 2025'}
                                 </p>
-                                <button onClick={openProfileFiling} className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors flex-shrink-0">
+                                <button onClick={openProfileFiling} className={`flex items-center gap-1.5 text-xs font-semibold ${theme.accentText} ${theme.accentTextHover} transition-colors flex-shrink-0`}>
                                   View submitted profile <ArrowRight size={13} />
                                 </button>
                               </div>
@@ -562,7 +615,7 @@ export default function DefaultLayout({
                                   <button onClick={handleSubmitProfile} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
                                     Looks good, confirm
                                   </button>
-                                  <button onClick={openProfileFiling} className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors">
+                                  <button onClick={openProfileFiling} className={`flex items-center gap-1.5 px-5 py-2 ${theme.btnRadius} ${theme.btnPrimary} text-sm font-semibold transition-colors`}>
                                     Review &amp; confirm <ArrowRight size={14} />
                                   </button>
                                 </div>
@@ -581,12 +634,12 @@ export default function DefaultLayout({
                                 {/* Actions */}
                                 <div className="flex items-center justify-between">
                                   {profilePct === 100
-                                    ? <button onClick={openProfileFiling} className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors">Review &amp; edit <ArrowRight size={13} /></button>
+                                    ? <button onClick={openProfileFiling} className={`flex items-center gap-1.5 text-xs font-semibold ${theme.accentText} ${theme.accentTextHover} transition-colors`}>Review &amp; edit <ArrowRight size={13} /></button>
                                     : <div />
                                   }
                                   <button
                                     onClick={profilePct === 100 ? handleSubmitProfile : openProfileFiling}
-                                    className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
+                                    className={`flex items-center gap-1.5 px-5 py-2 ${theme.btnRadius} ${theme.btnPrimary} text-sm font-semibold transition-colors`}
                                   >
                                     {!profileStarted ? 'Start profile' : profilePct < 100 ? 'Continue profile' : 'Submit profile'} <ArrowRight size={14} />
                                   </button>
@@ -630,7 +683,7 @@ export default function DefaultLayout({
                                         {comments} comment{comments > 1 ? 's' : ''}
                                       </span>
                                     )}
-                                    <span className="flex items-center gap-1 text-xs font-semibold text-blue-600 flex-shrink-0">
+                                    <span className={`flex items-center gap-1 text-xs font-semibold ${theme.accentText} flex-shrink-0`}>
                                       {ctaLabel} <ArrowRight size={12} />
                                     </span>
                                   </button>
@@ -639,13 +692,13 @@ export default function DefaultLayout({
                             </div>
 
                             {filingSubmitted && (
-                              <button onClick={openFilingReadOnly} className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+                              <button onClick={openFilingReadOnly} className={`w-full flex items-center justify-center gap-1.5 px-4 py-2.5 ${theme.btnRadius} ${theme.btnSecondary} text-sm font-medium transition-colors`}>
                                 View filing
                               </button>
                             )}
 
                             {!filingSubmitted && allComplete && (
-                              <button onClick={handleSubmitFiling} className="w-full flex items-center justify-center gap-1.5 mt-4 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors">
+                              <button onClick={handleSubmitFiling} className={`w-full flex items-center justify-center gap-1.5 mt-4 px-4 py-2.5 ${theme.btnRadius} ${theme.btnPrimary} text-sm font-semibold transition-colors`}>
                                 Submit filing <ArrowRight size={14} />
                               </button>
                             )}
@@ -670,16 +723,37 @@ export default function DefaultLayout({
         {/* Right sidebar — desktop only */}
         <div className="hidden md:block w-72 flex-shrink-0">
           <div className="space-y-4">
-            {paymentComplete ? (
-              <div className="bg-white rounded-2xl border border-gray-200 p-5">
+            {/* Profile card — assessment complete, migrates here from strip */}
+            {assessmentComplete && !paymentComplete && (
+              <div className={`${theme.card} ${theme.cardRadius} p-5`}>
+                <div className="flex items-center justify-between mb-2">
+                  <p className={theme.label}>FILING SETUP</p>
+                  <button
+                    onClick={() => setAssessmentWizardOpen(true)}
+                    className={`text-sm font-medium ${theme.accentText} ${theme.accentTextHover} transition-colors`}
+                  >
+                    Edit →
+                  </button>
+                </div>
+                <p className="text-sm font-medium text-gray-800">
+                  {assessmentSectionCount > 0
+                    ? `${assessmentSectionCount} section${assessmentSectionCount === 1 ? '' : 's'} identified`
+                    : 'Profile complete'}
+                </p>
+                <p className="text-xs text-gray-400 mt-0.5">Tailored for your 2025 filing</p>
+              </div>
+            )}
+
+            {paymentComplete && (
+              <div className={`${theme.card} ${theme.cardRadius} p-5`}>
                 <div className="flex items-center justify-between mb-0.5">
-                  <p className="text-[10px] font-semibold text-gray-400 tracking-widest">FEDERAL REFUND</p>
+                  <p className={theme.label}>FEDERAL REFUND</p>
                   <span className="text-base font-bold text-gray-900">$3,240</span>
                 </div>
                 <p className="text-[11px] text-gray-400 mb-4">Expected by Jun 10, 2025</p>
                 <div className="relative flex items-start mb-3">
                   <div className="absolute top-[5px] h-px bg-gray-100" style={{ left: '17%', width: '66%' }} />
-                  <div className="absolute top-[5px] h-px bg-blue-300" style={{ left: '17%', width: '33%' }} />
+                  <div className={`absolute top-[5px] h-px ${theme.progressFill} opacity-50`} style={{ left: '17%', width: '33%' }} />
                   {[
                     { label: 'Filed',       done: true,  active: false },
                     { label: 'Processing',  done: false, active: true  },
@@ -687,12 +761,12 @@ export default function DefaultLayout({
                   ].map(({ label, done, active }) => (
                     <div key={label} className="flex-1 flex flex-col items-center relative z-10">
                       <div className={`w-2.5 h-2.5 rounded-full border-2 ${
-                        done   ? 'bg-blue-500 border-blue-500' :
-                        active ? 'bg-white border-blue-400'   :
+                        done   ? `${theme.progressFill} ${theme.accentBorder}` :
+                        active ? `bg-white ${theme.accentBorder}`   :
                                  'bg-white border-gray-200'
                       }`} />
                       <span className={`text-[9px] mt-1.5 font-medium text-center leading-tight ${
-                        done   ? 'text-blue-600' :
+                        done   ? theme.accentText :
                         active ? 'text-gray-500' :
                                  'text-gray-300'
                       }`}>{label}</span>
@@ -700,21 +774,10 @@ export default function DefaultLayout({
                   ))}
                 </div>
               </div>
-            ) : (
-              <div className="bg-white rounded-2xl border border-gray-200 p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-[10px] font-semibold text-gray-400 tracking-widest">OVERALL PROGRESS</p>
-                  <span className="text-base font-bold text-gray-900">11%</span>
-                </div>
-                <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden mb-2">
-                  <div className="h-full bg-blue-500 rounded-full" style={{ width: '11%' }} />
-                </div>
-                <p className="text-[11px] text-gray-400">Step 1 of 5 · Complete your profile</p>
-              </div>
             )}
 
-            <div className="bg-white rounded-2xl border border-gray-200 p-5">
-              <p className="text-[10px] font-semibold text-gray-400 tracking-widest mb-3">YOUR ADVISOR</p>
+            <div className={`${theme.card} ${theme.cardRadius} p-5`}>
+              <p className={`${theme.label} mb-3`}>YOUR ADVISOR</p>
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">PN</div>
                 <div>
@@ -723,17 +786,17 @@ export default function DefaultLayout({
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <button onClick={() => setChatOpen(true)} className="flex items-center justify-center gap-1.5 bg-white text-gray-700 text-xs font-medium py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                <button onClick={() => setChatOpen(true)} className={`flex items-center justify-center gap-1.5 ${theme.btnSecondary} ${theme.btnRadius} text-xs font-medium py-2 transition-colors`}>
                   <MessageCircle size={13} /> Message
                 </button>
-                <button className="flex items-center justify-center gap-1.5 border border-gray-200 text-gray-700 text-xs font-medium py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                <button className={`flex items-center justify-center gap-1.5 ${theme.btnSecondary} ${theme.btnRadius} text-xs font-medium py-2 transition-colors`}>
                   <Phone size={13} /> Call
                 </button>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-gray-200 p-5">
-              <p className="text-[10px] font-semibold text-gray-400 tracking-widest mb-3">KEY DATES</p>
+            <div className={`${theme.card} ${theme.cardRadius} p-5`}>
+              <p className={`${theme.label} mb-3`}>KEY DATES</p>
               <div className="space-y-3">
                 {[
                   { label: 'Submit details by',      date: 'May 30, 2025',  note: '15 days left'  },
@@ -750,10 +813,10 @@ export default function DefaultLayout({
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-gray-200 p-5">
-              <p className="text-[10px] font-semibold text-gray-400 tracking-widest mb-2">NEED HELP?</p>
+            <div className={`${theme.card} ${theme.cardRadius} p-5`}>
+              <p className={`${theme.label} mb-2`}>NEED HELP?</p>
               <p className="text-xs text-gray-500 mb-3">Visit our help center for guides and answers to common questions.</p>
-              <button className="w-full flex items-center justify-between border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+              <button className={`w-full flex items-center justify-between ${theme.btnSecondary} ${theme.btnRadius} px-4 py-2.5 text-sm font-medium transition-colors`}>
                 Visit help center
                 <ExternalLink size={13} className="text-gray-400" />
               </button>
@@ -764,23 +827,33 @@ export default function DefaultLayout({
 
       <BottomTabBar activePage="tickets" />
 
+      {/* Assessment wizard overlay */}
+      <AssessmentWizardModal
+        open={assessmentWizardOpen}
+        onClose={() => setAssessmentWizardOpen(false)}
+        onComplete={answers => {
+          setAssessmentAnswers(answers)
+          onCompleteAssessment(answers)
+          setAssessmentWizardOpen(false)
+        }}
+        initialAnswers={assessmentAnswers}
+      />
+
       <BottomSheet open={sidebarOpen} onClose={() => setSidebarOpen(false)} title="Filing summary">
-        {/* Progress */}
         {!paymentComplete && (
           <div className="bg-gray-50 rounded-2xl p-4">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] font-semibold text-gray-400 tracking-widest">OVERALL PROGRESS</p>
+              <p className={theme.label}>OVERALL PROGRESS</p>
               <span className="text-base font-bold text-gray-900">11%</span>
             </div>
-            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden mb-1.5">
-              <div className="h-full bg-blue-500 rounded-full" style={{ width: '11%' }} />
+            <div className={`w-full h-2 ${theme.progressTrack} rounded-full overflow-hidden mb-1.5`}>
+              <div className={`h-full ${theme.progressFill} rounded-full`} style={{ width: '11%' }} />
             </div>
             <p className="text-[11px] text-gray-400">Step 1 of 5 · Complete your profile</p>
           </div>
         )}
-        {/* Advisor */}
         <div className="bg-gray-50 rounded-2xl p-4">
-          <p className="text-[10px] font-semibold text-gray-400 tracking-widest mb-3">YOUR ADVISOR</p>
+          <p className={`${theme.label} mb-3`}>YOUR ADVISOR</p>
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">PN</div>
             <div>
@@ -789,17 +862,16 @@ export default function DefaultLayout({
             </div>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            <button onClick={() => { setChatOpen(true); setSidebarOpen(false) }} className="flex items-center justify-center gap-1.5 bg-white text-gray-700 text-xs font-medium py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+            <button onClick={() => { setChatOpen(true); setSidebarOpen(false) }} className={`flex items-center justify-center gap-1.5 ${theme.btnSecondary} ${theme.btnRadius} text-xs font-medium py-2 transition-colors`}>
               <MessageCircle size={13} /> Message
             </button>
-            <button className="flex items-center justify-center gap-1.5 border border-gray-200 text-gray-700 text-xs font-medium py-2 rounded-lg bg-white hover:bg-gray-50 transition-colors">
+            <button className={`flex items-center justify-center gap-1.5 ${theme.btnSecondary} ${theme.btnRadius} text-xs font-medium py-2 transition-colors`}>
               <Phone size={13} /> Call
             </button>
           </div>
         </div>
-        {/* Key dates */}
         <div className="bg-gray-50 rounded-2xl p-4">
-          <p className="text-[10px] font-semibold text-gray-400 tracking-widest mb-3">KEY DATES</p>
+          <p className={`${theme.label} mb-3`}>KEY DATES</p>
           <div className="space-y-3">
             {[
               { label: 'Submit details by',       date: 'May 30, 2025',  note: '15 days left'  },
@@ -815,11 +887,10 @@ export default function DefaultLayout({
             ))}
           </div>
         </div>
-        {/* Help */}
         <div className="bg-gray-50 rounded-2xl p-4">
-          <p className="text-[10px] font-semibold text-gray-400 tracking-widest mb-2">NEED HELP?</p>
+          <p className={`${theme.label} mb-2`}>NEED HELP?</p>
           <p className="text-xs text-gray-500 mb-3">Visit our help center for guides and answers.</p>
-          <button className="w-full flex items-center justify-between border border-gray-200 bg-white rounded-xl px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+          <button className={`w-full flex items-center justify-between ${theme.btnSecondary} ${theme.btnRadius} px-4 py-2.5 text-sm font-medium transition-colors`}>
             Visit help center
             <ExternalLink size={13} className="text-gray-400" />
           </button>

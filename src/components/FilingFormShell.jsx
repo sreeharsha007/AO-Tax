@@ -5,6 +5,7 @@ import {
 } from 'lucide-react'
 import { NAV_SECTIONS } from '../data/filingFormData'
 import BottomSheet from './BottomSheet'
+import { useTheme } from '../context/ThemeContext'
 
 const TICKET = {
   id: '#467501',
@@ -13,12 +14,13 @@ const TICKET = {
 }
 
 function StepIcon({ state, size = 16 }) {
+  const { theme } = useTheme()
   if (state === 'complete')
-    return <CheckCircle2 size={size} className="text-blue-500 flex-shrink-0" />
+    return <CheckCircle2 size={size} className={`${theme.accentText} flex-shrink-0`} />
   if (state === 'in_progress' || state === 'active')
     return (
       <div
-        className="rounded-full border-2 border-blue-500 bg-blue-50 flex-shrink-0"
+        className={`rounded-full border-2 ${theme.accentBorder} ${theme.accentLight} flex-shrink-0`}
         style={{ width: size, height: size }}
       />
     )
@@ -29,12 +31,13 @@ function StepIcon({ state, size = 16 }) {
 const INCOME_SECTION_ID = 'income'
 
 function SidebarToggle({ enabled, onToggle }) {
+  const { theme } = useTheme()
   return (
     <button
       onClick={(e) => { e.stopPropagation(); onToggle() }}
       aria-label={enabled ? 'Disable section' : 'Enable section'}
       className={`relative inline-flex h-3.5 w-6 rounded-full flex-shrink-0 transition-colors duration-200 ${
-        enabled ? 'bg-blue-500' : 'bg-gray-300'
+        enabled ? theme.progressFill : 'bg-gray-300'
       }`}
     >
       <span className={`absolute top-0.5 h-2.5 w-2.5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
@@ -45,6 +48,7 @@ function SidebarToggle({ enabled, onToggle }) {
 }
 
 function SidebarNav({ sections = NAV_SECTIONS, activeSubId, onSelect, enabledSubs, onToggleSub, subStates, unresolvedBySubId = {} }) {
+  const { theme } = useTheme()
   const [expanded, setExpanded] = useState(() =>
     sections
       .filter(s => s.sub.some(sub => sub.id === activeSubId) || s.state === 'active')
@@ -90,14 +94,14 @@ function SidebarNav({ sections = NAV_SECTIONS, activeSubId, onSelect, enabledSub
                 }
               }}
               className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-left rounded-lg transition-colors ${
-                isSectionActive ? 'bg-blue-50 text-blue-700' : 'text-gray-900 hover:bg-gray-100'
+                isSectionActive ? `${theme.accentLight} ${theme.accentText}` : 'text-gray-900 hover:bg-gray-100'
               }`}
             >
               <StepIcon state={sectionState} />
               <span className="flex-1 text-xs font-semibold">{section.label}</span>
               {/* Collapsed progress counter */}
               {!isExpanded && progress && (
-                <span className={`text-[10px] font-semibold mr-1 ${progress.completed > 0 ? 'text-blue-500' : 'text-gray-400'}`}>
+                <span className={`text-[10px] font-semibold mr-1 ${progress.completed > 0 ? theme.accentText : 'text-gray-400'}`}>
                   {progress.completed}/{progress.total}
                 </span>
               )}
@@ -120,7 +124,7 @@ function SidebarNav({ sections = NAV_SECTIONS, activeSubId, onSelect, enabledSub
                       key={sub.id}
                       onClick={() => onSelect(sub.id)}
                       className={`w-full flex items-center gap-2 py-1.5 px-2 rounded-lg text-left transition-colors ${
-                        isActive ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'
+                        isActive ? `${theme.accentLight} ${theme.accentText}` : 'text-gray-700 hover:bg-gray-100'
                       }`}
                     >
                       <StepIcon state={subState} size={12} />
@@ -149,6 +153,7 @@ function SidebarNav({ sections = NAV_SECTIONS, activeSubId, onSelect, enabledSub
 }
 
 function FormField({ field, value, onChange, hasComment }) {
+  const { theme } = useTheme()
   const base = `w-full border rounded-lg px-3 py-2.5 text-sm text-gray-800 bg-white focus:outline-none focus:ring-2 placeholder-gray-300 ${
     hasComment
       ? 'border-amber-300 focus:border-amber-400 focus:ring-amber-100'
@@ -174,7 +179,7 @@ function FormField({ field, value, onChange, hasComment }) {
             onClick={() => onChange?.(o)}
             className={`px-4 py-2 rounded-full text-sm font-medium border transition-all ${
               value === o
-                ? 'bg-blue-50 border-blue-500 text-blue-700 font-semibold'
+                ? `${theme.accentLight} ${theme.accentBorder} ${theme.accentText} font-semibold`
                 : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
             }`}
           >
@@ -195,7 +200,7 @@ function FormField({ field, value, onChange, hasComment }) {
             onClick={() => onChange?.(o)}
             className={`px-5 py-2 rounded-full text-sm font-medium border transition-all ${
               value === o
-                ? 'bg-blue-50 border-blue-500 text-blue-700 font-semibold'
+                ? `${theme.accentLight} ${theme.accentBorder} ${theme.accentText} font-semibold`
                 : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
             }`}
           >
@@ -220,7 +225,7 @@ function FormField({ field, value, onChange, hasComment }) {
 
   if (field.type === 'note') {
     return (
-      <div className="col-span-2 flex items-start gap-2.5 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-xs text-blue-700">
+      <div className={`col-span-2 flex items-start gap-2.5 ${theme.accentLight} border border-blue-100 rounded-xl px-4 py-3 text-xs ${theme.accentText}`}>
         {field.text}
       </div>
     )
@@ -329,6 +334,7 @@ const YEARS = Array.from({ length: 12 }, (_, i) => String(2014 + i))
 const STATES = ['Alabama','Alaska','Arizona','California','Colorado','Florida','Georgia','Illinois','Massachusetts','New Jersey','New York','Ohio','Pennsylvania','Texas','Virginia','Washington','Other']
 
 function EmployerEntry({ entry, index, onUpdate, onRemove }) {
+  const { theme } = useTheme()
   const sel = "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 bg-white focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
   const inp = "w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 bg-white focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 placeholder-gray-300"
 
@@ -413,7 +419,7 @@ function EmployerEntry({ entry, index, onUpdate, onRemove }) {
                     onClick={() => onUpdate(entry.id, 'currently_working', o)}
                     className={`px-5 py-2 rounded-full text-sm font-medium border transition-all ${
                       entry.currently_working === o
-                        ? 'bg-blue-50 border-blue-500 text-blue-700 font-semibold'
+                        ? `${theme.accentLight} ${theme.accentBorder} ${theme.accentText} font-semibold`
                         : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
                     }`}
                   >
@@ -450,7 +456,7 @@ function EmployerEntry({ entry, index, onUpdate, onRemove }) {
                     onClick={() => onUpdate(entry.id, 'client_location', o)}
                     className={`px-5 py-2 rounded-full text-sm font-medium border transition-all ${
                       entry.client_location === o
-                        ? 'bg-blue-50 border-blue-500 text-blue-700 font-semibold'
+                        ? `${theme.accentLight} ${theme.accentBorder} ${theme.accentText} font-semibold`
                         : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
                     }`}
                   >
@@ -635,6 +641,7 @@ function InstitutionRow({ entry, index, entryType, docType, onUpdate, onRemove }
 }
 
 function IntDivQuestionRow({ label, qid, answer, onChange }) {
+  const { theme } = useTheme()
   return (
     <div className="flex items-center justify-between gap-6 px-5 py-4">
       <span className="text-sm text-gray-700 flex-1">{label}</span>
@@ -646,7 +653,7 @@ function IntDivQuestionRow({ label, qid, answer, onChange }) {
             onClick={() => onChange(o)}
             className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all ${
               answer === o
-                ? 'bg-blue-50 border-blue-500 text-blue-700 font-semibold'
+                ? `${theme.accentLight} ${theme.accentBorder} ${theme.accentText} font-semibold`
                 : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
             }`}
           >
@@ -659,6 +666,7 @@ function IntDivQuestionRow({ label, qid, answer, onChange }) {
 }
 
 function InstitutionList({ entries, entryType, docType, onAdd, onUpdate, onRemove }) {
+  const { theme } = useTheme()
   return (
     <div className="px-5 pb-6 pt-4 space-y-6">
       {/* Section header */}
@@ -666,7 +674,7 @@ function InstitutionList({ entries, entryType, docType, onAdd, onUpdate, onRemov
         <span className="text-sm font-semibold text-gray-700">Institutions</span>
         <button
           onClick={onAdd}
-          className="flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors"
+          className={`flex items-center gap-1.5 text-xs font-medium ${theme.accentText} ${theme.accentTextHover} transition-colors`}
         >
           <Plus size={12} /> Add institution
         </button>
@@ -807,6 +815,7 @@ const SALE_ASSET_GROUPS = [
 ]
 
 function SaleOfAssetsSection({ onCompletionChange }) {
+  const { theme } = useTheme()
   const [openGroups, setOpenGroups] = useState(['stocks'])
   const [answers, setAnswers] = useState({})
 
@@ -874,7 +883,7 @@ function SaleOfAssetsSection({ onCompletionChange }) {
                             onClick={() => setAnswer(q.id, o)}
                             className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all ${
                               answers[q.id] === o
-                                ? 'bg-blue-50 border-blue-500 text-blue-700 font-semibold'
+                                ? `${theme.accentLight} ${theme.accentBorder} ${theme.accentText} font-semibold`
                                 : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
                             }`}
                           >
@@ -904,7 +913,7 @@ function SaleOfAssetsSection({ onCompletionChange }) {
                 {group.note && (
                   <p className="text-xs text-gray-500 pt-2">
                     {group.note}{' '}
-                    <button className="text-blue-500 underline hover:text-blue-600">here</button>.
+                    <button className={`${theme.accentText} ${theme.accentTextHover} underline`}>here</button>.
                   </p>
                 )}
               </div>
@@ -917,11 +926,12 @@ function SaleOfAssetsSection({ onCompletionChange }) {
 }
 
 function ContentToggle({ enabled, onToggle }) {
+  const { theme } = useTheme()
   return (
     <button
       onClick={onToggle}
       className={`relative inline-flex h-6 w-11 rounded-full flex-shrink-0 transition-colors duration-200 ${
-        enabled ? 'bg-blue-500' : 'bg-gray-200'
+        enabled ? theme.progressFill : 'bg-gray-200'
       }`}
     >
       <span className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow transition-transform duration-200 ${
@@ -1294,6 +1304,7 @@ function CommentCard({ comment, currentIndex, total, onPrev, onNext, onResolve, 
 // ─── DiscardModal ─────────────────────────────────────────────────────────────
 
 function DiscardModal({ onSaveAndExit, onExitWithoutSaving, onCancel }) {
+  const { theme } = useTheme()
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onCancel} />
@@ -1307,7 +1318,7 @@ function DiscardModal({ onSaveAndExit, onExitWithoutSaving, onCancel }) {
         <div className="flex flex-col gap-2 px-6 pb-6">
           <button
             onClick={onSaveAndExit}
-            className="w-full px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
+            className={`w-full px-4 py-2.5 ${theme.btnRadius} text-sm font-semibold ${theme.btnPrimary}`}
           >
             Save and exit
           </button>
@@ -1330,6 +1341,7 @@ function DiscardModal({ onSaveAndExit, onExitWithoutSaving, onCancel }) {
 }
 
 export default function FilingFormShell({ onClose, initialSubId, initialSubStates = {}, initialFieldValues = {}, onSave, readOnly = false, sectionFilter, profileNavStyle = 'sidebar' }) {
+  const { theme } = useTheme()
   const visibleSections = sectionFilter === 'profile'
     ? NAV_SECTIONS.filter(s => s.id === 'profile')
     : sectionFilter === 'filing'
@@ -1510,7 +1522,7 @@ export default function FilingFormShell({ onClose, initialSubId, initialSubState
       {/* Mobile progress bar */}
       <div className="md:hidden h-[3px] bg-gray-100 flex-shrink-0">
         <div
-          className="h-full bg-blue-500 transition-all duration-500"
+          className={`h-full ${theme.progressFill} transition-all duration-500`}
           style={{ width: `${Math.round(((currentIdx) / allSubs.length) * 100)}%` }}
         />
       </div>
@@ -1557,14 +1569,14 @@ export default function FilingFormShell({ onClose, initialSubId, initialSubState
                 return (
                   <span key={sub.id} className="flex items-center">
                     {idx > 0 && (
-                      <span className={`block w-3 h-px flex-shrink-0 ${prevComplete ? 'bg-blue-300' : 'bg-gray-200'}`} />
+                      <span className={`block w-3 h-px flex-shrink-0 ${prevComplete ? theme.progressFill : 'bg-gray-200'}`} />
                     )}
                     {isComplete ? (
-                      <CheckCircle2 size={16} className="text-blue-500 flex-shrink-0" />
+                      <CheckCircle2 size={16} className={`${theme.accentText} flex-shrink-0`} />
                     ) : isActive ? (
                       <span className="flex items-center gap-1.5 flex-shrink-0">
-                        <span className="w-4 h-4 rounded-full border-2 border-blue-500 bg-blue-50 flex-shrink-0" />
-                        <span className="text-[11px] font-semibold text-blue-600 whitespace-nowrap">{sub.label}</span>
+                        <span className={`w-4 h-4 rounded-full border-2 ${theme.accentBorder} ${theme.accentLight} flex-shrink-0`} />
+                        <span className={`text-[11px] font-semibold ${theme.accentText} whitespace-nowrap`}>{sub.label}</span>
                       </span>
                     ) : (
                       <Circle size={16} className="text-gray-300 flex-shrink-0" />
@@ -1598,7 +1610,7 @@ export default function FilingFormShell({ onClose, initialSubId, initialSubState
       {!readOnly && profileNavStyle === 'progress' && (
         <div className="hidden md:block h-[3px] bg-gray-100 flex-shrink-0">
           <div
-            className="h-full bg-blue-500 transition-all duration-500"
+            className={`h-full ${theme.progressFill} transition-all duration-500`}
             style={{ width: `${Math.round((allSubs.filter(s => (subStates[s.id] || 'not_started') === 'complete').length / allSubs.length) * 100)}%` }}
           />
         </div>
@@ -1621,13 +1633,13 @@ export default function FilingFormShell({ onClose, initialSubId, initialSubState
                     <button
                       onClick={() => navigateTo(sub.id)}
                       className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-left ${
-                        isActive ? 'bg-blue-50' : 'hover:bg-gray-50'
+                        isActive ? theme.accentLight : 'hover:bg-gray-50'
                       }`}
                     >
                       {isComplete ? (
-                        <CheckCircle2 size={14} className="text-blue-500 flex-shrink-0" />
+                        <CheckCircle2 size={14} className={`${theme.accentText} flex-shrink-0`} />
                       ) : isActive ? (
-                        <div className="w-3.5 h-3.5 rounded-full border-2 border-blue-500 bg-blue-50 flex-shrink-0" />
+                        <div className={`w-3.5 h-3.5 rounded-full border-2 ${theme.accentBorder} ${theme.accentLight} flex-shrink-0`} />
                       ) : (
                         <Circle size={14} className="text-gray-300 flex-shrink-0" />
                       )}
@@ -1641,7 +1653,7 @@ export default function FilingFormShell({ onClose, initialSubId, initialSubState
                     </button>
                     {!isLast && (
                       <div className="px-3">
-                        <div className={`ml-[7px] w-px h-3 ${isComplete ? 'bg-blue-200' : 'bg-gray-200'}`} />
+                        <div className={`ml-[7px] w-px h-3 ${isComplete ? theme.progressFill : 'bg-gray-200'}`} />
                       </div>
                     )}
                   </div>
@@ -1702,14 +1714,14 @@ export default function FilingFormShell({ onClose, initialSubId, initialSubState
             {hasNext ? (
               <button
                 onClick={() => { markCurrentComplete(); navigateTo(allSubs[currentIdx + 1].id) }}
-                className="flex-1 py-3.5 rounded-xl bg-blue-600 text-white text-sm font-semibold flex items-center justify-center gap-2"
+                className={`flex-1 py-3.5 ${theme.btnRadius} text-sm font-semibold flex items-center justify-center gap-2 ${theme.btnPrimary}`}
               >
                 Save & continue <ArrowRight size={15} />
               </button>
             ) : (
               <button
                 onClick={saveAndExit}
-                className="flex-1 py-3.5 rounded-xl bg-blue-600 text-white text-sm font-semibold flex items-center justify-center gap-2"
+                className={`flex-1 py-3.5 ${theme.btnRadius} text-sm font-semibold flex items-center justify-center gap-2 ${theme.btnPrimary}`}
               >
                 {sectionFilter === 'profile'
                   ? <><CheckCircle2 size={15} /> Complete profile</>
@@ -1754,14 +1766,14 @@ export default function FilingFormShell({ onClose, initialSubId, initialSubState
               {hasNext ? (
                 <button
                   onClick={() => { markCurrentComplete(); navigateTo(allSubs[currentIdx + 1].id) }}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                  className={`flex items-center gap-1.5 px-4 py-2 ${theme.btnRadius} text-sm font-semibold ${theme.btnPrimary}`}
                 >
                   Save and continue <ArrowRight size={14} />
                 </button>
               ) : (
                 <button
                   onClick={saveAndExit}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                  className={`flex items-center gap-1.5 px-4 py-2 ${theme.btnRadius} text-sm font-semibold ${theme.btnPrimary}`}
                 >
                   {sectionFilter === 'profile' ? (
                     <><CheckCircle2 size={14} /> Complete profile</>
@@ -1793,13 +1805,13 @@ export default function FilingFormShell({ onClose, initialSubId, initialSubState
                   <button
                     onClick={() => { navigateTo(sub.id); setNavOpen(false) }}
                     className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left ${
-                      isActive ? 'bg-blue-50' : 'hover:bg-gray-50'
+                      isActive ? theme.accentLight : 'hover:bg-gray-50'
                     }`}
                   >
                     {isComplete ? (
-                      <CheckCircle2 size={14} className="text-blue-500 flex-shrink-0" />
+                      <CheckCircle2 size={14} className={`${theme.accentText} flex-shrink-0`} />
                     ) : isActive ? (
-                      <div className="w-3.5 h-3.5 rounded-full border-2 border-blue-500 bg-blue-50 flex-shrink-0" />
+                      <div className={`w-3.5 h-3.5 rounded-full border-2 ${theme.accentBorder} ${theme.accentLight} flex-shrink-0`} />
                     ) : (
                       <Circle size={14} className="text-gray-300 flex-shrink-0" />
                     )}
@@ -1813,7 +1825,7 @@ export default function FilingFormShell({ onClose, initialSubId, initialSubState
                   </button>
                   {!isLast && (
                     <div className="px-3">
-                      <div className={`ml-[7px] w-px h-2.5 ${isComplete ? 'bg-blue-200' : 'bg-gray-200'}`} />
+                      <div className={`ml-[7px] w-px h-2.5 ${isComplete ? theme.progressFill : 'bg-gray-200'}`} />
                     </div>
                   )}
                 </div>
@@ -1837,13 +1849,13 @@ export default function FilingFormShell({ onClose, initialSubId, initialSubState
               <button
                 onClick={() => { navigateTo(sub.id); setMobileNavOpen(false) }}
                 className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-colors text-left ${
-                  isActive ? 'bg-blue-50' : 'hover:bg-gray-50'
+                  isActive ? theme.accentLight : 'hover:bg-gray-50'
                 }`}
               >
                 {isComplete ? (
-                  <CheckCircle2 size={16} className="text-blue-500 flex-shrink-0" />
+                  <CheckCircle2 size={16} className={`${theme.accentText} flex-shrink-0`} />
                 ) : isActive ? (
-                  <div className="w-4 h-4 rounded-full border-2 border-blue-500 bg-blue-50 flex-shrink-0" />
+                  <div className={`w-4 h-4 rounded-full border-2 ${theme.accentBorder} ${theme.accentLight} flex-shrink-0`} />
                 ) : (
                   <Circle size={16} className="text-gray-300 flex-shrink-0" />
                 )}
@@ -1854,11 +1866,11 @@ export default function FilingFormShell({ onClose, initialSubId, initialSubState
                 }`}>
                   {sub.label}
                 </span>
-                {isActive && <ChevronRight size={14} className="text-blue-400 flex-shrink-0" />}
+                {isActive && <ChevronRight size={14} className={`${theme.accentText} flex-shrink-0`} />}
               </button>
               {!isLast && (
                 <div className="px-4">
-                  <div className={`ml-[9px] w-px h-2.5 ${isComplete ? 'bg-blue-200' : 'bg-gray-200'}`} />
+                  <div className={`ml-[9px] w-px h-2.5 ${isComplete ? theme.progressFill : 'bg-gray-200'}`} />
                 </div>
               )}
             </div>

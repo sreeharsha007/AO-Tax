@@ -1,45 +1,71 @@
 import { useState } from 'react'
-import { MessageCircle, Plus } from 'lucide-react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { Plus, ArrowRight } from 'lucide-react'
 import Navbar from '../components/Navbar'
+import { useTheme } from '../context/ThemeContext'
 import MyTickets from '../components/MyTickets'
 import ReferralSection from '../components/ReferralSection'
-import AdvisorCard from '../components/AdvisorCard'
 import UpcomingSection from '../components/UpcomingSection'
 import ResourcesSection from '../components/ResourcesSection'
 import NewTicketModal from '../components/NewTicketModal'
+import AssessmentWizardModal from '../components/AssessmentWizardModal'
 import BottomTabBar from '../components/BottomTabBar'
-import BottomSheet from '../components/BottomSheet'
+import { buildSectionList } from '../utils/inferProfile'
 
 export default function Dashboard() {
   const [modalOpen, setModalOpen] = useState(false)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [assessmentWizardOpen, setAssessmentWizardOpen] = useState(false)
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { theme } = useTheme()
+
+  function handleAssessmentComplete(answers) {
+    setAssessmentWizardOpen(false)
+    const sections = buildSectionList(answers)
+    navigate('/tickets/467501', {
+      state: { assessmentComplete: true, assessmentSectionCount: sections.length }
+    })
+  }
+
+  const isNewUser         = location.state?.isNewUser         ?? false
+  const assessmentSkipped = location.state?.assessmentSkipped ?? false
+  const firstName         = location.state?.firstName         ?? null
+  const assessmentDone    = location.state?.assessmentComplete ?? false
+  const assessmentAnswers = location.state?.assessmentAnswers  ?? null
+  const justFiled         = location.state?.justFiled          ?? false
+
+  const greeting = justFiled
+    ? 'All done, Surajit.'
+    : isNewUser && firstName
+      ? `Welcome, ${firstName}.`
+      : 'Welcome back, Surajit.'
+
+  const subtitle = justFiled
+    ? 'Your 2025 return has been e-filed. Priya will be in touch if anything comes up.'
+    : isNewUser
+      ? 'Your account is all set. Start your 2025 filing when you\'re ready.'
+      : 'Priya is two days into your return. There are two pending items from you.'
 
   return (
-    <div className="min-h-screen bg-[#f5f4f0]">
+    <div className={`min-h-screen ${theme.pageBg}`}>
       <Navbar activePage="dashboard" dark />
 
-      <div className="bg-[#f5f4f0] px-4 sm:px-6 md:px-8 pt-6 pb-5">
+      <div className={`${theme.pageBg} px-4 sm:px-6 md:px-8 pt-6 pb-5`}>
         <div className="max-w-[1280px] mx-auto">
-          <p className="hidden md:block text-[10px] font-semibold text-gray-400 tracking-widest mb-3">
-            DASHBOARD · TAX YEAR 2025
-          </p>
-          <div className="flex items-start justify-between mb-1 gap-4">
+<div className="flex items-start justify-between mb-1 gap-4">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight">
-                Welcome back, Surajit.
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight" style={{ fontFamily: theme.fontHeading }}>
+                {greeting}
               </h1>
               <p className="text-gray-500 text-sm mt-1">
-                Priya is two days into your return. There are two pending items from you.
+                {subtitle}
               </p>
             </div>
-            {/* Desktop: action buttons */}
+            {/* Desktop: action buttons — always visible */}
             <div className="hidden md:flex items-center gap-2 flex-shrink-0">
-              <button className="flex items-center gap-1.5 border border-gray-300 bg-white text-gray-700 text-sm font-medium px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
-                <MessageCircle size={14} /> Message Priya
-              </button>
               <button
                 onClick={() => setModalOpen(true)}
-                className="flex items-center gap-1.5 bg-gray-900 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+                className={`flex items-center gap-1.5 ${theme.btnPrimary} ${theme.btnRadius} text-sm font-medium px-4 py-2 transition-colors`}
               >
                 <Plus size={14} /> New filing
               </button>
@@ -48,18 +74,44 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="px-4 sm:px-6 md:px-8 pb-24 md:pb-10">
+      <div className="px-4 sm:px-6 md:px-8 pt-4 pb-24 md:pb-10">
         <div className="max-w-[1280px] mx-auto space-y-4">
+          {/* Mobile-only assessment strip — sits above the two-column layout so it doesn't push the left column down on desktop */}
+          {assessmentSkipped && (
+            <div className="md:hidden rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50/60 p-5">
+              <p className="text-[10px] font-bold tracking-widest text-indigo-400/80 mb-2">BEFORE YOU BEGIN</p>
+              <p className="text-sm font-semibold text-gray-900 mb-1">Complete your filing setup</p>
+              <p className="text-xs text-gray-500 leading-relaxed mb-4">A few quick questions to tailor your filing. Takes about a minute.</p>
+              <button
+                onClick={() => setAssessmentWizardOpen(true)}
+                className={`flex items-center justify-center gap-1.5 w-full py-2.5 ${theme.btnPrimary} ${theme.btnRadius} text-xs font-semibold transition-colors`}
+              >
+                Start setup <ArrowRight size={13} />
+              </button>
+            </div>
+          )}
           <div className="flex gap-4 items-start">
             <div className="flex-1 min-w-0 space-y-4">
-              <MyTickets />
+              <MyTickets isNewUser={isNewUser} assessmentDone={assessmentDone} assessmentAnswers={assessmentAnswers} filedTicketId={justFiled ? '#467501' : null} />
               <ReferralSection />
               {/* Mobile-only: resources + dates surface here instead of the sidebar */}
               <div className="md:hidden"><ResourcesSection /></div>
               <div className="md:hidden"><UpcomingSection /></div>
             </div>
             <div className="hidden md:block w-72 flex-shrink-0 space-y-4">
-              <AdvisorCard />
+              {assessmentSkipped && (
+                <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50/60 p-5">
+                  <p className="text-[10px] font-bold tracking-widest text-indigo-400/80 mb-2">BEFORE YOU BEGIN</p>
+                  <p className="text-sm font-semibold text-gray-900 mb-1">Complete your filing setup</p>
+                  <p className="text-xs text-gray-500 leading-relaxed mb-4">A few quick questions to tailor your filing. Takes about a minute.</p>
+                  <button
+                    onClick={() => setAssessmentWizardOpen(true)}
+                    className={`flex items-center justify-center gap-1.5 w-full py-2.5 ${theme.btnPrimary} ${theme.btnRadius} text-xs font-semibold transition-colors`}
+                  >
+                    Start setup <ArrowRight size={13} />
+                  </button>
+                </div>
+              )}
               <UpcomingSection />
               <ResourcesSection />
             </div>
@@ -69,19 +121,13 @@ export default function Dashboard() {
 
       <BottomTabBar activePage="dashboard" onNewFiling={() => setModalOpen(true)} />
 
-      {/* Floating Priya avatar — above bottom tab bar, mobile only */}
-      <button
-        onClick={() => setSidebarOpen(true)}
-        className="fixed bottom-24 right-4 z-50 md:hidden w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center text-white text-sm font-semibold shadow-xl hover:bg-purple-700 transition-colors"
-      >
-        PN
-      </button>
+      {modalOpen && <NewTicketModal onClose={() => setModalOpen(false)} isReturningUser={!isNewUser} />}
 
-      <BottomSheet open={sidebarOpen} onClose={() => setSidebarOpen(false)} title="Your advisor">
-        <AdvisorCard />
-      </BottomSheet>
-
-      {modalOpen && <NewTicketModal onClose={() => setModalOpen(false)} />}
+      <AssessmentWizardModal
+        open={assessmentWizardOpen}
+        onClose={() => setAssessmentWizardOpen(false)}
+        onComplete={handleAssessmentComplete}
+      />
     </div>
   )
 }

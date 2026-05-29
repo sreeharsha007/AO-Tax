@@ -40,9 +40,9 @@ export default function StudioLayout({ scenario = 0, setChatOpen, setDocsOpen })
       <div className="max-w-[640px] mx-auto px-8 pt-10 pb-32">
         {/* Breadcrumb */}
         <div className="flex items-center gap-1.5 text-[11px] text-gray-400 mb-10">
-          <button onClick={() => navigate('/')} className="hover:text-gray-600">Dashboard</button>
+          <button onClick={() => navigate('/dashboard')} className="hover:text-gray-600">Dashboard</button>
           <ChevronRight size={10} />
-          <button onClick={() => navigate('/')} className="hover:text-gray-600">My Filings</button>
+          <button onClick={() => navigate('/dashboard')} className="hover:text-gray-600">My Filings</button>
           <ChevronRight size={10} />
           <span className="text-gray-600 font-medium">#467501</span>
         </div>
