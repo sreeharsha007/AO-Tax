@@ -141,12 +141,13 @@ function ChipGrid({ options, selected, onToggle, icons }) {
   )
 }
 
-/* ── Loft: compact chip — direct toggle, always visible ─────────────────── */
+/* ── Enhanced: compact chip — direct toggle, always visible ─────────────── */
 function LoftChip({ opt, isSelected, onToggle, lucideIcon: LucideIcon, phosphorIcon: PhosphorIcon }) {
+  const { theme } = useTheme()
   return (
     <button
       onClick={() => onToggle(opt.id)}
-      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all ${
+      className={`flex items-center gap-1.5 px-3 py-1.5 ${theme.pillBtnRadius} border text-xs font-medium transition-all ${
         isSelected
           ? 'bg-blue-50 border-blue-200 text-blue-700'
           : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300 hover:bg-gray-50'
@@ -154,9 +155,9 @@ function LoftChip({ opt, isSelected, onToggle, lucideIcon: LucideIcon, phosphorI
     >
       {PhosphorIcon && (
         <PhosphorIcon
-          size={11}
-          weight="duotone"
-          className={isSelected ? 'text-blue-600' : 'text-gray-400'}
+          size={13}
+          weight={theme.iconWeight}
+          className={isSelected ? theme.accentText : (theme.wizardIconInline ? 'text-blue-300' : 'text-gray-400')}
           aria-hidden
         />
       )}

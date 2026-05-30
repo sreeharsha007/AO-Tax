@@ -170,9 +170,10 @@ function DocumentIllustration({ sectionCount }) {
   const { theme } = useTheme()
   const cool = theme.revealIllustrationPalette === 'cool'
 
-  // Palette: warm (Loft slate) vs cool (Azure blue/cyan)
-  const bodyStroke   = cool ? '#93c5fd' : '#94a3b8'   // blue-300 vs slate-400
-  const linesStroke  = cool ? '#bfdbfe' : '#cbd5e1'   // blue-200 vs slate-300
+  // Palette: warm (Loft slate) vs cool (Azure blue)
+  // blue-400 body gives contrast against blue-50 card background
+  const bodyStroke   = cool ? '#60a5fa' : '#94a3b8'   // blue-400 vs slate-400
+  const linesStroke  = cool ? '#93c5fd' : '#cbd5e1'   // blue-300 vs slate-300
   const checkStroke  = theme.accentTextColor           // always the direction's accent
 
   return (
@@ -281,7 +282,7 @@ export default function SignupFlow({ initialData = {} }) {
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 pb-12">
         <div className={`w-full ${step === 'profile' ? 'max-w-lg' : 'max-w-sm'}`}>
           {/* Keyed wrapper drives step entrance animation */}
-          <div key={step} className={enhanced ? 'step-enter' : 'step-enter-default'}>
+          <div key={step} className={theme.stepEnterClass}>
 
           {/* ── Step: Account creation ─────────────────────────────────── */}
           {step === 'account' && (
@@ -293,7 +294,7 @@ export default function SignupFlow({ initialData = {} }) {
                 <p className="text-sm text-gray-500 mt-1">Just the basics to get started.</p>
               </div>
 
-              <div className={theme.formCardWrapped ? `${theme.formFieldSpacing} bg-white ${theme.cardRadius} px-6 py-7 ${theme.cardShadow}` : 'space-y-4'}>
+              <div className={theme.formCardWrapped ? `${theme.formFieldSpacing} bg-white ${theme.cardRadius} px-6 py-7 ${theme.cardShadow}` : theme.formFieldSpacing}>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <FieldLabel theme={theme}>First name</FieldLabel>
@@ -380,13 +381,13 @@ export default function SignupFlow({ initialData = {} }) {
                   {/* Card body — staggered entrance */}
                   <div className="bg-white px-6 py-6">
                     <p
-                      className={`text-sm text-gray-600 leading-relaxed ${enhanced ? 'item-enter' : ''}`}
+                      className={`text-sm text-gray-600 leading-relaxed ${theme.itemEnterClass}`}
                       style={enhanced ? { animationDelay: '100ms' } : undefined}
                     >
                       A few questions help us understand your tax situation and tailor your 2025 return. Takes about a minute.
                     </p>
                     <div
-                      className={`mt-5 space-y-3 ${enhanced ? 'item-enter' : ''}`}
+                      className={`mt-5 space-y-3 ${theme.itemEnterClass}`}
                       style={enhanced ? { animationDelay: '160ms' } : undefined}
                     >
                       <button

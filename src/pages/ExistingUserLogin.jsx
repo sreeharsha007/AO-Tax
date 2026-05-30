@@ -125,7 +125,7 @@ export default function ExistingUserLogin() {
 
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 pb-16">
         {/* Keyed wrapper drives step entrance animation */}
-        <div key={confirmStep ? 'confirm' : 'login'} className={`w-full flex flex-col items-center ${enhanced ? 'step-enter' : 'step-enter-default'}`}>
+        <div key={confirmStep ? 'confirm' : 'login'} className={`w-full flex flex-col items-center ${theme.stepEnterClass}`}>
 
         {/* ── Step 3: Profile confirmation (KEY MOMENT) ── */}
         {confirmStep ? (
@@ -164,7 +164,7 @@ export default function ExistingUserLogin() {
               <p className="text-sm text-gray-500 mt-1.5">Enter your email or mobile to continue.</p>
             </div>
 
-            <div className={theme.formCardWrapped ? `${theme.formFieldSpacing} bg-white ${theme.cardRadius} px-6 py-7 ${theme.cardShadow}` : 'space-y-4'}>
+            <div className={theme.formCardWrapped ? `${theme.formFieldSpacing} bg-white ${theme.cardRadius} px-6 py-7 ${theme.cardShadow}` : theme.formFieldSpacing}>
               <div>
                 <div
                   className={`relative flex ${theme.inputCls} overflow-visible focus-within:ring-0`}

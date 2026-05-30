@@ -42,7 +42,7 @@ export default function LoginPage() {
 
           {/* Staggered entrance — driven by theme.animationsEnhanced */}
           <div
-            className={enhanced ? 'item-enter' : ''}
+            className={theme.itemEnterClass}
             style={enhanced ? { animationDelay: '0ms' } : undefined}
           >
             <div className="mb-10">
@@ -58,7 +58,7 @@ export default function LoginPage() {
           <div className="space-y-3">
             {/* New user CTA */}
             <div
-              className={enhanced ? 'item-enter' : ''}
+              className={theme.itemEnterClass}
               style={enhanced ? { animationDelay: '80ms' } : undefined}
             >
               <button
@@ -81,7 +81,7 @@ export default function LoginPage() {
 
             {/* Returning user CTA */}
             <div
-              className={enhanced ? 'item-enter' : ''}
+              className={theme.itemEnterClass}
               style={enhanced ? { animationDelay: '140ms' } : undefined}
             >
               <button
@@ -106,7 +106,7 @@ export default function LoginPage() {
           {/* Trust signal — driven by theme.showTrustSignal */}
           {theme.showTrustSignal && (
             <p
-              className={`text-center text-[11px] text-gray-400 mt-10 leading-relaxed ${enhanced ? 'item-enter' : ''}`}
+              className={`text-center text-[11px] text-gray-400 mt-10 leading-relaxed ${theme.itemEnterClass}`}
               style={enhanced ? { animationDelay: '200ms' } : undefined}
             >
               Trusted by 12,000+ filers · IRS-authorized · Bank-level encryption

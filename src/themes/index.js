@@ -41,8 +41,8 @@ export const THEMES = {
     stepUpcoming: 'bg-gray-200 text-gray-400',
 
     badgeRadius: 'rounded-full',
+    pillBtnRadius: 'rounded-full',
 
-    // Icon system
     iconStyle: 'lucide',
     iconWeight: 'regular',
     useColoredIcons: false,
@@ -56,7 +56,6 @@ export const THEMES = {
 
     label: 'text-[10px] font-bold tracking-widest text-gray-400 uppercase',
 
-    // Key moment tokens
     heroNumberSize: 'text-4xl',
     heroNumberColor: 'text-gray-900',
     successBg: 'bg-blue-50',
@@ -67,54 +66,42 @@ export const THEMES = {
     completeBg: 'bg-emerald-50',
     completeAccent: 'text-emerald-700',
 
-    // Typography scale tokens
     loginHeadingCls: 'text-4xl font-bold tracking-tight',
     sectionHeadingCls: 'text-2xl font-bold',
     heroTagline: 'text-sm text-gray-500',
     wizardQuestionSize: 'text-xl',
 
-    // Illustration tokens
     useIllustrations: false,
     emptyStateStyle: 'text',
-    monogramStyle: 'none',                      // 'none' | 'rings' | 'square'
-    revealIllustrationPalette: 'warm',          // 'warm' | 'cool'
+    monogramStyle: 'none',
+    revealIllustrationPalette: 'warm',
 
-    // ── Structural tokens (gates component-level behavior) ──────────────────
-    // These replace all hardcoded `theme.id === 'loft'` checks in components.
-    // Adding a new direction = set these tokens, no component code changes needed.
-
-    // Ambient background glow blur orbs
+    // ── Structural tokens ───────────────────────────────────────────────────
     ambientGlow: false,
     ambientGlowPrimary: '',
     ambientGlowSecondary: '',
 
-    // Icon badge above LoginPage heading
     showHeaderIcon: false,
-
-    // Trust signal text on LoginPage
     showTrustSignal: false,
 
-    // Wrap form fields in a floating white card
     formCardWrapped: false,
     formFieldSpacing: 'space-y-4',
 
-    // Card hover lift effect on interactive cards/buttons
     cardHoverLift: false,
-
-    // Enable all micro-interaction animations
     animationsEnhanced: false,
 
-    // Welcome card header style: 'minimal' | 'dark-gradient' | 'light-gradient'
     welcomeCardStyle: 'minimal',
 
-    // Yes/No pill border radius
-    pillBtnRadius: 'rounded-full',
-
-    // Wizard multi-select: stacked list (OptionRow) vs grid (OptionPill)
     wizardListLayout: false,
-
-    // Show percentage on wizard progress bar
     showProgressPercent: true,
+
+    // ── Animation class tokens (per-direction motion character) ─────────────
+    stepEnterClass: 'step-enter-default',     // step transition animation
+    itemEnterClass: '',                        // item stagger (empty = none)
+    wizardProgressStyle: 'bar',               // 'bar' | 'dots'
+    wizardIconInline: false,                   // inline icon vs badge
+    wizardSelectionStyle: 'fill',             // 'fill' | 'ring'
+    wizardRowPy: 'py-3.5',                    // row vertical padding
   },
 
   loft: {
@@ -159,8 +146,8 @@ export const THEMES = {
     stepUpcoming: 'bg-gray-200 text-gray-400',
 
     badgeRadius: 'rounded-full',
+    pillBtnRadius: 'rounded-xl',
 
-    // Icon system — Phosphor duotone badges
     iconStyle: 'phosphor',
     iconWeight: 'duotone',
     useColoredIcons: true,
@@ -174,7 +161,6 @@ export const THEMES = {
 
     label: 'text-[10px] font-bold tracking-widest text-gray-400 uppercase',
 
-    // Key moment tokens
     heroNumberSize: 'text-5xl',
     heroNumberColor: 'text-blue-700',
     successBg: 'bg-gradient-to-br from-blue-50 to-indigo-50',
@@ -185,17 +171,15 @@ export const THEMES = {
     completeBg: 'bg-gradient-to-br from-emerald-50 to-teal-50',
     completeAccent: 'text-emerald-700',
 
-    // Typography scale tokens
     loginHeadingCls: 'text-5xl font-black tracking-tight leading-none',
     sectionHeadingCls: 'text-3xl font-bold',
     heroTagline: 'text-base text-gray-500',
     wizardQuestionSize: 'text-2xl',
 
-    // Illustration tokens
     useIllustrations: true,
     emptyStateStyle: 'illustrated',
-    monogramStyle: 'rings',                     // LoftMonogram — thin SVG rings
-    revealIllustrationPalette: 'warm',          // slate strokes + blue-700 check
+    monogramStyle: 'rings',
+    revealIllustrationPalette: 'warm',
 
     // ── Structural tokens ───────────────────────────────────────────────────
     ambientGlow: true,
@@ -213,9 +197,16 @@ export const THEMES = {
 
     welcomeCardStyle: 'dark-gradient',
 
-    pillBtnRadius: 'rounded-xl',
     wizardListLayout: true,
     showProgressPercent: false,
+
+    // ── Animation class tokens ──────────────────────────────────────────────
+    stepEnterClass: 'step-enter',
+    itemEnterClass: 'item-enter',
+    wizardProgressStyle: 'bar',
+    wizardIconInline: false,
+    wizardSelectionStyle: 'fill',
+    wizardRowPy: 'py-3.5',
   },
 
   azure: {
@@ -225,7 +216,7 @@ export const THEMES = {
     previewPageBg: '#f0f6ff',
     previewAccent: '#2563eb',
     previewCardRadius: '10px',
-    previewBtnRadius: '10px',
+    previewBtnRadius: '99px',     // shows pill shape in preview
 
     fontBody: "'Inter', system-ui, sans-serif",
     fontHeading: "'Inter', system-ui, sans-serif",
@@ -235,14 +226,14 @@ export const THEMES = {
 
     card: 'bg-white border border-blue-50',
     cardRadius: 'rounded-2xl',
-    cardShadow: 'shadow-[0_2px_16px_rgba(37,99,235,0.09),0_1px_4px_rgba(37,99,235,0.06)]',
+    cardShadow: 'shadow-[0_1px_3px_rgba(37,99,235,0.08)]',
 
     btnPrimary: 'bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.97] transition-all tracking-wide',
     btnSecondary: 'bg-white text-blue-700 border border-blue-200 hover:bg-blue-50 hover:shadow-sm active:scale-[0.98] transition-all tracking-wide',
-    btnRadius: 'rounded-xl',
+    btnRadius: 'rounded-full',
     btnDisabled: 'bg-gray-100 text-gray-400 cursor-not-allowed',
 
-    inputCls: 'border border-blue-100 rounded-xl focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.12)] bg-white text-gray-900 placeholder-gray-400 transition-all',
+    inputCls: 'border border-blue-100 rounded-lg focus:border-blue-500 focus:shadow-[0_0_0_1.5px_rgba(37,99,235,0.30)] bg-white text-gray-900 placeholder-gray-400 transition-all',
 
     accentText: 'text-blue-600',
     accentBg: 'bg-blue-600',
@@ -260,12 +251,12 @@ export const THEMES = {
     stepUpcoming: 'bg-blue-50 text-blue-300',
 
     badgeRadius: 'rounded-full',
+    pillBtnRadius: 'rounded-full',
 
-    // Icon system — Phosphor duotone, more blue-biased badges
     iconStyle: 'phosphor',
     iconWeight: 'duotone',
     useColoredIcons: true,
-    iconBadge: true,
+    iconBadge: false,             // no badge backgrounds in Azure
     iconBadgeRadius: 'rounded-xl',
     iconDefault: 'bg-blue-100 text-blue-600',
     iconProfile: 'bg-blue-100 text-blue-600',
@@ -275,28 +266,25 @@ export const THEMES = {
 
     label: 'text-[10px] font-bold tracking-widest text-blue-400 uppercase',
 
-    // Key moment tokens
     heroNumberSize: 'text-5xl',
     heroNumberColor: 'text-blue-600',
     successBg: 'bg-gradient-to-br from-blue-50 via-cyan-50 to-blue-50',
     successText: 'text-blue-900',
     advisorCardBg: 'bg-white',
-    advisorCardHeaderBg: 'bg-gradient-to-br from-blue-500 to-blue-700',
+    advisorCardHeaderBg: 'bg-gradient-to-br from-sky-400 to-blue-500',
     advisorAvatarBg: 'bg-gradient-to-br from-blue-400 to-blue-600',
     completeBg: 'bg-gradient-to-br from-blue-50 to-cyan-50',
     completeAccent: 'text-blue-700',
 
-    // Typography scale tokens
     loginHeadingCls: 'text-5xl font-black tracking-tight leading-none',
     sectionHeadingCls: 'text-3xl font-bold',
     heroTagline: 'text-base text-blue-500',
     wizardQuestionSize: 'text-2xl',
 
-    // Illustration tokens
     useIllustrations: true,
     emptyStateStyle: 'illustrated',
-    monogramStyle: 'square',                    // AzureMonogram — solid rounded square
-    revealIllustrationPalette: 'cool',          // azure/cyan strokes + blue-600 check
+    monogramStyle: 'square',
+    revealIllustrationPalette: 'cool',
 
     // ── Structural tokens ───────────────────────────────────────────────────
     ambientGlow: true,
@@ -306,17 +294,24 @@ export const THEMES = {
     showHeaderIcon: true,
     showTrustSignal: true,
 
-    formCardWrapped: true,
-    formFieldSpacing: 'space-y-5',
+    formCardWrapped: false,       // forms breathe on the blue-tinted background
+    formFieldSpacing: 'space-y-6',
 
     cardHoverLift: true,
     animationsEnhanced: true,
 
     welcomeCardStyle: 'light-gradient',
 
-    pillBtnRadius: 'rounded-xl',
     wizardListLayout: true,
     showProgressPercent: false,
+
+    // ── Animation class tokens (smooth, deliberate — no springs) ────────────
+    stepEnterClass: 'step-enter-azure',
+    itemEnterClass: 'item-enter-azure',
+    wizardProgressStyle: 'dots',
+    wizardIconInline: true,        // inline icons, no badge backgrounds
+    wizardSelectionStyle: 'ring',  // crisp ring, no fill wash
+    wizardRowPy: 'py-2.5',        // compact rows
   },
 }
 

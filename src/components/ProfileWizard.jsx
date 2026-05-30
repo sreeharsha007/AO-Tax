@@ -88,54 +88,75 @@ function OptionPill({ label, sub, selected, onClick, lucideIcon: LucideIcon, pho
   )
 }
 
-/* ── Option row — Loft stacked list ──────────────────────────────────────── */
+/* ── Option row — stacked list, adapts per direction via tokens ───────────── */
 function OptionRow({ label, sub, selected, onClick, lucideIcon: LucideIcon, phosphorIcon: PhosphorIcon, badgeCls, index }) {
   const { theme } = useTheme()
+  const isRing = theme.wizardSelectionStyle === 'ring'
+  const isInline = theme.wizardIconInline
+
   const [bouncing, setBouncing] = useState(false)
   const prev = useRef(selected)
-
   useEffect(() => {
-    if (!prev.current && selected) setBouncing(true)
+    // Only bounce on selection when using fill style (Loft) — ring style is instant
+    if (!prev.current && selected && !isRing) setBouncing(true)
     prev.current = selected
   }, [selected])
 
   return (
-    /* Outer div: stagger entrance only */
+    /* Outer div: stagger entrance */
     <div
-      className="item-enter"
+      className={theme.itemEnterClass}
       style={{ animationDelay: `${index * 35}ms` }}
     >
       <button
         onClick={onClick}
         onAnimationEnd={() => setBouncing(false)}
-        className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl border transition-all text-left ${
+        className={`w-full flex items-center gap-3 px-4 ${theme.wizardRowPy} rounded-xl transition-all text-left ${
           bouncing ? 'select-bounce' : ''
         } ${
           selected
-            ? 'bg-blue-50 border-blue-100'
-            : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm'
+            ? isRing
+              ? 'ring-1 ring-blue-600 border border-transparent bg-blue-50/60'
+              : 'bg-blue-50 border border-blue-100'
+            : 'bg-white border border-gray-200 hover:border-gray-300 hover:shadow-sm'
         }`}
       >
-        {/* Icon badge — category colour always on */}
+        {/* Icon — inline (Azure) or badge background (Loft) */}
         {(LucideIcon || PhosphorIcon) && (
-          <div className={`w-8 h-8 ${theme.iconBadgeRadius} flex items-center justify-center flex-shrink-0 ${badgeCls || 'bg-gray-100 text-gray-500'}`}>
-            {PhosphorIcon
-              ? <PhosphorIcon size={16} weight="duotone" />
-              : LucideIcon && <LucideIcon size={14} />}
-          </div>
+          isInline ? (
+            /* Azure: icon inline, no badge, duotone or regular */
+            <div className="flex-shrink-0 w-5 flex items-center justify-center">
+              {PhosphorIcon
+                ? <PhosphorIcon size={15} weight={theme.iconWeight}
+                    className={selected ? theme.accentText : 'text-blue-300'} />
+                : <LucideIcon size={14} className={selected ? theme.accentText : 'text-gray-400'} />
+              }
+            </div>
+          ) : (
+            /* Loft/Default: icon in coloured badge */
+            <div className={`w-8 h-8 ${theme.iconBadgeRadius} flex items-center justify-center flex-shrink-0 ${badgeCls || 'bg-gray-100 text-gray-500'}`}>
+              {PhosphorIcon
+                ? <PhosphorIcon size={16} weight="duotone" />
+                : LucideIcon && <LucideIcon size={14} />}
+            </div>
+          )
         )}
+
         {/* Label + sub */}
         <div className="flex-1 min-w-0">
           <p className={`text-sm font-medium leading-tight ${selected ? theme.accentText : 'text-gray-900'}`}>{label}</p>
           <p className={`text-xs mt-0.5 ${selected ? 'text-gray-400' : 'text-gray-500'}`}>{sub}</p>
         </div>
-        {/* Selection circle — inline style for direction-accurate accent */}
-        <div
-          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${!selected ? 'bg-white border-gray-300' : ''}`}
-          style={selected ? { backgroundColor: theme.accentTextColor, borderColor: theme.accentTextColor } : undefined}
-        >
-          {selected && <Check size={9} className="text-white" strokeWidth={3.5} />}
-        </div>
+
+        {/* Selection indicator — only for fill style (Loft/Default) */}
+        {!isRing && (
+          <div
+            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${!selected ? 'bg-white border-gray-300' : ''}`}
+            style={selected ? { backgroundColor: theme.accentTextColor, borderColor: theme.accentTextColor } : undefined}
+          >
+            {selected && <Check size={9} className="text-white" strokeWidth={3.5} />}
+          </div>
+        )}
       </button>
     </div>
   )
@@ -291,22 +312,46 @@ export default function ProfileWizard({ onComplete, onSkip, initialAnswers = nul
 
   const inner = (
     <>
-      {/* Progress bar — Loft: step name only, no percentage */}
+      {/* Progress indicator — dots (Azure) or bar (Loft/Default) */}
       <div className="mb-8">
-        <div className={`h-0.5 ${theme.progressTrack} rounded-full overflow-hidden mb-2`}>
-          <div
-            className={`h-full ${theme.progressFill} rounded-full progress-fill-animated`}
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-        <div className="flex items-center justify-between">
-          <p className={theme.label}>{steps[step]}</p>
-          {!enhanced && <p className={theme.label}>{pct}%</p>}
-        </div>
+        {theme.wizardProgressStyle === 'dots' ? (
+          /* Azure: step dots — completed filled, current outlined, upcoming neutral */
+          <div className="flex items-center gap-2.5 mb-3">
+            {steps.map((s, i) => {
+              const done = i < step
+              const current = i === step
+              return (
+                <div
+                  key={s}
+                  className={`rounded-full transition-all duration-200 flex-shrink-0 ${
+                    done    ? 'w-2 h-2 bg-blue-600'
+                    : current ? 'w-2.5 h-2.5 border-[1.5px] border-blue-600 bg-transparent'
+                    : 'w-1.5 h-1.5 bg-gray-200'
+                  }`}
+                />
+              )
+            })}
+            <p className={`${theme.label} ml-1`}>{steps[step]}</p>
+          </div>
+        ) : (
+          /* Loft/Default: animated progress bar */
+          <>
+            <div className={`h-0.5 ${theme.progressTrack} rounded-full overflow-hidden mb-2`}>
+              <div
+                className={`h-full ${theme.progressFill} rounded-full progress-fill-animated`}
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <p className={theme.label}>{steps[step]}</p>
+              {theme.showProgressPercent && <p className={theme.label}>{pct}%</p>}
+            </div>
+          </>
+        )}
       </div>
 
-      {/* Step content with entrance animation */}
-      <div key={step} className={enhanced ? 'step-enter' : 'step-enter-default'}>
+      {/* Step content with direction-specific entrance animation */}
+      <div key={step} className={theme.stepEnterClass}>
         {step === 0 && <ResidencyStep answers={answers} update={update} enhanced={enhanced} />}
         {step === 1 && (
           <SelectStep
@@ -361,7 +406,7 @@ export default function ProfileWizard({ onComplete, onSkip, initialAnswers = nul
             className={`flex items-center gap-2 px-5 py-2.5 text-sm font-semibold transition-all ${theme.btnRadius} ${
               canContinue() ? `${theme.btnPrimary} ${enhanced ? 'btn-unlock' : ''}` : theme.btnDisabled
             }`}
-            style={enhanced && canContinue() ? { boxShadow: '0 4px 12px rgba(29,78,216,0.24)' } : undefined}
+            style={enhanced && canContinue() ? { boxShadow: `0 4px 12px ${theme.accentTextColor}3d` } : undefined}
           >
             {isLast ? 'Finish' : 'Continue'} <ArrowRight size={15} />
           </button>
@@ -370,10 +415,10 @@ export default function ProfileWizard({ onComplete, onSkip, initialAnswers = nul
     </>
   )
 
-  /* Loft: wrap in a floating card */
+  /* Enhanced directions: wrap in card using theme.card tokens */
   if (enhanced) {
     return (
-      <div className={`bg-white ${theme.cardRadius} ${theme.cardShadow} p-6`}>
+      <div className={`${theme.card} ${theme.cardRadius} ${theme.cardShadow} p-6`}>
         {inner}
       </div>
     )
