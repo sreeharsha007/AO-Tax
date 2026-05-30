@@ -52,8 +52,10 @@ function YesNo({ value, onChange }) {
             onClick={() => onChange(opt)}
             className={`py-4 ${theme.btnRadius} border text-sm font-semibold transition-all capitalize ${
               active
-                ? `${theme.accentLight} ${theme.accentBorder} ${theme.accentText}`
-                : `bg-white border-gray-200 text-gray-700 hover:border-gray-300 ${theme.animationsEnhanced ? 'hover:shadow-sm' : ''}`
+                ? theme.wizardSelectionStyle === 'checkbox'
+                  ? 'bg-gray-100 border-gray-700 text-gray-900'  // Print: neutral marked, not activated
+                  : `${theme.accentLight} ${theme.accentBorder} ${theme.accentText}`
+                : `bg-white ${theme.borderMuted} text-gray-700 hover:border-gray-300 ${theme.animationsEnhanced ? 'hover:shadow-sm' : ''}`
             }`}
           >
             {opt === 'yes' ? 'Yes' : 'No'}
@@ -91,7 +93,8 @@ function OptionPill({ label, sub, selected, onClick, lucideIcon: LucideIcon, pho
 /* ── Option row — stacked list, adapts per direction via tokens ───────────── */
 function OptionRow({ label, sub, selected, onClick, lucideIcon: LucideIcon, phosphorIcon: PhosphorIcon, badgeCls, index }) {
   const { theme } = useTheme()
-  const isRing = theme.wizardSelectionStyle === 'ring'
+  const isRing     = theme.wizardSelectionStyle === 'ring'
+  const isCheckbox = theme.wizardSelectionStyle === 'checkbox'
   const isInline = theme.wizardIconInline
 
   const [bouncing, setBouncing] = useState(false)
@@ -111,25 +114,34 @@ function OptionRow({ label, sub, selected, onClick, lucideIcon: LucideIcon, phos
       <button
         onClick={onClick}
         onAnimationEnd={() => setBouncing(false)}
-        className={`w-full flex items-center gap-3 px-4 ${theme.wizardRowPy} rounded-xl transition-all text-left ${
-          bouncing ? 'select-bounce' : ''
+        className={`w-full flex items-center gap-3 px-4 ${theme.wizardRowPy} ${theme.cardRadius || 'rounded-xl'} transition-all text-left ${
+          bouncing && !isRing && !isCheckbox && theme.springAnimations ? 'select-bounce' : ''
         } ${
           selected
-            ? isRing
-              ? 'ring-1 ring-blue-600 border border-transparent bg-blue-50/60'
-              : 'bg-blue-50 border border-blue-100'
-            : 'bg-white border border-gray-200 hover:border-gray-300 hover:shadow-sm'
+            ? isRing      ? 'ring-1 ring-blue-600 border border-transparent bg-blue-50/60'
+            : isCheckbox  ? 'bg-gray-50 border border-gray-700'  // Print: light neutral fill + strong border
+            :                `${theme.accentLight} border ${theme.accentBorder}`
+            : `${theme.cardBg || 'bg-white'} border ${theme.borderMuted} ${theme.borderMutedHover} hover:shadow-sm`
         }`}
       >
         {/* Icon — inline (Azure) or badge background (Loft) */}
         {(LucideIcon || PhosphorIcon) && (
           isInline ? (
-            /* Azure: icon inline, no badge, duotone or regular */
+            /* Enhanced inline: icon without badge — direction controls style and weight */
             <div className="flex-shrink-0 w-5 flex items-center justify-center">
-              {PhosphorIcon
+              {theme.iconStyle === 'phosphor' && PhosphorIcon
                 ? <PhosphorIcon size={15} weight={theme.iconWeight}
-                    className={selected ? theme.accentText : 'text-blue-300'} />
-                : <LucideIcon size={14} className={selected ? theme.accentText : 'text-gray-400'} />
+                    className={selected
+                      ? theme.id === 'grain' ? theme.accentText : theme.accentText
+                      : theme.id === 'grain' ? 'text-stone-400' : 'text-blue-300'
+                    }
+                  />
+                : LucideIcon && <LucideIcon size={14}
+                    className={selected
+                      ? isCheckbox ? 'text-gray-900' : theme.accentText
+                      : 'text-gray-400'
+                    }
+                  />
               }
             </div>
           ) : (
@@ -148,14 +160,24 @@ function OptionRow({ label, sub, selected, onClick, lucideIcon: LucideIcon, phos
           <p className={`text-xs mt-0.5 ${selected ? 'text-gray-400' : 'text-gray-500'}`}>{sub}</p>
         </div>
 
-        {/* Selection indicator — only for fill style (Loft/Default) */}
+        {/* Selection indicator — circle for fill, square for checkbox, none for ring */}
         {!isRing && (
-          <div
-            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${!selected ? 'bg-white border-gray-300' : ''}`}
-            style={selected ? { backgroundColor: theme.accentTextColor, borderColor: theme.accentTextColor } : undefined}
-          >
-            {selected && <Check size={9} className="text-white" strokeWidth={3.5} />}
-          </div>
+          isCheckbox ? (
+            /* Print: square checkbox — journalistic, no rounding */
+            <div className={`w-4 h-4 border flex items-center justify-center flex-shrink-0 transition-all ${
+              selected ? 'bg-gray-900 border-gray-900' : 'bg-white border-gray-400'
+            }`}>
+              {selected && <Check size={8} className="text-white" strokeWidth={3} />}
+            </div>
+          ) : (
+            /* Fill style: circle indicator */
+            <div
+              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${!selected ? 'bg-white border-gray-300' : ''}`}
+              style={selected ? { backgroundColor: theme.accentTextColor, borderColor: theme.accentTextColor } : undefined}
+            >
+              {selected && <Check size={9} className="text-white" strokeWidth={3.5} />}
+            </div>
+          )
         )}
       </button>
     </div>
@@ -336,7 +358,7 @@ export default function ProfileWizard({ onComplete, onSkip, initialAnswers = nul
         ) : (
           /* Loft/Default: animated progress bar */
           <>
-            <div className={`h-0.5 ${theme.progressTrack} rounded-full overflow-hidden mb-2`}>
+            <div className={`${theme.progressBarHeight || 'h-0.5'} ${theme.progressTrack} rounded-full overflow-hidden mb-2`}>
               <div
                 className={`h-full ${theme.progressFill} rounded-full progress-fill-animated`}
                 style={{ width: `${pct}%` }}
@@ -404,7 +426,7 @@ export default function ProfileWizard({ onComplete, onSkip, initialAnswers = nul
             onClick={handleContinue}
             disabled={!canContinue()}
             className={`flex items-center gap-2 px-5 py-2.5 text-sm font-semibold transition-all ${theme.btnRadius} ${
-              canContinue() ? `${theme.btnPrimary} ${enhanced ? 'btn-unlock' : ''}` : theme.btnDisabled
+              canContinue() ? `${theme.btnPrimary} ${enhanced && theme.springAnimations ? 'btn-unlock' : ''}` : theme.btnDisabled
             }`}
             style={enhanced && canContinue() ? { boxShadow: `0 4px 12px ${theme.accentTextColor}3d` } : undefined}
           >
@@ -415,7 +437,7 @@ export default function ProfileWizard({ onComplete, onSkip, initialAnswers = nul
     </>
   )
 
-  /* Enhanced directions: wrap in card using theme.card tokens */
+  /* Enhanced directions: wrap in card using theme tokens */
   if (enhanced) {
     return (
       <div className={`${theme.card} ${theme.cardRadius} ${theme.cardShadow} p-6`}>

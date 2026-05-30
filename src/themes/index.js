@@ -75,6 +75,7 @@ export const THEMES = {
     emptyStateStyle: 'text',
     monogramStyle: 'none',
     revealIllustrationPalette: 'warm',
+    revealStyle: 'check',               // 'check' | 'illustration' | 'number-hero'
 
     // ── Structural tokens ───────────────────────────────────────────────────
     ambientGlow: false,
@@ -100,8 +101,16 @@ export const THEMES = {
     itemEnterClass: '',                        // item stagger (empty = none)
     wizardProgressStyle: 'bar',               // 'bar' | 'dots'
     wizardIconInline: false,                   // inline icon vs badge
-    wizardSelectionStyle: 'fill',             // 'fill' | 'ring'
-    wizardRowPy: 'py-3.5',                    // row vertical padding
+    wizardSelectionStyle: 'fill',             // 'fill' | 'ring' | 'warm-fill'
+    wizardRowPy: 'py-3.5',
+
+    // ── New cross-direction tokens ───────────────────────────────────────────
+    cardBg: 'bg-white',
+    springAnimations: false,
+    progressBarHeight: 'h-0.5',
+    borderMuted: 'border-gray-200',
+    borderMutedHover: 'hover:border-gray-300',
+    inputStyle: 'box',                        // 'box' | 'underline'
   },
 
   loft: {
@@ -180,6 +189,7 @@ export const THEMES = {
     emptyStateStyle: 'illustrated',
     monogramStyle: 'rings',
     revealIllustrationPalette: 'warm',
+    revealStyle: 'illustration',
 
     // ── Structural tokens ───────────────────────────────────────────────────
     ambientGlow: true,
@@ -207,6 +217,12 @@ export const THEMES = {
     wizardIconInline: false,
     wizardSelectionStyle: 'fill',
     wizardRowPy: 'py-3.5',
+    cardBg: 'bg-white',
+    springAnimations: true,      // Loft: spring feels warm and physical
+    progressBarHeight: 'h-0.5',
+    borderMuted: 'border-gray-200',
+    borderMutedHover: 'hover:border-gray-300',
+    inputStyle: 'box',
   },
 
   azure: {
@@ -285,6 +301,7 @@ export const THEMES = {
     emptyStateStyle: 'illustrated',
     monogramStyle: 'square',
     revealIllustrationPalette: 'cool',
+    revealStyle: 'illustration',
 
     // ── Structural tokens ───────────────────────────────────────────────────
     ambientGlow: true,
@@ -310,9 +327,238 @@ export const THEMES = {
     itemEnterClass: 'item-enter-azure',
     wizardProgressStyle: 'dots',
     wizardIconInline: true,        // inline icons, no badge backgrounds
-    wizardSelectionStyle: 'ring',  // crisp ring, no fill wash
-    wizardRowPy: 'py-2.5',        // compact rows
+    wizardSelectionStyle: 'ring',
+    wizardRowPy: 'py-2.5',
+    cardBg: 'bg-white',
+    springAnimations: false,     // Azure: smooth, no spring
+    progressBarHeight: 'h-0.5',
+    borderMuted: 'border-blue-100',
+    borderMutedHover: 'hover:border-blue-200',
+    inputStyle: 'box',
+  },
+
+  grain: {
+    id: 'grain',
+    name: 'Grain',
+    description: 'Tactile · Physical · Crafted',
+    previewPageBg: '#f4f1eb',
+    previewAccent: '#1e40af',
+    previewCardRadius: '8px',
+    previewBtnRadius: '6px',
+
+    fontBody: "'Inter', system-ui, sans-serif",
+    fontHeading: "'Lora', Georgia, serif",
+
+    pageBg: 'bg-[#f4f1eb]',
+    pageGrain: true,
+
+    card: 'bg-[#faf9f6] border border-[#ddd5c5]',
+    cardRadius: 'rounded-lg',    // angular like a printed form, not soft like Loft's xl
+    cardShadow: 'shadow-[0_2px_8px_rgba(101,76,58,0.10),0_1px_3px_rgba(0,0,0,0.07)]',  // warm-tinted shadow
+
+    btnPrimary: 'bg-blue-800 text-white hover:bg-blue-900 active:scale-[0.97] transition-all tracking-wide',
+    btnSecondary: 'bg-[#faf9f6] text-blue-900 border border-[#ddd5c5] hover:bg-[#f4f1eb] active:scale-[0.98] transition-all tracking-wide',
+    btnRadius: 'rounded-lg',
+    btnDisabled: 'bg-stone-100 text-stone-400 cursor-not-allowed',
+
+    // Underline input — bottom border only, no box, no radius. The LINE is the field.
+    inputCls: 'border-0 border-b-2 border-[#c4b8a8] rounded-none bg-transparent text-gray-900 placeholder-stone-400/60 focus:border-blue-700 focus:outline-none transition-colors',
+
+    accentText: 'text-blue-800',
+    accentBg: 'bg-blue-800',
+    accentBgHover: 'hover:bg-blue-900',
+    accentTextHover: 'hover:text-blue-900',
+    accentLight: 'bg-blue-50',
+    accentBorder: 'border-blue-700',
+    accentTextColor: '#1e40af',
+
+    progressFill: 'bg-blue-800',
+    progressTrack: 'bg-[#ddd5c5]',
+
+    stepActive: 'border-2 border-blue-800 text-blue-800 bg-[#faf9f6]',
+    stepComplete: 'bg-blue-800 text-white',
+    stepUpcoming: 'bg-[#ddd5c5] text-stone-400',
+
+    badgeRadius: 'rounded',
+    pillBtnRadius: 'rounded-lg',
+
+    iconStyle: 'phosphor',
+    iconWeight: 'light',
+    useColoredIcons: false,
+    iconBadge: false,
+    iconBadgeRadius: 'rounded-md',
+    iconDefault: 'bg-stone-100 text-stone-500',
+    iconProfile: 'bg-stone-100 text-stone-500',
+    iconIncome: 'bg-stone-100 text-stone-600',
+    iconDeductions: 'bg-stone-100 text-stone-600',
+    iconAssets: 'bg-stone-100 text-stone-600',
+
+    label: 'text-[10px] font-bold tracking-widest text-stone-400 uppercase',
+
+    heroNumberSize: 'text-5xl',
+    heroNumberColor: 'text-blue-800',
+    successBg: 'bg-stone-50',          // flat warm surface — grain texture tells the warmth story
+    successText: 'text-stone-900',
+    advisorCardBg: 'bg-[#faf9f6]',
+    advisorCardHeaderBg: 'bg-stone-900', // solid ink-dark — no digital gradient, physical authority
+    advisorAvatarBg: 'bg-gradient-to-br from-blue-800 to-blue-900',
+    completeBg: 'bg-gradient-to-br from-amber-50 to-stone-50',
+    completeAccent: 'text-blue-800',
+
+    loginHeadingCls: 'text-5xl font-bold tracking-tight leading-tight',
+    sectionHeadingCls: 'text-3xl font-bold',
+    heroTagline: 'text-base text-stone-500',
+    wizardQuestionSize: 'text-2xl',
+
+    useIllustrations: true,
+    emptyStateStyle: 'illustrated',
+    monogramStyle: 'stamp',
+    revealIllustrationPalette: 'ink',
+    revealStyle: 'illustration',
+
+    ambientGlow: false,
+    ambientGlowPrimary: '',
+    ambientGlowSecondary: '',
+
+    showHeaderIcon: true,
+    showTrustSignal: true,
+
+    formCardWrapped: true,
+    formFieldSpacing: 'space-y-5',
+
+    cardHoverLift: true,
+    animationsEnhanced: true,
+
+    welcomeCardStyle: 'ink-gradient',
+
+    wizardListLayout: true,
+    showProgressPercent: false,
+
+    stepEnterClass: 'step-enter-grain',
+    itemEnterClass: 'item-enter-grain',
+    wizardProgressStyle: 'bar',
+    wizardIconInline: true,
+    wizardSelectionStyle: 'fill',   // same blue accent as Yes/No single-select — consistent
+    wizardRowPy: 'py-3',
+    cardBg: 'bg-[#faf9f6]',      // warm paper cast — not pure white
+    springAnimations: false,     // Grain: measured ease-out, no bounce
+    progressBarHeight: 'h-1',   // slightly thicker — physical meter feel
+    borderMuted: 'border-[#ddd5c5]',
+    borderMutedHover: 'hover:border-[#c5b99a]',
+    inputStyle: 'underline',
+  },
+
+  print: {
+    id: 'print',
+    name: 'Print',
+    description: 'Editorial · Typographic · Precise',
+    previewPageBg: '#ffffff',
+    previewAccent: '#1d4ed8',
+    previewCardRadius: '0px',
+    previewBtnRadius: '2px',
+
+    fontBody: "'Inter', system-ui, sans-serif",
+    fontHeading: "'Inter', system-ui, sans-serif",
+
+    pageBg: 'bg-white',
+    pageGrain: false,
+
+    card: 'bg-white border border-gray-200',
+    cardRadius: 'rounded-none',
+    cardShadow: '',
+
+    btnPrimary: 'bg-gray-900 text-white hover:bg-gray-800 active:scale-[0.98] transition-all tracking-wide',
+    btnSecondary: 'bg-white text-gray-900 border border-gray-900 hover:bg-gray-50 active:scale-[0.98] transition-all tracking-wide',
+    btnRadius: 'rounded-none',
+    btnDisabled: 'bg-gray-100 text-gray-400 cursor-not-allowed',
+
+    inputCls: 'border border-gray-300 rounded-none focus:border-blue-700 focus:outline-none bg-white text-gray-900 placeholder-gray-400 transition-colors',
+
+    accentText: 'text-blue-700',
+    accentBg: 'bg-blue-700',
+    accentBgHover: 'hover:bg-blue-800',
+    accentTextHover: 'hover:text-blue-800',
+    accentLight: 'bg-blue-50',
+    accentBorder: 'border-blue-700',
+    accentTextColor: '#1d4ed8',
+
+    progressFill: 'bg-gray-900',    // editorial: dark ink fill, not blue
+    progressTrack: 'bg-gray-100',
+
+    stepActive: 'border-2 border-gray-900 text-gray-900 bg-white',
+    stepComplete: 'bg-gray-900 text-white',
+    stepUpcoming: 'bg-gray-100 text-gray-400',
+
+    badgeRadius: 'rounded-none',
+    pillBtnRadius: 'rounded-none',
+
+    iconStyle: 'lucide',            // Lucide regular — functional, no decorative weight
+    iconWeight: 'regular',
+    useColoredIcons: false,
+    iconBadge: false,
+    iconBadgeRadius: 'rounded-none',
+    iconDefault: 'text-gray-400',
+    iconProfile: 'text-gray-400',
+    iconIncome: 'text-gray-400',
+    iconDeductions: 'text-gray-400',
+    iconAssets: 'text-gray-400',
+
+    label: 'text-[10px] font-bold tracking-widest text-gray-400 uppercase',
+
+    heroNumberSize: 'text-7xl',     // ← THE Print signature: data as typography
+    heroNumberColor: 'text-gray-900',
+    successBg: 'bg-white',
+    successText: 'text-gray-900',
+    advisorCardBg: 'bg-white',
+    advisorCardHeaderBg: '',
+    advisorAvatarBg: 'bg-gray-900',
+    completeBg: 'bg-white',
+    completeAccent: 'text-gray-900',
+
+    loginHeadingCls: 'text-6xl font-black tracking-tight leading-none',
+    sectionHeadingCls: 'text-4xl font-bold',
+    heroTagline: 'text-sm text-gray-500',
+    wizardQuestionSize: 'text-2xl',
+
+    useIllustrations: false,
+    emptyStateStyle: 'text',
+    monogramStyle: 'none',
+    revealIllustrationPalette: 'none',
+    revealStyle: 'number-hero',     // data as typography — no illustration
+
+    // ── Structural tokens ───────────────────────────────────────────────────
+    ambientGlow: false,
+    ambientGlowPrimary: '',
+    ambientGlowSecondary: '',
+
+    showHeaderIcon: false,
+    showTrustSignal: true,
+
+    formCardWrapped: true,
+    formFieldSpacing: 'space-y-6',
+
+    cardHoverLift: false,
+    animationsEnhanced: true,
+
+    welcomeCardStyle: 'editorial',  // no gradient, pure typography
+
+    wizardListLayout: true,
+    showProgressPercent: false,
+
+    stepEnterClass: 'step-enter-print',
+    itemEnterClass: 'item-enter-print',
+    wizardProgressStyle: 'bar',
+    wizardIconInline: true,
+    wizardSelectionStyle: 'checkbox',  // square checkmark — journalistic
+    wizardRowPy: 'py-3',
+
+    cardBg: 'bg-white',
+    springAnimations: false,
+    progressBarHeight: 'h-0.5',
+    borderMuted: 'border-gray-200',
+    borderMutedHover: 'hover:border-gray-400',
+    inputStyle: 'box',
   },
 }
 
-export const THEME_LIST = ['default', 'loft', 'azure']
+export const THEME_LIST = ['default', 'loft', 'azure', 'grain', 'print']

@@ -7,6 +7,7 @@ import ReturningUserConfirmation from '../components/ReturningUserConfirmation'
 
 /* ── OTP digit box — handles its own bounce without remounting ───────────── */
 function DigitBox({ digit, inputRef, onChange, onKeyDown, inputCls, enhanced }) {
+  const { theme } = useTheme()
   const [bouncing, setBouncing] = useState(false)
   const prev = useRef('')
   useEffect(() => {
@@ -15,7 +16,7 @@ function DigitBox({ digit, inputRef, onChange, onKeyDown, inputCls, enhanced }) 
   }, [digit])
   return (
     <div
-      className={`flex-1 min-w-0 ${bouncing && enhanced ? 'digit-bounce' : ''}`}
+      className={`flex-1 min-w-0 ${bouncing && enhanced && theme.springAnimations ? 'digit-bounce' : ''}`}
       onAnimationEnd={() => setBouncing(false)}
     >
       <input
@@ -24,7 +25,7 @@ function DigitBox({ digit, inputRef, onChange, onKeyDown, inputCls, enhanced }) 
         value={digit}
         onChange={onChange}
         onKeyDown={onKeyDown}
-        className={`w-full h-11 text-center text-lg font-semibold focus:outline-none transition-all ${inputCls}`}
+        className={`w-full text-center text-lg font-semibold focus:outline-none transition-all ${inputCls} ${theme.inputStyle === 'underline' ? 'h-10 pb-1' : 'h-11'}`}
       />
     </div>
   )
@@ -164,17 +165,21 @@ export default function ExistingUserLogin() {
               <p className="text-sm text-gray-500 mt-1.5">Enter your email or mobile to continue.</p>
             </div>
 
-            <div className={theme.formCardWrapped ? `${theme.formFieldSpacing} bg-white ${theme.cardRadius} px-6 py-7 ${theme.cardShadow}` : theme.formFieldSpacing}>
+            <div className={theme.formCardWrapped ? `${theme.formFieldSpacing} ${theme.cardBg} ${theme.cardRadius} px-6 py-7 ${theme.cardShadow}` : theme.formFieldSpacing}>
               <div>
                 <div
-                  className={`relative flex ${theme.inputCls} overflow-visible focus-within:ring-0`}
-                  style={{ padding: 0 }}
+                  className={`relative flex ${theme.inputStyle === 'underline' ? '' : theme.inputCls} overflow-visible focus-within:ring-0`}
+                  style={theme.inputStyle === 'underline' ? { borderBottom: '2px solid #c4b8a8', padding: 0 } : { padding: 0 }}
                 >
                   {!isEmail && (
                     <button
                       type="button"
                       onClick={() => setCountryOpen(o => !o)}
-                      className="flex items-center gap-1.5 px-3 py-3 border-r border-gray-200 bg-gray-50 text-sm text-gray-700 whitespace-nowrap flex-shrink-0 hover:bg-gray-100 transition-colors rounded-l-[inherit]"
+                      className={`flex items-center gap-1.5 whitespace-nowrap flex-shrink-0 transition-colors ${
+                        theme.inputStyle === 'underline'
+                          ? 'px-0 pr-2 py-2.5 text-sm text-stone-500 bg-transparent hover:text-stone-700'
+                          : 'px-3 py-3 border-r border-gray-200 bg-gray-50 text-sm text-gray-700 hover:bg-gray-100 rounded-l-[inherit]'
+                      }`}
                     >
                       <span>{selectedCountry.flag}</span>
                       <span className="font-medium">{selectedCountry.dial}</span>
@@ -186,7 +191,7 @@ export default function ExistingUserLogin() {
                     value={identifier}
                     onChange={e => { setIdentifier(e.target.value); setOtpSent(false); setOtp('') }}
                     autoFocus
-                    className="flex-1 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none bg-transparent"
+                    className={`flex-1 text-sm text-gray-900 focus:outline-none bg-transparent ${theme.inputStyle === 'underline' ? 'px-1 py-2.5 placeholder-stone-400/60' : 'px-4 py-3 placeholder-gray-400'}`}
                   />
                   {countryOpen && !isEmail && (
                     <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-xl border border-gray-200 shadow-lg z-20 overflow-hidden">
@@ -242,7 +247,7 @@ export default function ExistingUserLogin() {
               disabled={!otpSent || otp.length < 6}
               className={`mt-6 w-full flex items-center justify-center gap-2 py-3.5 text-sm font-semibold transition-all ${theme.btnRadius} ${
                 otpSent && otp.length === 6
-                  ? `${theme.btnPrimary} ${enhanced ? 'btn-unlock' : ''}`
+                  ? `${theme.btnPrimary} ${enhanced && theme.springAnimations ? 'btn-unlock' : ''}`
                   : theme.btnDisabled
               }`}
               style={enhanced && otpSent && otp.length === 6 ? { boxShadow: `0 4px 16px ${theme.accentTextColor}47` } : undefined}

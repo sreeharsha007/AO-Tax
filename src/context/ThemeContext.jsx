@@ -22,11 +22,14 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     document.body.style.fontFamily = theme.fontBody
-    // Grain texture overlay (Loft direction)
+    // Grain texture overlays — each direction uses its own class and opacity
+    document.documentElement.classList.remove('loft-grain', 'grain-texture')
     if (theme.pageGrain) {
-      document.documentElement.classList.add('loft-grain')
-    } else {
-      document.documentElement.classList.remove('loft-grain')
+      if (themeId === 'grain') {
+        document.documentElement.classList.add('grain-texture')  // 4.5% opacity
+      } else {
+        document.documentElement.classList.add('loft-grain')     // 2.8% opacity
+      }
     }
     // Direction class for motion defaults
     document.documentElement.classList.toggle('loft-page', themeId === 'loft')

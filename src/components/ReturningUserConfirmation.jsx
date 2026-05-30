@@ -100,8 +100,14 @@ function YesNoInline({ value, onChange, question }) {
                 enhanced ? theme.pillBtnRadius : 'rounded-full'
               } ${
                 active
-                  ? `${theme.accentLight} ${theme.accentBorder} ${theme.accentText}`
-                  : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                  ? theme.id === 'print'
+                    ? 'bg-gray-100 border-gray-700 text-gray-900'                 // Print: neutral marked, not activated
+                    : `${theme.accentLight} ${theme.accentBorder} ${theme.accentText}`
+                  : theme.id === 'grain'
+                    ? 'bg-[#faf9f6] border-[#ddd5c5] text-stone-600 hover:bg-amber-50/30'
+                    : theme.id === 'print'
+                      ? 'bg-white border-gray-300 text-gray-700 hover:border-gray-500'
+                      : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
               }`}
             >
               {opt === 'yes' ? 'Yes' : 'No'}
@@ -149,15 +155,30 @@ function LoftChip({ opt, isSelected, onToggle, lucideIcon: LucideIcon, phosphorI
       onClick={() => onToggle(opt.id)}
       className={`flex items-center gap-1.5 px-3 py-1.5 ${theme.pillBtnRadius} border text-xs font-medium transition-all ${
         isSelected
-          ? 'bg-blue-50 border-blue-200 text-blue-700'
-          : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300 hover:bg-gray-50'
+          ? theme.id === 'print'
+            ? 'bg-gray-100 border-gray-700 text-gray-900'                       // Print: neutral marked chip
+            : theme.id === 'grain'
+            ? `${theme.accentLight} ${theme.accentBorder} ${theme.accentText}`  // Grain: same blue accent as Yes/No pills
+            : 'bg-blue-50 border-blue-200 text-blue-700'        // Loft/Azure: blue fill
+          : theme.id === 'grain'
+            ? 'bg-[#faf9f6] border-[#ddd5c5] text-stone-500 hover:bg-amber-50/30 hover:border-[#c5b99a]'
+            : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300 hover:bg-gray-50'
       }`}
     >
       {PhosphorIcon && (
         <PhosphorIcon
           size={13}
           weight={theme.iconWeight}
-          className={isSelected ? theme.accentText : (theme.wizardIconInline ? 'text-blue-300' : 'text-gray-400')}
+          className={isSelected
+            ? theme.id === 'print' ? 'text-gray-700' : theme.accentText
+            : theme.id === 'grain'
+              ? 'text-stone-400'
+              : theme.id === 'print'
+                ? 'text-gray-400'
+                : theme.wizardIconInline
+                  ? 'text-blue-300'
+                  : 'text-gray-400'
+          }
           aria-hidden
         />
       )}
@@ -173,7 +194,7 @@ function LoftChip({ opt, isSelected, onToggle, lucideIcon: LucideIcon, phosphorI
 function ProfileSection({ label, children }) {
   const { theme } = useTheme()
   return (
-    <div className="px-6 py-5 border-t border-gray-100">
+    <div className={`px-6 py-5 border-t ${theme.borderMuted || 'border-gray-100'}`}>
       <p className={`${theme.label} mb-3`}>{label}</p>
       {children}
     </div>
@@ -183,10 +204,10 @@ function ProfileSection({ label, children }) {
 /* ── Loft layout: hybrid Direction 1 + Direction 3 ──────────────────────── */
 function LoftConfirmationLayout({ answers, update, toggleMulti, onConfirm, theme }) {
   return (
-    <div className={`bg-white ${theme.cardRadius} ${theme.cardShadow} overflow-hidden`}>
+    <div className={`${theme.cardBg || 'bg-white'} ${theme.cardRadius} ${theme.cardShadow} overflow-hidden`} style={{ border: `1px solid ${theme.id === 'grain' ? '#ddd5c5' : 'transparent'}` }}>
 
       {/* Header */}
-      <div className="px-6 pt-6 pb-5 border-b border-gray-100">
+      <div className={`px-6 pt-6 pb-5 border-b ${theme.id === 'grain' ? 'border-[#ddd5c5]' : 'border-gray-100'}`}>
         <p className={theme.label}>BEFORE YOU BEGIN</p>
         <p className="text-base font-semibold text-gray-900 mt-1.5">Your 2024 profile</p>
         <p className="text-xs text-gray-500 mt-1 leading-relaxed">
@@ -258,7 +279,7 @@ function LoftConfirmationLayout({ answers, update, toggleMulti, onConfirm, theme
         <button
           onClick={() => onConfirm(answers)}
           className={`w-full flex items-center justify-center gap-2 py-3.5 ${theme.btnPrimary} ${theme.btnRadius} text-sm font-semibold transition-all`}
-          style={{ boxShadow: '0 4px 16px rgba(29,78,216,0.24)' }}
+          style={{ boxShadow: `0 4px 16px ${theme.accentTextColor}3d` }}
         >
           <Check size={14} strokeWidth={3} />
           Confirm — this is still accurate

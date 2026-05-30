@@ -31,7 +31,14 @@ export default function LoginPage() {
           {/* Icon badge above heading — driven by theme.showHeaderIcon */}
           {theme.showHeaderIcon && (
             <div className="mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center shadow-[0_4px_16px_rgba(29,78,216,0.35)]">
+              <div
+                className={`w-12 h-12 flex items-center justify-center`}
+                style={{
+                  backgroundColor: theme.accentTextColor,
+                  borderRadius: theme.btnRadius === 'rounded-full' ? '24px' : theme.btnRadius === 'rounded-xl' ? '12px' : '8px',
+                  boxShadow: `0 4px 16px ${theme.accentTextColor}59`,
+                }}
+              >
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
                   <path d="M9 12h6M9 16h4M7 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
                   <path d="M9 4h6a1 1 0 011 1v2H8V5a1 1 0 011-1z" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
@@ -68,7 +75,7 @@ export default function LoginPage() {
               >
                 <div className="flex items-center gap-3">
                   {theme.iconStyle === 'phosphor' && (
-                    <UserCirclePlus size={22} weight="duotone" className="opacity-80 flex-shrink-0" />
+                    <UserCirclePlus size={22} weight={theme.iconWeight} className="opacity-80 flex-shrink-0" />
                   )}
                   <div className="text-left">
                     <p className="text-sm font-semibold">New to AOTax</p>
@@ -91,7 +98,7 @@ export default function LoginPage() {
               >
                 <div className="flex items-center gap-3">
                   {theme.iconStyle === 'phosphor' && (
-                    <UserCircle size={22} weight="duotone" className={`${theme.accentText} flex-shrink-0`} />
+                    <UserCircle size={22} weight={theme.iconWeight} className={`${theme.accentText} flex-shrink-0`} />
                   )}
                   <div className="text-left">
                     <p className="text-sm font-semibold text-gray-800">Returning customer</p>
@@ -106,7 +113,7 @@ export default function LoginPage() {
           {/* Trust signal — driven by theme.showTrustSignal */}
           {theme.showTrustSignal && (
             <p
-              className={`text-center text-[11px] text-gray-400 mt-10 leading-relaxed ${theme.itemEnterClass}`}
+              className={`text-center text-[11px] mt-10 leading-relaxed ${theme.label} normal-case tracking-normal font-normal ${theme.itemEnterClass}`}
               style={enhanced ? { animationDelay: '200ms' } : undefined}
             >
               Trusted by 12,000+ filers · IRS-authorized · Bank-level encryption

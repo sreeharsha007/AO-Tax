@@ -8,6 +8,7 @@ import { useTheme } from '../context/ThemeContext'
 
 /* ── OTP digit box — handles its own bounce without remounting ───────────── */
 function DigitBox({ digit, inputRef, onChange, onKeyDown, inputCls, enhanced }) {
+  const { theme } = useTheme()
   const [bouncing, setBouncing] = useState(false)
   const prev = useRef('')
   useEffect(() => {
@@ -16,7 +17,7 @@ function DigitBox({ digit, inputRef, onChange, onKeyDown, inputCls, enhanced }) 
   }, [digit])
   return (
     <div
-      className={`flex-1 min-w-0 ${bouncing && enhanced ? 'digit-bounce' : ''}`}
+      className={`flex-1 min-w-0 ${bouncing && enhanced && theme.springAnimations ? 'digit-bounce' : ''}`}
       onAnimationEnd={() => setBouncing(false)}
     >
       <input
@@ -25,7 +26,7 @@ function DigitBox({ digit, inputRef, onChange, onKeyDown, inputCls, enhanced }) 
         value={digit}
         onChange={onChange}
         onKeyDown={onKeyDown}
-        className={`w-full h-11 text-center text-lg font-semibold focus:outline-none transition-all ${inputCls}`}
+        className={`w-full text-center text-lg font-semibold focus:outline-none transition-all ${inputCls} ${theme.inputStyle === 'underline' ? 'h-10 pb-1' : 'h-11'}`}
       />
     </div>
   )
@@ -77,13 +78,21 @@ function OTPInput({ value, onChange, inputCls, enhanced }) {
 function MobileInput({ country, setCountry, mobile, setMobile, theme }) {
   const [open, setOpen] = useState(false)
   const selected = COUNTRIES.find(c => c.code === country) || COUNTRIES[0]
+  const underline = theme.inputStyle === 'underline'
 
   return (
-    <div className={`relative flex ${theme.inputCls} overflow-visible`} style={{ padding: 0 }}>
+    <div
+      className={`relative flex ${underline ? '' : theme.inputCls} overflow-visible`}
+      style={underline ? { borderBottom: '2px solid #c4b8a8', padding: 0 } : { padding: 0 }}
+    >
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-1.5 px-3 py-3 border-r border-gray-200 bg-gray-50 text-sm text-gray-700 whitespace-nowrap flex-shrink-0 hover:bg-gray-100 transition-colors rounded-l-[inherit]"
+        className={`flex items-center gap-1.5 whitespace-nowrap flex-shrink-0 transition-colors ${
+          underline
+            ? 'px-0 pr-2 py-2.5 text-sm text-stone-500 hover:text-stone-700 bg-transparent'
+            : 'px-3 py-3 border-r border-gray-200 bg-gray-50 text-sm text-gray-700 hover:bg-gray-100 rounded-l-[inherit]'
+        }`}
       >
         <span>{selected.flag}</span>
         <span className="font-medium">{selected.dial}</span>
@@ -92,7 +101,7 @@ function MobileInput({ country, setCountry, mobile, setMobile, theme }) {
         type="tel" placeholder="Mobile number"
         value={mobile}
         onChange={e => setMobile(e.target.value.replace(/\D/g, ''))}
-        className="flex-1 px-3 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none bg-transparent"
+        className={`flex-1 text-sm text-gray-900 focus:outline-none bg-transparent ${underline ? 'px-1 py-2.5 placeholder-stone-400/60' : 'px-3 py-3 placeholder-gray-400'}`}
       />
       {open && (
         <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-xl border border-gray-200 shadow-lg z-20 overflow-hidden">
@@ -162,6 +171,30 @@ function WelcomeMonogram({ initial }) {
     )
   }
 
+  if (theme.monogramStyle === 'stamp') {
+    // Grain: ink stamp — solid, pressed, engraved quality
+    // Larger initial + visible inner ring = letterpress/seal character
+    return (
+      <div
+        className="mx-auto mb-5 flex items-center justify-center"
+        style={{
+          width: 58, height: 58,
+          backgroundColor: '#1e3a8a',
+          borderRadius: 8,
+          boxShadow: 'inset 0 0 0 2.5px rgba(255,255,255,0.22), inset 0 0 0 4px rgba(255,255,255,0.08), 0 3px 10px rgba(0,0,0,0.30)',
+        }}
+      >
+        <span
+          className="text-white text-3xl font-bold select-none"
+          style={{ fontFamily: theme.fontHeading, letterSpacing: '-0.02em' }}
+          aria-hidden
+        >
+          {initial}
+        </span>
+      </div>
+    )
+  }
+
   return null
 }
 
@@ -169,19 +202,18 @@ function WelcomeMonogram({ initial }) {
 function DocumentIllustration({ sectionCount }) {
   const { theme } = useTheme()
   const cool = theme.revealIllustrationPalette === 'cool'
-
-  // Palette: warm (Loft slate) vs cool (Azure blue)
-  // blue-400 body gives contrast against blue-50 card background
-  const bodyStroke   = cool ? '#60a5fa' : '#94a3b8'   // blue-400 vs slate-400
-  const linesStroke  = cool ? '#93c5fd' : '#cbd5e1'   // blue-300 vs slate-300
+  const ink  = theme.revealIllustrationPalette === 'ink'
+  // Palette: warm (Loft slate) | cool (Azure blue) | ink (Grain warm-navy)
+  const bodyStroke  = ink ? '#1e3a5f' : cool ? '#60a5fa' : '#94a3b8'
+  const linesStroke = ink ? '#c7bba0' : cool ? '#93c5fd' : '#cbd5e1'  // parchment lines for Grain
   const checkStroke  = theme.accentTextColor           // always the direction's accent
 
   return (
     <div className="relative mx-auto mb-2" style={{ width: 72, height: 72 }}>
       <svg width="72" height="72" viewBox="0 0 72 72" fill="none" aria-hidden>
-        <path d="M12 8h32l14 14v46H12z" stroke={bodyStroke} strokeWidth="1.5" strokeLinejoin="round" />
-        <path d="M44 8v14h14" stroke={bodyStroke} strokeWidth="1.5" strokeLinejoin="round" />
-        <path d="M20 32h32M20 39h32M20 46h22" stroke={linesStroke} strokeWidth="1.25" strokeLinecap="round" />
+        <path d="M12 8h32l14 14v46H12z" stroke={bodyStroke} strokeWidth={ink ? '1' : '1.5'} strokeLinejoin="round" />
+        <path d="M44 8v14h14" stroke={bodyStroke} strokeWidth={ink ? '1' : '1.5'} strokeLinejoin="round" />
+        <path d="M20 32h32M20 39h32M20 46h22" stroke={linesStroke} strokeWidth={ink ? '1' : '1.25'} strokeLinecap="round" />
         {/* Check mark — drawn via stroke-dashoffset animation */}
         <path
           d="M20 56l9 9 19-21"
@@ -294,7 +326,7 @@ export default function SignupFlow({ initialData = {} }) {
                 <p className="text-sm text-gray-500 mt-1">Just the basics to get started.</p>
               </div>
 
-              <div className={theme.formCardWrapped ? `${theme.formFieldSpacing} bg-white ${theme.cardRadius} px-6 py-7 ${theme.cardShadow}` : theme.formFieldSpacing}>
+              <div className={theme.formCardWrapped ? `${theme.formFieldSpacing} ${theme.cardBg} ${theme.cardRadius} px-6 py-7 ${theme.cardShadow}` : theme.formFieldSpacing}>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <FieldLabel theme={theme}>First name</FieldLabel>
@@ -350,7 +382,7 @@ export default function SignupFlow({ initialData = {} }) {
                 key={canContinue ? 'active' : 'disabled'}
                 onClick={() => setStep('welcome')}
                 disabled={!canContinue}
-                className={`mt-6 w-full flex items-center justify-center gap-2 py-3.5 text-sm font-semibold transition-all ${theme.btnRadius} ${canContinue ? `${theme.btnPrimary} ${enhanced ? 'btn-unlock' : ''}` : theme.btnDisabled}`}
+                className={`mt-6 w-full flex items-center justify-center gap-2 py-3.5 text-sm font-semibold transition-all ${theme.btnRadius} ${canContinue ? `${theme.btnPrimary} ${enhanced && theme.springAnimations ? 'btn-unlock' : ''}` : theme.btnDisabled}`}
                 style={enhanced && canContinue ? { boxShadow: `0 4px 16px ${theme.accentTextColor}47` } : undefined}
               >
                 Continue <ArrowRight size={15} />
@@ -361,13 +393,54 @@ export default function SignupFlow({ initialData = {} }) {
           {/* ── Step: Welcome (KEY MOMENT) ────────────────────────────── */}
           {step === 'welcome' && (
             <div className="text-center">
-              {theme.welcomeCardStyle !== 'minimal' ? (
+              {theme.welcomeCardStyle === 'editorial' ? (
+                /* Print: editorial welcome — no gradient, pure typography + bold rule */
+                <div className="border border-gray-200 overflow-hidden mb-2">
+                  {/* Bold top rule — the editorial masthead mark */}
+                  <div className="border-t-4 border-gray-900 px-6 pt-6 pb-5">
+                    <p className={`${theme.label} mb-3`}>WELCOME</p>
+                    <h1
+                      className="text-5xl font-black text-gray-900 leading-none"
+                      style={{ fontFamily: theme.fontHeading }}
+                    >
+                      {form.firstName}.
+                    </h1>
+                    <p className="text-sm text-gray-500 mt-2">Your account is ready.</p>
+                  </div>
+                  {/* Thin rule + body */}
+                  <div className="border-t border-gray-100 px-6 py-5">
+                    <p
+                      className={`text-sm text-gray-600 leading-relaxed ${theme.itemEnterClass}`}
+                      style={{ animationDelay: '80ms' }}
+                    >
+                      A few questions help us tailor your 2025 return. Takes about a minute.
+                    </p>
+                    <div
+                      className={`mt-5 space-y-3 ${theme.itemEnterClass}`}
+                      style={{ animationDelay: '140ms' }}
+                    >
+                      <button
+                        onClick={() => setStep('profile')}
+                        className={`w-full flex items-center justify-center gap-2 ${theme.btnPrimary} ${theme.btnRadius} py-3.5 text-sm font-semibold transition-all`}
+                      >
+                        Set up my 2025 filing
+                      </button>
+                      <button
+                        onClick={() => navigate('/dashboard', { state: { isNewUser: true, assessmentSkipped: true, firstName: form.firstName } })}
+                        className={`w-full text-sm font-medium ${theme.accentText} ${theme.accentTextHover} transition-colors py-2`}
+                      >
+                        I'll fill this during my first filing
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : theme.welcomeCardStyle !== 'minimal' ? (
                 /* Enhanced welcome card — gradient header driven by theme.advisorCardHeaderBg */
-                <div className={`${theme.cardRadius} ${theme.cardShadow} overflow-hidden mb-2`}>
+                <div className={`${theme.cardRadius} ${theme.cardShadow} overflow-hidden mb-2`} style={theme.id === 'grain' ? { border: '1px solid #ddd5c5' } : undefined}>
                   {/* Gradient header — color from token */}
                   <div className={`${theme.advisorCardHeaderBg} px-6 pt-8 pb-10 relative overflow-hidden`}>
-                    {/* Ambient glow within header */}
-                    <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full blur-2xl" aria-hidden />
+                    {/* Ambient glow within header — suppressed for Grain (physical materials don't glow) */}
+                    {theme.id !== 'grain' && <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full blur-2xl" aria-hidden />}
 
                     {/* Direction monogram — rings, square, or none */}
                     <WelcomeMonogram initial={(form.firstName[0] || 'A').toUpperCase()} />
@@ -378,8 +451,8 @@ export default function SignupFlow({ initialData = {} }) {
                     <p className="text-white/60 text-sm mt-1.5 relative z-10 font-light">Your account is ready.</p>
                   </div>
 
-                  {/* Card body — staggered entrance */}
-                  <div className="bg-white px-6 py-6">
+                  {/* Card body — warm paper for Grain, white for others */}
+                  <div className={`${theme.id === 'grain' ? 'bg-[#faf9f6]' : 'bg-white'} px-6 py-6`}>
                     <p
                       className={`text-sm text-gray-600 leading-relaxed ${theme.itemEnterClass}`}
                       style={enhanced ? { animationDelay: '100ms' } : undefined}
@@ -395,7 +468,7 @@ export default function SignupFlow({ initialData = {} }) {
                         className={`w-full flex items-center justify-center gap-2.5 ${theme.btnPrimary} ${theme.btnRadius} py-3.5 text-sm font-semibold transition-all`}
                         style={{ boxShadow: `0 4px 16px ${theme.accentTextColor}47` }}
                       >
-                        <FilePlus size={18} weight="duotone" />
+                        <FilePlus size={18} weight={theme.iconWeight} />
                         Set up my 2025 filing
                       </button>
                       <button
@@ -462,13 +535,44 @@ export default function SignupFlow({ initialData = {} }) {
           {/* ── Step: Reveal (KEY MOMENT) ──────────────────────────────── */}
           {step === 'reveal' && (
             <div className="text-center">
-              {theme.useIllustrations ? (
+              {theme.revealStyle === 'number-hero' ? (
+                /* Print: number as typographic hero — no illustration */
+                <div className="bg-white border border-gray-200 overflow-hidden text-center">
+                  {/* Bold top rule */}
+                  <div className="border-t-4 border-gray-900" />
+                  <div className="px-8 pt-10 pb-2">
+                    <p className={`${theme.label} mb-4`}>FILING SETUP COMPLETE</p>
+                    <p className={`${theme.heroNumberSize} ${theme.heroNumberColor} font-black leading-none`}>
+                      {sections.length || 0}
+                    </p>
+                    <div className="border-t border-gray-100 mt-6 pt-4">
+                      <p className="text-sm text-gray-400 tracking-widest uppercase">sections ready</p>
+                    </div>
+                  </div>
+                  <div className="px-6 pb-6 pt-4 space-y-3">
+                    <button
+                      onClick={handleStartFiling}
+                      className={`w-full flex items-center justify-center gap-2 ${theme.btnPrimary} ${theme.btnRadius} py-3.5 text-sm font-semibold transition-all`}
+                    >
+                      Start my 2025 filing <ArrowRight size={15} />
+                    </button>
+                    <button
+                      onClick={() => navigate('/dashboard', {
+                        state: { isNewUser: true, firstName: form.firstName, assessmentComplete: true, assessmentAnswers: profileAnswers ?? null },
+                      })}
+                      className={`w-full text-sm font-medium ${theme.accentText} ${theme.accentTextHover} transition-colors py-2`}
+                    >
+                      I'll do this later
+                    </button>
+                  </div>
+                </div>
+              ) : theme.revealStyle === 'illustration' ? (
                 /* Enhanced reveal card — tokens drive background, border, illustration */
                 <div className={`${theme.successBg} ${theme.cardRadius} border border-blue-100 ${theme.cardShadow} overflow-hidden`}>
                   {/* Illustration area */}
                   <div className="px-8 pt-10 pb-6">
                     <DocumentIllustration sectionCount={sections.length} />
-                    <h1 className="text-3xl font-bold text-gray-900 mt-6 leading-tight">Your filing is set up.</h1>
+                    <h1 className="text-3xl font-bold text-gray-900 mt-6 leading-tight" style={{ fontFamily: theme.fontHeading }}>Your filing is set up.</h1>
                     <p className="text-sm text-gray-500 mt-2.5 leading-relaxed max-w-[240px] mx-auto">
                       {sections.length > 0
                         ? `We've tailored your 2025 return — ${sections.length} section${sections.length === 1 ? '' : 's'} ready for you to complete.`
@@ -483,7 +587,7 @@ export default function SignupFlow({ initialData = {} }) {
                       className={`w-full flex items-center justify-center gap-2.5 ${theme.btnPrimary} ${theme.btnRadius} py-3.5 text-sm font-semibold transition-all`}
                       style={{ boxShadow: `0 4px 16px ${theme.accentTextColor}47` }}
                     >
-                      <ArrowCircleRight size={18} weight="duotone" />
+                      <ArrowCircleRight size={18} weight={theme.iconWeight} />
                       Start my 2025 filing
                     </button>
                     <button

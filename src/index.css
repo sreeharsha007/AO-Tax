@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -115,6 +116,56 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 .accordion-open { animation: accordion-open 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
+
+/* ── Print: fast, crisp step entrance — content appears, doesn't animate ── */
+@keyframes step-enter-print {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.step-enter-print {
+  animation: step-enter-print 150ms ease-in both;
+}
+
+/* ── Print: item entrance — near-instant, purposeful ────────────────────── */
+@keyframes item-enter-print {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.item-enter-print {
+  animation: item-enter-print 120ms ease-in both;
+}
+
+/* ── Grain: slower step entrance — physical placement feel ──────────────── */
+@keyframes step-enter-grain {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.step-enter-grain {
+  animation: step-enter-grain 280ms ease-out both;
+}
+
+/* ── Grain: item stagger — measured, settled cadence ────────────────────── */
+@keyframes item-enter-grain {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.item-enter-grain {
+  animation: item-enter-grain 200ms ease-out both;
+}
+
+/* ── Grain texture — heavier than Loft (4.5% vs 2.8%) ──────────────────── */
+/* The texture defines the direction — it must be visible, not just felt.   */
+.grain-texture::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px 200px;
+}
 
 /* ── Azure: pure fade step entrance (no translate — smooth, deliberate) ─── */
 @keyframes step-enter-azure {
