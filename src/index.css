@@ -117,6 +117,24 @@
 }
 .accordion-open { animation: accordion-open 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
 
+/* ── Authority: instant functional response — 150ms, no slide ───────────── */
+@keyframes step-enter-authority {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.step-enter-authority {
+  animation: step-enter-authority 150ms ease-in both;
+}
+
+/* ── Authority: item entrance — 100ms, near-instant ─────────────────────── */
+@keyframes item-enter-authority {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.item-enter-authority {
+  animation: item-enter-authority 100ms ease-in both;
+}
+
 /* ── Print: fast, crisp step entrance — content appears, doesn't animate ── */
 @keyframes step-enter-print {
   from { opacity: 0; }

@@ -100,8 +100,10 @@ function YesNoInline({ value, onChange, question }) {
                 enhanced ? theme.pillBtnRadius : 'rounded-full'
               } ${
                 active
-                  ? theme.id === 'print'
-                    ? 'bg-gray-100 border-gray-700 text-gray-900'                 // Print: neutral marked, not activated
+                  ? theme.id === 'authority'
+                    ? `${theme.accentLight} ${theme.accentBorder} ${theme.accentText}` // Authority: blue
+                    : theme.id === 'print'
+                    ? 'bg-gray-100 border-gray-700 text-gray-900'                 // Print: neutral marked
                     : `${theme.accentLight} ${theme.accentBorder} ${theme.accentText}`
                   : theme.id === 'grain'
                     ? 'bg-[#faf9f6] border-[#ddd5c5] text-stone-600 hover:bg-amber-50/30'
@@ -155,7 +157,9 @@ function LoftChip({ opt, isSelected, onToggle, lucideIcon: LucideIcon, phosphorI
       onClick={() => onToggle(opt.id)}
       className={`flex items-center gap-1.5 px-3 py-1.5 ${theme.pillBtnRadius} border text-xs font-medium transition-all ${
         isSelected
-          ? theme.id === 'print'
+          ? theme.id === 'authority'
+            ? `${theme.accentLight} ${theme.accentBorder} ${theme.accentText}`  // Authority: blue fill + blue border
+            : theme.id === 'print'
             ? 'bg-gray-100 border-gray-700 text-gray-900'                       // Print: neutral marked chip
             : theme.id === 'grain'
             ? `${theme.accentLight} ${theme.accentBorder} ${theme.accentText}`  // Grain: same blue accent as Yes/No pills
@@ -167,17 +171,15 @@ function LoftChip({ opt, isSelected, onToggle, lucideIcon: LucideIcon, phosphorI
     >
       {PhosphorIcon && (
         <PhosphorIcon
-          size={13}
+          size={15}
           weight={theme.iconWeight}
           className={isSelected
             ? theme.id === 'print' ? 'text-gray-700' : theme.accentText
-            : theme.id === 'grain'
-              ? 'text-stone-400'
-              : theme.id === 'print'
-                ? 'text-gray-400'
-                : theme.wizardIconInline
-                  ? 'text-blue-300'
-                  : 'text-gray-400'
+            : theme.id === 'grain'      ? 'text-stone-400'  // warm neutral
+            : theme.id === 'authority'  ? 'text-gray-400'   // neutral — structural
+            : theme.id === 'print'      ? 'text-gray-400'   // neutral
+            : theme.wizardIconInline    ? 'text-blue-300'   // Azure/Loft: ambient blue
+            : 'text-gray-400'
           }
           aria-hidden
         />
@@ -204,10 +206,10 @@ function ProfileSection({ label, children }) {
 /* ── Loft layout: hybrid Direction 1 + Direction 3 ──────────────────────── */
 function LoftConfirmationLayout({ answers, update, toggleMulti, onConfirm, theme }) {
   return (
-    <div className={`${theme.cardBg || 'bg-white'} ${theme.cardRadius} ${theme.cardShadow} overflow-hidden`} style={{ border: `1px solid ${theme.id === 'grain' ? '#ddd5c5' : 'transparent'}` }}>
+    <div className={`${theme.card} ${theme.cardRadius} ${theme.cardShadow} overflow-hidden`}>
 
       {/* Header */}
-      <div className={`px-6 pt-6 pb-5 border-b ${theme.id === 'grain' ? 'border-[#ddd5c5]' : 'border-gray-100'}`}>
+      <div className={`px-6 pt-6 pb-5 border-b ${theme.borderMuted || 'border-gray-100'}`}>
         <p className={theme.label}>BEFORE YOU BEGIN</p>
         <p className="text-base font-semibold text-gray-900 mt-1.5">Your 2024 profile</p>
         <p className="text-xs text-gray-500 mt-1 leading-relaxed">

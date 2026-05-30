@@ -559,6 +559,117 @@ export const THEMES = {
     borderMutedHover: 'hover:border-gray-400',
     inputStyle: 'box',
   },
+
+  authority: {
+    id: 'authority',
+    name: 'Authority',
+    description: 'Structured · Confident · Data-forward',
+    previewPageBg: '#f9fafb',
+    previewAccent: '#2563eb',
+    previewCardRadius: '6px',
+    previewBtnRadius: '4px',
+
+    fontBody: "'Inter', system-ui, sans-serif",
+    fontHeading: "'Inter', system-ui, sans-serif",
+
+    pageBg: 'bg-[#f9fafb]',
+    pageGrain: false,
+
+    card: 'bg-white border border-gray-200',
+    cardRadius: 'rounded-md',
+    cardShadow: 'shadow-[0_1px_3px_rgba(0,0,0,0.10),0_1px_2px_rgba(0,0,0,0.06)]',
+
+    btnPrimary: 'bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.98] transition-all tracking-wide',
+    btnSecondary: 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 active:scale-[0.98] transition-all tracking-wide',
+    btnRadius: 'rounded-md',
+    btnDisabled: 'bg-gray-100 text-gray-400 cursor-not-allowed',
+
+    inputCls: 'border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10 bg-white text-gray-900 placeholder-gray-400 transition-colors',
+
+    accentText: 'text-blue-600',
+    accentBg: 'bg-blue-600',
+    accentBgHover: 'hover:bg-blue-700',
+    accentTextHover: 'hover:text-blue-700',
+    accentLight: 'bg-blue-50',
+    accentBorder: 'border-blue-600',
+    accentTextColor: '#2563eb',
+
+    progressFill: 'bg-blue-600',
+    progressTrack: 'bg-gray-200',
+
+    stepActive: 'border-2 border-blue-600 text-blue-600 bg-white',
+    stepComplete: 'bg-blue-600 text-white',
+    stepUpcoming: 'bg-gray-200 text-gray-400',
+
+    badgeRadius: 'rounded-md',
+    pillBtnRadius: 'rounded-md',
+
+    iconStyle: 'phosphor',
+    iconWeight: 'regular',
+    useColoredIcons: false,
+    iconBadge: false,
+    iconBadgeRadius: 'rounded-sm',
+    iconDefault: 'text-gray-400',
+    iconProfile: 'text-gray-400',
+    iconIncome: 'text-gray-400',
+    iconDeductions: 'text-gray-400',
+    iconAssets: 'text-gray-400',
+
+    label: 'text-[10px] font-bold tracking-widest text-gray-500 uppercase',
+
+    heroNumberSize: 'text-5xl',
+    heroNumberColor: 'text-gray-900',
+    successBg: 'bg-white',
+    successText: 'text-gray-900',
+    advisorCardBg: 'bg-white',
+    advisorCardHeaderBg: 'bg-blue-600',
+    advisorAvatarBg: 'bg-blue-600',
+    completeBg: 'bg-white',
+    completeAccent: 'text-blue-600',
+
+    loginHeadingCls: 'text-5xl font-black tracking-tight leading-none',
+    sectionHeadingCls: 'text-3xl font-bold',
+    heroTagline: 'text-sm text-gray-500',
+    wizardQuestionSize: 'text-2xl',
+
+    useIllustrations: false,
+    emptyStateStyle: 'text',
+    monogramStyle: 'command',
+    revealIllustrationPalette: 'none',
+    revealStyle: 'data-readout',
+
+    ambientGlow: false,
+    ambientGlowPrimary: '',
+    ambientGlowSecondary: '',
+
+    showHeaderIcon: true,
+    showTrustSignal: true,
+
+    formCardWrapped: true,
+    formFieldSpacing: 'space-y-4',
+
+    cardHoverLift: false,
+    animationsEnhanced: true,
+
+    welcomeCardStyle: 'command',
+
+    wizardListLayout: true,
+    showProgressPercent: false,
+
+    stepEnterClass: 'step-enter-authority',
+    itemEnterClass: 'item-enter-authority',
+    wizardProgressStyle: 'bar',
+    wizardIconInline: true,
+    wizardSelectionStyle: 'accent-bar',
+    wizardRowPy: 'py-3',
+
+    cardBg: 'bg-white',
+    springAnimations: false,
+    progressBarHeight: 'h-1',
+    borderMuted: 'border-gray-200',
+    borderMutedHover: 'hover:border-gray-300',
+    inputStyle: 'box',
+  },
 }
 
-export const THEME_LIST = ['default', 'loft', 'azure', 'grain', 'print']
+export const THEME_LIST = ['default', 'loft', 'azure', 'grain', 'print', 'authority']

@@ -195,6 +195,20 @@ function WelcomeMonogram({ initial }) {
     )
   }
 
+  if (theme.monogramStyle === 'command') {
+    // Authority: solid blue-600 square — structural, no decoration
+    return (
+      <div
+        className="w-14 h-14 rounded-md mx-auto mb-5 flex items-center justify-center bg-blue-600"
+        style={{ boxShadow: 'inset 0 0 0 1.5px rgba(255,255,255,0.15), 0 2px 8px rgba(37,99,235,0.30)' }}
+      >
+        <span className="text-white text-2xl font-bold select-none" aria-hidden>
+          {initial}
+        </span>
+      </div>
+    )
+  }
+
   return null
 }
 
@@ -393,7 +407,40 @@ export default function SignupFlow({ initialData = {} }) {
           {/* ── Step: Welcome (KEY MOMENT) ────────────────────────────── */}
           {step === 'welcome' && (
             <div className="text-center">
-              {theme.welcomeCardStyle === 'editorial' ? (
+              {theme.welcomeCardStyle === 'command' ? (
+                /* Authority: solid blue header — structural, no gradient */
+                <div className={`${theme.cardRadius} ${theme.cardShadow} border border-gray-200 overflow-hidden mb-2`}>
+                  <div className="bg-blue-600 px-6 pt-8 pb-10 relative overflow-hidden">
+                    <WelcomeMonogram initial={(form.firstName[0] || 'A').toUpperCase()} />
+                    <h1 className="text-3xl font-bold text-white relative z-10 mt-1">
+                      Welcome, {form.firstName}.
+                    </h1>
+                    <p className="text-blue-100/80 text-sm mt-1.5 relative z-10">Your account is ready.</p>
+                  </div>
+                  <div className="bg-white px-6 py-6">
+                    <p className={`text-sm text-gray-600 leading-relaxed ${theme.itemEnterClass}`}
+                      style={{ animationDelay: '80ms' }}>
+                      A few questions help us understand your tax situation and tailor your 2025 return. Takes about a minute.
+                    </p>
+                    <div className={`mt-5 space-y-3 ${theme.itemEnterClass}`}
+                      style={{ animationDelay: '140ms' }}>
+                      <button
+                        onClick={() => setStep('profile')}
+                        className={`w-full flex items-center justify-center gap-2.5 ${theme.btnPrimary} ${theme.btnRadius} py-3.5 text-sm font-semibold transition-all`}
+                        style={{ boxShadow: `0 4px 12px ${theme.accentTextColor}3d` }}
+                      >
+                        Set up my 2025 filing <ArrowRight size={15} />
+                      </button>
+                      <button
+                        onClick={() => navigate('/dashboard', { state: { isNewUser: true, assessmentSkipped: true, firstName: form.firstName } })}
+                        className={`w-full text-sm font-medium ${theme.accentText} ${theme.accentTextHover} transition-colors py-2`}
+                      >
+                        I'll fill this during my first filing
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : theme.welcomeCardStyle === 'editorial' ? (
                 /* Print: editorial welcome — no gradient, pure typography + bold rule */
                 <div className="border border-gray-200 overflow-hidden mb-2">
                   {/* Bold top rule — the editorial masthead mark */}
@@ -535,7 +582,61 @@ export default function SignupFlow({ initialData = {} }) {
           {/* ── Step: Reveal (KEY MOMENT) ──────────────────────────────── */}
           {step === 'reveal' && (
             <div className="text-center">
-              {theme.revealStyle === 'number-hero' ? (
+              {theme.revealStyle === 'data-readout' ? (
+                /* Authority: structured data readout — number + section list */
+                <div className={`bg-white ${theme.cardRadius} border border-gray-200 ${theme.cardShadow} overflow-hidden`}>
+                  {/* Number header */}
+                  <div className="px-8 pt-8 pb-6 border-b border-gray-100">
+                    <p className={`${theme.label} mb-2`}>Sections Configured</p>
+                    <p className={`${theme.heroNumberSize} ${theme.heroNumberColor} font-black tabular-nums leading-none`}>
+                      {sections.length || 0}
+                    </p>
+                  </div>
+                  {/* Section list — readable labels */}
+                  {sections.length > 0 && (
+                    <div className="px-8 py-5 space-y-2.5">
+                      {sections.map((section, i) => {
+                        const LABELS = {
+                          income_w2: 'Salary or wages', income_freelance: 'Freelance income',
+                          income_investments: 'Investment income', income_dividends: 'Dividends & interest',
+                          income_rental: 'Rental income', income_foreign: 'Foreign income',
+                          deductions_mortgage: 'Home mortgage', deductions_student: 'Student loans',
+                          deductions_charitable: 'Charitable giving', deductions_medical: 'Medical expenses',
+                          deductions_business: 'Business expenses', deductions_homeoffice: 'Home office',
+                          global_assets: 'International assets',
+                        }
+                        const label = LABELS[section] || section.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase())
+                        return (
+                          <div key={i} className="flex items-center gap-2.5 text-sm text-gray-700">
+                            <div className="w-4 h-4 rounded-sm bg-blue-600 flex items-center justify-center flex-shrink-0">
+                              <Check size={9} className="text-white" strokeWidth={3} />
+                            </div>
+                            {label}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                  {/* CTA */}
+                  <div className="px-6 pb-6 pt-4 space-y-3 border-t border-gray-100">
+                    <button
+                      onClick={handleStartFiling}
+                      className={`w-full flex items-center justify-center gap-2 ${theme.btnPrimary} ${theme.btnRadius} py-3.5 text-sm font-semibold transition-all`}
+                      style={{ boxShadow: `0 4px 12px ${theme.accentTextColor}3d` }}
+                    >
+                      Start my 2025 filing <ArrowRight size={15} />
+                    </button>
+                    <button
+                      onClick={() => navigate('/dashboard', {
+                        state: { isNewUser: true, firstName: form.firstName, assessmentComplete: true, assessmentAnswers: profileAnswers ?? null },
+                      })}
+                      className={`w-full text-sm font-medium ${theme.accentText} ${theme.accentTextHover} transition-colors py-2`}
+                    >
+                      I'll do this later
+                    </button>
+                  </div>
+                </div>
+              ) : theme.revealStyle === 'number-hero' ? (
                 /* Print: number as typographic hero — no illustration */
                 <div className="bg-white border border-gray-200 overflow-hidden text-center">
                   {/* Bold top rule */}

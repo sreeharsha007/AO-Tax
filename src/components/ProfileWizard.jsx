@@ -80,7 +80,7 @@ function OptionPill({ label, sub, selected, onClick, lucideIcon: LucideIcon, pho
     >
       <div className="flex items-start justify-between mb-3">
         {LucideIcon && (
-          <LucideIcon size={16} className={selected ? theme.accentText : 'text-gray-400'} />
+          <LucideIcon size={18} className={selected ? theme.accentText : 'text-gray-400'} />
         )}
         {selected && <Check size={13} className={theme.accentText} strokeWidth={3} />}
       </div>
@@ -93,8 +93,9 @@ function OptionPill({ label, sub, selected, onClick, lucideIcon: LucideIcon, pho
 /* ── Option row — stacked list, adapts per direction via tokens ───────────── */
 function OptionRow({ label, sub, selected, onClick, lucideIcon: LucideIcon, phosphorIcon: PhosphorIcon, badgeCls, index }) {
   const { theme } = useTheme()
-  const isRing     = theme.wizardSelectionStyle === 'ring'
-  const isCheckbox = theme.wizardSelectionStyle === 'checkbox'
+  const isRing      = theme.wizardSelectionStyle === 'ring'
+  const isCheckbox  = theme.wizardSelectionStyle === 'checkbox'
+  const isAccentBar = theme.wizardSelectionStyle === 'accent-bar'
   const isInline = theme.wizardIconInline
 
   const [bouncing, setBouncing] = useState(false)
@@ -114,12 +115,13 @@ function OptionRow({ label, sub, selected, onClick, lucideIcon: LucideIcon, phos
       <button
         onClick={onClick}
         onAnimationEnd={() => setBouncing(false)}
-        className={`w-full flex items-center gap-3 px-4 ${theme.wizardRowPy} ${theme.cardRadius || 'rounded-xl'} transition-all text-left ${
-          bouncing && !isRing && !isCheckbox && theme.springAnimations ? 'select-bounce' : ''
+        className={`w-full flex items-center gap-3 px-4 ${theme.wizardRowPy} ${selected && isAccentBar ? 'rounded-r-md' : (theme.cardRadius || 'rounded-xl')} transition-all text-left ${
+          bouncing && !isRing && !isCheckbox && !isAccentBar && theme.springAnimations ? 'select-bounce' : ''
         } ${
           selected
-            ? isRing      ? 'ring-1 ring-blue-600 border border-transparent bg-blue-50/60'
-            : isCheckbox  ? 'bg-gray-50 border border-gray-700'  // Print: light neutral fill + strong border
+            ? isRing       ? 'ring-1 ring-blue-600 border border-transparent bg-blue-50/60'
+            : isCheckbox   ? 'bg-gray-50 border border-gray-700'
+            : isAccentBar  ? 'bg-blue-50/30 border border-gray-200 border-l-4 border-l-blue-600'
             :                `${theme.accentLight} border ${theme.accentBorder}`
             : `${theme.cardBg || 'bg-white'} border ${theme.borderMuted} ${theme.borderMutedHover} hover:shadow-sm`
         }`}
@@ -128,15 +130,18 @@ function OptionRow({ label, sub, selected, onClick, lucideIcon: LucideIcon, phos
         {(LucideIcon || PhosphorIcon) && (
           isInline ? (
             /* Enhanced inline: icon without badge — direction controls style and weight */
-            <div className="flex-shrink-0 w-5 flex items-center justify-center">
+            <div className="flex-shrink-0 w-6 flex items-center justify-center">
               {theme.iconStyle === 'phosphor' && PhosphorIcon
-                ? <PhosphorIcon size={15} weight={theme.iconWeight}
+                ? <PhosphorIcon size={18} weight={theme.iconWeight}
                     className={selected
-                      ? theme.id === 'grain' ? theme.accentText : theme.accentText
-                      : theme.id === 'grain' ? 'text-stone-400' : 'text-blue-300'
+                      ? theme.accentText
+                      : theme.id === 'grain'     ? 'text-stone-400'
+                      : theme.id === 'authority' ? 'text-gray-400'
+                      : theme.id === 'print'     ? 'text-gray-400'
+                      : 'text-blue-300'
                     }
                   />
-                : LucideIcon && <LucideIcon size={14}
+                : LucideIcon && <LucideIcon size={16}
                     className={selected
                       ? isCheckbox ? 'text-gray-900' : theme.accentText
                       : 'text-gray-400'
@@ -148,8 +153,8 @@ function OptionRow({ label, sub, selected, onClick, lucideIcon: LucideIcon, phos
             /* Loft/Default: icon in coloured badge */
             <div className={`w-8 h-8 ${theme.iconBadgeRadius} flex items-center justify-center flex-shrink-0 ${badgeCls || 'bg-gray-100 text-gray-500'}`}>
               {PhosphorIcon
-                ? <PhosphorIcon size={16} weight="duotone" />
-                : LucideIcon && <LucideIcon size={14} />}
+                ? <PhosphorIcon size={18} weight="duotone" />
+                : LucideIcon && <LucideIcon size={16} />}
             </div>
           )
         )}
@@ -160,8 +165,8 @@ function OptionRow({ label, sub, selected, onClick, lucideIcon: LucideIcon, phos
           <p className={`text-xs mt-0.5 ${selected ? 'text-gray-400' : 'text-gray-500'}`}>{sub}</p>
         </div>
 
-        {/* Selection indicator — circle for fill, square for checkbox, none for ring */}
-        {!isRing && (
+        {/* Selection indicator — circle for fill, square for checkbox, none for ring/accent-bar */}
+        {!isRing && !isAccentBar && (
           isCheckbox ? (
             /* Print: square checkbox — journalistic, no rounding */
             <div className={`w-4 h-4 border flex items-center justify-center flex-shrink-0 transition-all ${
